@@ -7,9 +7,11 @@
         <div class="header-content">
           <div class="site-name">SiteName</div>
           <div class="icon-container">
-            <el-icon class="icon-style" @click="switchToTab('third')">
-              <BellFilled />
-            </el-icon>
+            <router-link to="/notifications">
+              <el-icon class="icon-style">
+                <BellFilled />
+              </el-icon>
+            </router-link>
             <el-icon class="icon-style" @click="switchToTab('second')">
               <CirclePlusFilled />
             </el-icon>
@@ -21,7 +23,7 @@
       <el-main style="padding-top: 0;">
         <el-container>
           <el-tabs v-model="activeName" class="demo-tabs containet-style" @tab-click="handleClick">
-            <el-tab-pane label="Для вас" name="first" >
+            <el-tab-pane label="Для вас" name="first">
               <ListPostCards />
             </el-tab-pane>
             <el-tab-pane label="Подписки" name="second">Config</el-tab-pane>
