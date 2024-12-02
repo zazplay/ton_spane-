@@ -9,7 +9,7 @@
                 <HeaderComponent/>
             </el-header>
             <el-main>
-                components
+                <ListPostCards/>
             </el-main>
         </el-container>
         </el-container>
@@ -19,7 +19,9 @@
 
 <script>
 import HeaderComponent from './HeaderComponent.vue';
+import ListPostCards from './ListPostCards.vue';
 import MenuComponent from './MenuComponent.vue';
+
 // import PostCard from './PostCard.vue';
 
 export default {
@@ -27,6 +29,7 @@ export default {
     components: {
         MenuComponent,
         HeaderComponent,
+        ListPostCards
         // PostCard
     }
 }
