@@ -54,7 +54,7 @@ const switchToTab = (tabName) => {
 
 <style>
 .demo-tabs>.el-tabs__content {
-  padding: 10px;
+  /* padding: 10px; */
   color: #6b778c;
   font-size: 32px;
   font-weight: 600;
@@ -122,7 +122,7 @@ const switchToTab = (tabName) => {
 /* Контейнер для иконок */
 .icon-container {
   display: flex;
-  gap: 10px;
+  /* gap: 10px; */
   /* Отступы между иконками */
 }
 </style>
