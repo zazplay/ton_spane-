@@ -36,9 +36,8 @@ const props = defineProps({
   isBlurred: {
   type: Boolean,
   default: false  
-  
-},
-initialSubscribed: {
+  },
+  initialSubscribed: {
   type: Boolean,
   default: false
 }
@@ -82,7 +81,7 @@ const handleDonate = (status) => {
 </script>
 
 <template>
-  <el-card style="width: 600px">
+  <el-card style="width: 600px; margin-bottom: 30px;">
     <el-row class="demo-avatar demo-basic">
       <div style="display: flex; align-items: center; width: 100%">
         <el-avatar shape="square" :size="50" :src="avatarUrl" />
@@ -169,9 +168,9 @@ const handleDonate = (status) => {
 <style scoped>
 .actions-container {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
+  justify-content: flex-start;
+  align-items: left;
+  
 }
 
 .custom-heart-tag {
@@ -213,7 +212,7 @@ const handleDonate = (status) => {
 .demo-basic .demo-basic--square {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: left;
 }
 
 .demo-basic .block {
