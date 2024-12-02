@@ -65,8 +65,9 @@ const posts = [
 .posts-container {
   display: flex;
   flex-direction: column;
+  justify-self: center;
   /* gap: 20px; */
-  max-width: 500px;
+  max-width: 600px;
   /* margin: 0 auto; */
   /* padding: 20px; */
 }

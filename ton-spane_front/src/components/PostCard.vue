@@ -1,113 +1,92 @@
-
 <script setup>
-import { ref } from 'vue'
+import { ref, defineProps, defineEmits } from 'vue'
+import ShareModal from './ShareModal.vue' 
+import TipsModal from './TipsModal.vue'
 
-// Props
-// eslint-disable-next-line no-undef
+// Определение входных параметров компонента
 const props = defineProps({
-  username: {
-    type: String,
-    default: 'vikpix'
-  },
-  avatarUrl: {
-    type: String,
-    default: 'https://bannerplus.ru/files/img/pics/devushka-krasivye-kartinki/devushka-krasivye-kartinki-56.webp'
-  },
-  imageUrl: {
-    type: String,
-    default: 'https://masterpiecer-images.s3.yandex.net/8c41eb6445aa11ee92c1363fac71b015:upscaled'
-  },
-  postDesc: {
-    type: String,
-    default: 'Проснулась сегодня с таким хорошим настроением 😉'
-  },
-  initialLiked: {
-    type: Boolean,
-    default: false
-  },
-  initialShared: {
-    type: Boolean,
-    default: false
-  },
-  initialDonated: {
-    type: Boolean,
-    default: false
-  },
-  isBlurred: {
-  type: Boolean,
-  default: false  
-  },
-  initialSubscribed: {
-  type: Boolean,
-  default: false
-}
-  // Add new props here
-  // propName: {
-  //   type: <Type>,
-  //   default: <DefaultValue>
-  // }
+  username: { type: String, default: 'vikpix' },
+  avatarUrl: { type: String, default: '' },
+  imageUrl: { type: String, default: '' },
+  postDesc: { type: String, default: '' },
+  isBlurred: { type: Boolean, default: false },
+  // Начальные состояния интерактивных элементов
+  initialLiked: { type: Boolean, default: false },
+  initialShared: { type: Boolean, default: false },
+  initialDonated: { type: Boolean, default: false },
+  initialSubscribed: { type: Boolean, default: false }
 })
 
-// eslint-disable-next-line no-undef
+// Определение событий компонента
 const emit = defineEmits(['like', 'share', 'donate', 'subscribe'])
 
-// Reactive states
+// Реактивные состояния
 const isLiked = ref(props.initialLiked)
+const isSubscribed = ref(props.initialSubscribed)
 const isShared = ref(props.initialShared)
 const isDonated = ref(props.initialDonated)
-const isSubscribed = ref(props.initialSubscribed)
 
+// Состояния модальных окон
+const isShareModalVisible = ref(false)
+const isTipsModalVisible = ref(false)
 
-
-// Event handlers
-const handleLike = (status) => {
-  isLiked.value = status
-  emit('like', status)
+// Обработчики событий
+const handleLike = () => {
+  isLiked.value = !isLiked.value
+  emit('like', isLiked.value)
 }
+
 const handleSubscribe = () => {
   isSubscribed.value = !isSubscribed.value
   emit('subscribe', isSubscribed.value)
 }
 
-const handleShare = (status) => {
-  isShared.value = status
-  emit('share', status)
+const handleShare = () => {
+  isShared.value = !isShared.value
+  isShareModalVisible.value = true
+  emit('share', isShared.value)
 }
 
-const handleDonate = (status) => {
-  isDonated.value = status
-  emit('donate', status)
+const handleDonate = () => {
+  isDonated.value = !isDonated.value
+  isTipsModalVisible.value = true
+  emit('donate', isDonated.value)
 }
 </script>
 
 <template>
-  <el-card style="width: 600px; margin-bottom: 30px;">
-    <el-row class="demo-avatar demo-basic">
-      <div style="display: flex; align-items: center; width: 100%">
-        <el-avatar shape="square" :size="50" :src="avatarUrl" />
-        <el-text class="mx-1" style="font-size: 20px; margin-left: 15px;">{{ username }}</el-text>
-        <el-button 
-  :type="isSubscribed ? 'success' : 'primary'" 
-  class="mt-3" 
-  style="margin-left: auto" 
-  @click="handleSubscribe"
-  plain
->
-  {{ isSubscribed ? 'Вы подписаны' : 'Подписаться' }}
-</el-button>      </div>
-    </el-row>
+  <!-- Модальные окна -->
+  <ShareModal v-model:dialogVisible="isShareModalVisible" />
+  <TipsModal v-model:dialogDonateVisible="isTipsModalVisible" />
+
+  <!-- Карточка поста -->
+  <el-card class="post-card">
+    <!-- Шапка с информацией о пользователе -->
+    <div class="header">
+      <el-avatar :size="50" :src="avatarUrl" />
+      <el-text class="username">{{ username }}</el-text>
+      <el-button 
+        :type="isSubscribed ? 'success' : 'primary'" 
+        @click="handleSubscribe"
+        plain
+      >
+        {{ isSubscribed ? 'Вы подписаны' : 'Подписаться' }}
+      </el-button>
+    </div>
+
+    <!-- Изображение поста -->
     <img
       :src="imageUrl"
-      style="width: 100%"
-      :style="{ filter: isBlurred ? 'blur(30px)' : 'none' }"
-
+      class="post-image"
+      :class="{ 'blurred': isBlurred }"
     />
-    <div class="actions-container">
+
+    <!-- Панель действий -->
+    <div class="actions">
       <el-check-tag 
         :checked="isLiked"
-        type="danger"
         @change="handleLike"
-        class="custom-heart-tag"
+        class="action-tag heart"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -119,7 +98,6 @@ const handleDonate = (status) => {
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
-          style="vertical-align: middle;"
         >
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
         </svg>
@@ -127,99 +105,83 @@ const handleDonate = (status) => {
       
       <el-check-tag 
         :checked="isShared"
-        type="warning"
         @change="handleShare"
-        class="custom-share-tag"
+        class="action-tag share"
       >
-        <el-icon 
-          size="25px" 
-          style="vertical-align: middle; color: #E6A23C;"
-        >
-          <Share />
-        </el-icon>
+        <el-icon size="25px"><Share /></el-icon>
       </el-check-tag>
 
       <el-check-tag 
         :checked="isDonated"
-        type="success"
         @change="handleDonate"
-        class="custom-donate-tag"
+        class="action-tag donate"
       >
-        <el-icon 
-          size="25px" 
-          style="vertical-align: middle; color: green;"
-        >
-          <Money />
-        </el-icon>
+        <el-icon size="25px"><Money /></el-icon>
       </el-check-tag>
-      <el-text 
-        class="mx-8 text-regular" 
-        size="large"
-        tag="b"
-        emphasis
-      >
-  {{ postDesc.length > 100 ? postDesc.slice(0, 100) + '...' : postDesc }}
-</el-text>
+
+      <!-- Описание поста -->
+      <el-text class="description" tag="b" emphasis>
+        {{ postDesc.length > 100 ? postDesc.slice(0, 100) + '...' : postDesc }}
+      </el-text>
     </div>
   </el-card>
 </template>
 
-
 <style scoped>
-.actions-container {
+.post-card {
+  width: 600px;
+  margin-bottom: 30px;
+}
+
+.header {
   display: flex;
-  justify-content: flex-start;
-  align-items: left;
-  
+  align-items: center;
+  margin-bottom: 15px;
 }
 
-.custom-heart-tag {
-  border-color: red !important;
-  color: red !important;
-}
-
-.custom-share-tag {
-  border-color: #E6A23C !important;
-  color: #E6A23C !important;
-}
-
-.custom-donate-tag {
-  border-color: green !important;
-  color: green !important;
-}
-
-.custom-heart-tag:hover, 
-.custom-share-tag:hover,
-.custom-donate-tag:hover {
-  opacity: 0.8;
-}
-
-.userName {
+.username {
   font-size: 20px;
+  margin-left: 15px;
+  margin-right: auto;
 }
 
-.demo-basic {
-  text-align: center;
-  margin-bottom: 10px;
+.post-image {
+  width: 100%;
 }
 
-.demo-basic .sub-title {
-  margin-bottom: 10px;
-  font-size: 14px;
-  color: var(--el-text-color-secondary);
+.blurred {
+  filter: blur(30px);
 }
 
-.demo-basic .demo-basic--square {
+.actions {
   display: flex;
-  justify-content: space-between;
-  align-items: left;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
 }
 
-.demo-basic .block {
-  flex: 1;
+.action-tag {
+  display: flex;
+  align-items: center;
+  padding: 5px;
 }
 
-.demo-basic .el-col:not(:last-child) {
-  border-right: 1px solid var(--el-border-color);
+.action-tag.heart { 
+  border-color: red;
+  color: red;
+}
+
+.action-tag.share {
+  border-color: #E6A23C;
+  color: #E6A23C;
+}
+
+.action-tag.donate {
+  border-color: green;
+  color: green;
+}
+
+.description {
+  margin-left: 15px;
 }
 </style>
