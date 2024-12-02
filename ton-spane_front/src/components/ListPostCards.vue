@@ -67,7 +67,7 @@ const posts = [
   flex-direction: column;
   gap: 20px;
   max-width: 500px;
-  margin: 0 auto;
+  /* margin: 0 auto; */
   /* padding: 20px; */
 }
 </style>

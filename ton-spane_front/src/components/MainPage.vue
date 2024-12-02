@@ -1,7 +1,7 @@
 <template>
     <div class="common-layout  main-container-style">
         <el-container>
-            <el-aside width="20%">
+            <el-aside class="left-menu" >
                 <MenuComponent />
             </el-aside>
             <el-container class="container-content-style">
@@ -28,10 +28,13 @@ export default {
 
 <style scoped>
 .main-container-style {
-    width: 1000px;
+    width: 800px;
     margin: 0 auto;
 }
 
+.left-menu{
+    width:20%;
+}
 .container-content-style {
     width: 80%;
 }

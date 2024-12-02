@@ -21,7 +21,7 @@
       <el-main style="padding-top: 0;">
         <el-container>
           <el-tabs v-model="activeName" class="demo-tabs containet-style" @tab-click="handleClick">
-            <el-tab-pane label="Для вас" name="first">
+            <el-tab-pane label="Для вас" name="first" >
               <ListPostCards />
             </el-tab-pane>
             <el-tab-pane label="Подписки" name="second">Config</el-tab-pane>
@@ -73,13 +73,13 @@ const switchToTab = (tabName) => {
 }
 
 .icon-style {
-  font-size: 2em;
+  font-size: 1.5em;
   /* Увеличивает размер иконки */
   cursor: pointer;
   /* Делает иконку кликабельной */
   color: #E5EAF3;
   /* Настраивает цвет (по желанию) */
-  padding: 0.2em;
+  padding: 0.1em;
   transition: transform 0.3s ease;
   /* Добавляет эффект при наведении */
 }

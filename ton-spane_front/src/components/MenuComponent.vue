@@ -1,6 +1,6 @@
 <template>
     <el-menu default-active="1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-        <h5  style="color:#E5EAF3; margin-top:100px;">SiteName</h5>
+        <h5>SiteName</h5>
         <el-menu-item index="1">
             <el-icon>
                 <House />
@@ -15,7 +15,7 @@
             <span>Клипы</span>
         </el-menu-item>
 
-        <el-menu-item index="3" >
+        <el-menu-item index="3">
             <el-icon>
                 <Message />
             </el-icon>
@@ -40,7 +40,7 @@
             <img src="../assets/dollar-svgrepo-com.svg" style=" margin-left: -5px;" />
             <span>Покупки</span>
         </el-menu-item>
-        
+
         <el-menu-item index="7">
             <el-icon>
                 <IconMenu />
@@ -63,10 +63,14 @@ const handleClose = (key, keyPath) => {
 
 <style scoped>
 .el-menu-vertical-demo {
-  border-right: none !important; /* Убирает правую границу */
+    border-right: none !important;
+    /* Убирает правую границу */
+    color: #E5EAF3;
+    margin-top: 1em;
 }
 
 .el-menu-item {
-  border-right: none !important; /* Убирает границу у каждого элемента */
-} 
+    border-right: none !important;
+    /* Убирает границу у каждого элемента */
+}
 </style>
