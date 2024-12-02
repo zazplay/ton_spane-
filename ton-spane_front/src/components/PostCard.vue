@@ -1,15 +1,107 @@
+
+<script setup>
+import { ref } from 'vue'
+
+// Props
+// eslint-disable-next-line no-undef
+const props = defineProps({
+  username: {
+    type: String,
+    default: 'vikpix'
+  },
+  avatarUrl: {
+    type: String,
+    default: 'https://bannerplus.ru/files/img/pics/devushka-krasivye-kartinki/devushka-krasivye-kartinki-56.webp'
+  },
+  imageUrl: {
+    type: String,
+    default: 'https://masterpiecer-images.s3.yandex.net/8c41eb6445aa11ee92c1363fac71b015:upscaled'
+  },
+  postDesc: {
+    type: String,
+    default: 'Проснулась сегодня с таким хорошим настроением 😉'
+  },
+  initialLiked: {
+    type: Boolean,
+    default: false
+  },
+  initialShared: {
+    type: Boolean,
+    default: false
+  },
+  initialDonated: {
+    type: Boolean,
+    default: false
+  },
+  isBlurred: {
+  type: Boolean,
+  default: false  
+  
+},
+initialSubscribed: {
+  type: Boolean,
+  default: false
+}
+  // Add new props here
+  // propName: {
+  //   type: <Type>,
+  //   default: <DefaultValue>
+  // }
+})
+
+// eslint-disable-next-line no-undef
+const emit = defineEmits(['like', 'share', 'donate', 'subscribe'])
+
+// Reactive states
+const isLiked = ref(props.initialLiked)
+const isShared = ref(props.initialShared)
+const isDonated = ref(props.initialDonated)
+const isSubscribed = ref(props.initialSubscribed)
+
+
+
+// Event handlers
+const handleLike = (status) => {
+  isLiked.value = status
+  emit('like', status)
+}
+const handleSubscribe = () => {
+  isSubscribed.value = !isSubscribed.value
+  emit('subscribe', isSubscribed.value)
+}
+
+const handleShare = (status) => {
+  isShared.value = status
+  emit('share', status)
+}
+
+const handleDonate = (status) => {
+  isDonated.value = status
+  emit('donate', status)
+}
+</script>
+
 <template>
-  <el-card style="max-width: 480px">
+  <el-card style="max-width: 500px">
     <el-row class="demo-avatar demo-basic">
       <div style="display: flex; align-items: center; width: 100%">
         <el-avatar shape="square" :size="50" :src="avatarUrl" />
         <el-text class="mx-1" style="font-size: 20px; margin-left: 15px;">{{ username }}</el-text>
-        <el-button type="primary" class="mt-3" style="margin-left: auto" plain>Подписаться</el-button>
-      </div>
+        <el-button 
+  :type="isSubscribed ? 'success' : 'primary'" 
+  class="mt-3" 
+  style="margin-left: auto" 
+  @click="handleSubscribe"
+  plain
+>
+  {{ isSubscribed ? 'Вы подписаны' : 'Подписаться' }}
+</el-button>      </div>
     </el-row>
     <img
       :src="imageUrl"
       style="width: 100%"
+      :style="{ filter: isBlurred ? 'blur(30px)' : 'none' }"
+
     />
     <div class="actions-container">
       <el-check-tag 
@@ -61,71 +153,18 @@
           <Money />
         </el-icon>
       </el-check-tag>
+      <el-text 
+        class="mx-8 text-regular" 
+        size="large"
+        tag="b"
+        emphasis
+      >
+  {{ postDesc.length > 100 ? postDesc.slice(0, 100) + '...' : postDesc }}
+</el-text>
     </div>
   </el-card>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-
-// Props
-// eslint-disable-next-line no-undef
-const props = defineProps({
-  username: {
-    type: String,
-    default: 'vikpix'
-  },
-  avatarUrl: {
-    type: String,
-    default: 'https://pictures.ua.tribuna.com/image/642258ce-18ed-4728-a2d2-0ca953ccb2de?width=1260&quality=70'
-  },
-  imageUrl: {
-    type: String,
-    default: 'https://masterpiecer-images.s3.yandex.net/8c41eb6445aa11ee92c1363fac71b015:upscaled'
-  },
-  initialLiked: {
-    type: Boolean,
-    default: false
-  },
-  initialShared: {
-    type: Boolean,
-    default: false
-  },
-  initialDonated: {
-    type: Boolean,
-    default: false
-  },
-  // Add new props here
-  // propName: {
-  //   type: <Type>,
-  //   default: <DefaultValue>
-  // }
-})
-
-// eslint-disable-next-line no-undef
-const emit = defineEmits(['like', 'share', 'donate'])
-
-// Reactive states
-const isLiked = ref(props.initialLiked)
-const isShared = ref(props.initialShared)
-const isDonated = ref(props.initialDonated)
-
-// Event handlers
-const handleLike = (status) => {
-  isLiked.value = status
-  emit('like', status)
-}
-
-const handleShare = (status) => {
-  isShared.value = status
-  emit('share', status)
-}
-
-const handleDonate = (status) => {
-  isDonated.value = status
-  emit('donate', status)
-}
-</script>
 
 <style scoped>
 .actions-container {
