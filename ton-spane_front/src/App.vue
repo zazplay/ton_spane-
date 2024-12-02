@@ -1,16 +1,20 @@
 <script>
 import MainPage from './components/MainPage.vue';
+import ListPostCards from './components/ListPostCards.vue';
 
 export default {
   name: 'App',
   components: {
     MainPage
+    ListPostCards
+
   }
 }
 </script>
 
 <template>
   <MainPage></MainPage>
+  <ListPostCards></ListPostCards>
 </template>
 
 
