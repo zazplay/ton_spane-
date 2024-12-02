@@ -5,8 +5,6 @@ export default {
   name: 'App',
   components: {
     MainPage,
-   
-
   }
 }
 </script>

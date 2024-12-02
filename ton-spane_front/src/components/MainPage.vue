@@ -1,36 +1,27 @@
 <template>
-    <div class="common-layout main-container-style">
+    <div class="common-layout  main-container-style">
         <el-container>
-            <el-aside width="300px">
+            <el-aside width="20%">
                 <MenuComponent />
-        </el-aside>
-        <el-container>
-            <el-header>
-                <HeaderComponent/>
-            </el-header>
-            <el-main>
-                <ListPostCards/>
-            </el-main>
-        </el-container>
+            </el-aside>
+            <el-container class="container-content-style">
+                <TareComponent />
+            </el-container>
         </el-container>
     </div>
 </template>
 
 
 <script>
-import HeaderComponent from './HeaderComponent.vue';
-import ListPostCards from './ListPostCards.vue';
+import TareComponent from './TapeComponent.vue';
 import MenuComponent from './MenuComponent.vue';
 
-// import PostCard from './PostCard.vue';
 
 export default {
     name: 'MainPage',
     components: {
         MenuComponent,
-        HeaderComponent,
-        ListPostCards
-        // PostCard
+        TareComponent,
     }
 }
 </script>
@@ -39,5 +30,9 @@ export default {
 .main-container-style {
     width: 1000px;
     margin: 0 auto;
+}
+
+.container-content-style {
+    width: 80%;
 }
 </style>

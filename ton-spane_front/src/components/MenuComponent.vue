@@ -1,6 +1,6 @@
 <template>
     <el-menu default-active="1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-        <h5 class="mb-2">Default colors</h5>
+        <h5  style="color:#E5EAF3; margin-top:100px;">SiteName</h5>
         <el-menu-item index="1">
             <el-icon>
                 <House />
