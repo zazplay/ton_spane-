@@ -82,7 +82,7 @@ const handleDonate = (status) => {
 </script>
 
 <template>
-  <el-card style="max-width: 500px">
+  <el-card style="width: 600px">
     <el-row class="demo-avatar demo-basic">
       <div style="display: flex; align-items: center; width: 100%">
         <el-avatar shape="square" :size="50" :src="avatarUrl" />

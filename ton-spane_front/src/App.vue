@@ -1,17 +1,18 @@
 
 <script>
-import PostCard from './components/PostCard.vue'
+import ListPostCards from './components/ListPostCards.vue';
 
 export default {
   name: 'App',
   components: {
-    PostCard
+    ListPostCards
+
   }
 }
 </script>
 
 <template>
-  <PostCard></PostCard>
+  <ListPostCards></ListPostCards>
 </template>
 
 
