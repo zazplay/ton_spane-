@@ -5,6 +5,8 @@ import ClipsPage from './components/ClipsPage.vue';
 import MessagePage from './components/MessagePage.vue';
 
 const routes = [
+  { path: '/',redirect: '/tape'},
+
   { path: '/tape',  component: TapeComponent },
   { path: '/notifications', component: NotificationsPage },
   { path: '/clips', component: ClipsPage },
