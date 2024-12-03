@@ -38,22 +38,28 @@
         </el-menu-item>
 
         <el-menu-item index="5">
-            <el-icon>
-                <Search />
-            </el-icon>
-            <span>Поиск</span>
+            <router-link to="/search">
+                <el-icon>
+                    <Search />
+                </el-icon>
+                <span>Поиск</span>
+            </router-link>
         </el-menu-item>
 
         <el-menu-item index="6">
-            <img src="../assets/dollar-svgrepo-com.svg" style=" margin-left: -5px;" />
-            <span>Покупки</span>
+            <router-link to="/purchased">
+                <img src="../assets/dollar-svgrepo-com.svg" style="margin-left: -5px;" />
+                <span>Покупки</span>
+            </router-link>
         </el-menu-item>
 
         <el-menu-item index="7">
-            <el-icon>
-                <IconMenu />
-            </el-icon>
-            <span>Еще</span>
+            <router-link to="/more">
+                <el-icon>
+                    <IconMenu />
+                </el-icon>
+                <span>Еще</span>
+            </router-link>
         </el-menu-item>
     </el-menu>
 </template>

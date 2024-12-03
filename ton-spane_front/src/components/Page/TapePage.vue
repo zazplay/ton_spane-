@@ -38,7 +38,7 @@
 <script setup>
 import { ref } from 'vue';
 import { BellFilled, CirclePlusFilled } from '@element-plus/icons-vue';
-import ListPostCards from './ListPostCards.vue';
+import ListPostCards from '../ListPostCards.vue';
 
 // Управление активной вкладкой
 const activeName = ref('first');
