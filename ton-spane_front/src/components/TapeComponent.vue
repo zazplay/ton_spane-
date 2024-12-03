@@ -7,9 +7,11 @@
         <div class="header-content">
           <div class="site-name">SiteName</div>
           <div class="icon-container">
-            <el-icon class="icon-style" @click="switchToTab('third')">
-              <BellFilled />
-            </el-icon>
+            <router-link to="/notifications">
+              <el-icon class="icon-style">
+                <BellFilled />
+              </el-icon>
+            </router-link>
             <el-icon class="icon-style" @click="switchToTab('second')">
               <CirclePlusFilled />
             </el-icon>
@@ -73,13 +75,13 @@ const switchToTab = (tabName) => {
 }
 
 .icon-style {
-  font-size: 2em;
+  font-size: 1.5em;
   /* Увеличивает размер иконки */
   cursor: pointer;
   /* Делает иконку кликабельной */
   color: #E5EAF3;
   /* Настраивает цвет (по желанию) */
-  padding: 0.2em;
+  padding: 0.1em;
   transition: transform 0.3s ease;
   /* Добавляет эффект при наведении */
 }
