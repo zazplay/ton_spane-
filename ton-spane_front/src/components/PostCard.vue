@@ -17,6 +17,7 @@ const props = defineProps({
   initialSubscribed: { type: Boolean, default: false }
 })
 
+
 // Определение событий компонента
 const emit = defineEmits(['like', 'share', 'donate', 'subscribe'])
 
@@ -75,11 +76,33 @@ const handleDonate = () => {
     </div>
 
     <!-- Изображение поста -->
-    <img
+    <!-- <img
       :src="imageUrl"
       class="post-image"
       :class="{ 'blurred': isBlurred }"
-    />
+    /> -->
+
+    <div class="demo-image__preview">
+  <el-image
+    class="post-image"
+    :class="{ 'blurred': isBlurred }"
+    :src="imageUrl"
+    :zoom-rate="1.2"
+    :max-scale="7"
+    :min-scale="0.2"
+    :preview-src-list="isBlurred ? [] : [imageUrl]"
+    :initial-index="4"
+    fit="cover"
+    @error="() => {}"
+    :preview-teleported="true"
+  >
+    <template #error>
+      <div class="image-slot">
+        <el-icon><Picture-Failed /></el-icon>
+      </div>
+    </template>
+  </el-image>
+</div>
 
     <!-- Панель действий -->
     <div class="actions">
@@ -146,7 +169,7 @@ const handleDonate = () => {
 }
 
 .post-image {
-  width: 100%;
+  max-height: 600px;
 }
 
 .blurred {
