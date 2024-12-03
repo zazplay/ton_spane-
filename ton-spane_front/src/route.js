@@ -8,14 +8,8 @@ import PurchasedPage from './components/Page/PurchasedPage.vue';
 import MorePage from './components/Page/MorePage.vue';
 
 const routes = [
-<<<<<<< HEAD
-  { path: '/',redirect: '/tape'},
-
-  { path: '/tape',  component: TapeComponent },
-=======
   { path: '/',  component: TapePage },
   { path: '/tape',  component: TapePage },
->>>>>>> Dmitriy_br
   { path: '/notifications', component: NotificationsPage },
   { path: '/clips', component: ClipsPage },
   { path: '/message', component: MessagePage },
