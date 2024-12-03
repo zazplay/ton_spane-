@@ -13,7 +13,7 @@
   </template>
   
   <script>
-  import MenuComponent from './MenuComponent.vue';
+  import MenuComponent from '../MenuComponent.vue';
   
   export default {
     name: 'MainPage',

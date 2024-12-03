@@ -1,6 +1,5 @@
 <script>
-import MainPage from './components/MainPage.vue';
-
+import MainPage from './components/Page/MainPage.vue';
 export default {
   name: 'App',
   components: {
@@ -10,8 +9,7 @@ export default {
 </script>
 
 <template>
-  <MainPage></MainPage>
- 
+  <MainPage />
 </template>
 
 
