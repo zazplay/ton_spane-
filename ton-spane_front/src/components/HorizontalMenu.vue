@@ -1,7 +1,6 @@
 <template>
-    <el-menu default-active="1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-        <h2>DreamScape</h2>
-        
+    <el-menu class='horizontal-menu' default-active="1" @open="handleOpen" @close="handleClose">
+
         <router-link to="/tape">
             <el-menu-item index="1">
                 <el-icon>
@@ -29,15 +28,6 @@
             </el-menu-item>
         </router-link>
 
-        <router-link to="/notifications">
-            <el-menu-item index="4">
-                <el-icon>
-                    <BellFilled />
-                </el-icon>
-                <span>Обновления</span>
-            </el-menu-item>
-        </router-link>
-
         <router-link to="/search">
             <el-menu-item index="5">
                 <el-icon>
@@ -47,68 +37,77 @@
             </el-menu-item>
         </router-link>
 
-        <router-link to="/purchased">
-            <el-menu-item index="6">
-                <img src="../assets/dollar-svgrepo-com.svg" style="margin-left: -5px;" />
-                <span>Покупки</span>
-            </el-menu-item>
-        </router-link>
-
         <router-link to="/more">
             <el-menu-item index="7">
                 <el-icon>
                     <IconMenu />
                 </el-icon>
-                <span>Еще</span>
+                <span>Профиль</span>
             </el-menu-item>
         </router-link>
+
     </el-menu>
 </template>
 
 <script setup>
-import { Menu as IconMenu } from '@element-plus/icons-vue';
+import { Menu as IconMenu, House, Film, Message, Search } from '@element-plus/icons-vue';
 
 const handleOpen = (key, keyPath) => {
-    console.log(key, keyPath)
-}
+    console.log(key, keyPath);
+};
 const handleClose = (key, keyPath) => {
-    console.log(key, keyPath)
-}
+    console.log(key, keyPath);
+};
 </script>
 
 <style scoped>
-.menu-wrapper {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-}
-
 .el-menu-vertical-demo {
     border-right: none !important;
-    /* Убирает правую границу */
     color: #E5EAF3;
     margin-top: 1em;
 }
 
 .el-menu-item {
     border-right: none !important;
-    /* Убирает границу у каждого элемента */
 }
 
-/* Сброс стилей для всех ссылок */
+/* Для горизонтального меню */
+.horizontal-menu {
+    height: 90px;
+    display: flex;
+    flex-direction: row;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: #2c2c2c;
+    justify-content: space-evenly;
+    z-index: 1000;
+    margin-left: -7px;
+    padding-left: 10px;
+}
+
+.horizontal-menu .el-menu-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10px;
+    padding-left: 0 !important;
+}
+
+.horizontal-menu .el-icon {
+    margin-bottom: 0px;
+}
+
+/* Сброс стилей для ссылок */
 a:-webkit-any-link {
     color: inherit !important;
-    /* Наследовать цвет, не использовать цвет для ссылок */
     cursor: inherit !important;
-    /* Наследовать курсор */
     text-decoration: none !important;
-    /* Убрать подчеркивание */
 }
 
-/* Или если конкретно для router-link */
-router-link {
-    color: inherit;
-    text-decoration: none;
-    cursor: pointer;
+.horizontal-menu .el-menu-item:hover {
+    background-color: transparent !important;
+    /* color: inherit !important; */
+    cursor: default !important;
 }
 </style>

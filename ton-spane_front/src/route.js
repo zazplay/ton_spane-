@@ -11,6 +11,7 @@ import userTemplate from './components/Page/UserPage/UserPage.vue'
 import UserSubscribe from './components/Page/UserSubsribeModal/UserSubscribe.vue';
 
 
+
 const routes = [
   { path: '/',  component: TapePage },
   { path: '/tape',  component: TapePage },
@@ -20,9 +21,9 @@ const routes = [
   { path: '/search', component: SearchPage },
   { path: '/purchased', component: PurchasedPage },
   { path: '/more', component: MorePage },
-
   { path: '/userTemplate', component: userTemplate },
   { path: '/userSubscribeDonate', component: UserSubscribe },
+
 
 
 
