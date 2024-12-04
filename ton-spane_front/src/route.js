@@ -20,7 +20,6 @@ const routes = [
   { path: '/search', component: SearchPage },
   { path: '/purchased', component: PurchasedPage },
   { path: '/more', component: MorePage },
-
   { path: '/userTemplate', component: userTemplate },
   { path: '/userSubscribeDonate', component: UserSubscribe },
 
