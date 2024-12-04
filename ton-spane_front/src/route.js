@@ -8,6 +8,8 @@ import PurchasedPage from './components/Page/PurchasedPage.vue';
 import MorePage from './components/Page/MorePage.vue';
 
 import userTemplate from './components/Page/UserPage/UserPage.vue'
+import UserSubscribe from './components/Page/UserSubsribeModal/UserSubscribe.vue';
+
 
 const routes = [
   { path: '/',  component: TapePage },
@@ -20,6 +22,8 @@ const routes = [
   { path: '/more', component: MorePage },
 
   { path: '/userTemplate', component: userTemplate },
+  { path: '/userSubscribeDonate', component: UserSubscribe },
+
 
 
 

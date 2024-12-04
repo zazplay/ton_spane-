@@ -24,16 +24,23 @@
   </script>
   
   <style scoped>
-  .main-container-style {
-    width: 810px;
+.main-container-style {
+    width: 100%;
+    max-width: 1200px; /* или другое подходящее значение */
     margin: 0 auto;
-  }
-  
-  .left-menu {
-    width: 20%;
-  }
-  .container-content-style {
-    width: 80%;
-  }
+    display: flex;
+    justify-content: center;
+    padding: 0 20px; /* отступы по краям */
+    box-sizing: border-box;
+}
+
+.left-menu {
+    width: 240px; /* фиксированная ширина для меню */
+}
+
+.container-content-style {
+    width: calc(100% - 260px); /* вычитаем ширину меню + немного для отступа */
+    margin-left: 20px; /* отступ от меню */
+}
   </style>
   
