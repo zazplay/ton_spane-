@@ -2,6 +2,8 @@
 import { ref, defineProps, defineEmits } from 'vue'
 import ShareModal from './ShareModal.vue' 
 import TipsModal from './TipsModal.vue'
+import { Picture as PictureFailed } from '@element-plus/icons-vue'
+
 
 // Определение входных параметров компонента
 const props = defineProps({

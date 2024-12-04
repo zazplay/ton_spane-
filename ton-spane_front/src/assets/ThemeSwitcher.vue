@@ -24,7 +24,7 @@ const toggleTheme = () => {
 <style scoped>
 .theme-switcher {
   position: fixed;
-  top: 20px;
+  bottom: 20px;
   right: 20px;
   z-index: 1000;
 }
