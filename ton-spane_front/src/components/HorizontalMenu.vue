@@ -1,6 +1,5 @@
 <template>
-    <el-menu class='horizontal-menu'  default-active="1"
-        @open="handleOpen" @close="handleClose">
+    <el-menu class='horizontal-menu' default-active="1" @open="handleOpen" @close="handleClose">
 
         <router-link to="/tape">
             <el-menu-item index="1">
@@ -11,7 +10,7 @@
             </el-menu-item>
         </router-link>
 
-        <router-link to="/clips" >
+        <router-link to="/clips">
             <el-menu-item index="2">
                 <el-icon>
                     <Film />
@@ -29,7 +28,7 @@
             </el-menu-item>
         </router-link>
 
-        <router-link to="/search" >
+        <router-link to="/search">
             <el-menu-item index="5">
                 <el-icon>
                     <Search />
@@ -52,22 +51,6 @@
 
 <script setup>
 import { Menu as IconMenu, House, Film, Message, Search } from '@element-plus/icons-vue';
-// import { ref } from 'vue';
-
-// const isSmallScreen = ref(false);
-
-// const updateScreenSize = () => {
-//     isSmallScreen.value = window.innerWidth < 1200;
-// };
-
-// onMounted(() => {
-//     updateScreenSize();
-//     window.addEventListener('resize', updateScreenSize);
-// });
-
-// onUnmounted(() => {
-//     window.removeEventListener('resize', updateScreenSize);
-// });
 
 const handleOpen = (key, keyPath) => {
     console.log(key, keyPath);
@@ -109,7 +92,6 @@ const handleClose = (key, keyPath) => {
     align-items: center;
     padding-top: 10px;
     padding-left: 0 !important;
-
 }
 
 .horizontal-menu .el-icon {
@@ -121,5 +103,11 @@ a:-webkit-any-link {
     color: inherit !important;
     cursor: inherit !important;
     text-decoration: none !important;
+}
+
+.horizontal-menu .el-menu-item:hover {
+    background-color: transparent !important;
+    /* color: inherit !important; */
+    cursor: default !important;
 }
 </style>
