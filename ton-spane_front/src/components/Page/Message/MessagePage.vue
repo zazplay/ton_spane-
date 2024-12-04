@@ -22,12 +22,21 @@
         </el-tabs>
       </el-main>
     </el-container>
+    <el-container>
+      <MessageUser />
+    </el-container>
   </div>
 </template>
 
 <script>
+import MessageUser from './MessageUser.vue';
+
+
 export default {
   name: 'MessagePage',
+  components: {
+    MessageUser
+  },
   data() {
     return {
       activeName: 'all', // Управління активною вкладкою
@@ -47,24 +56,24 @@ export default {
 </script>
 
 <style scoped>
-  .container-header {
-    display: flex;
-    justify-content: space-between;
-    color: white;
-    width: 100%;
-    margin-top: 1em;
-    font-size: x-large;
-  }
+.container-header {
+  display: flex;
+  justify-content: space-between;
+  color: white;
+  width: 100%;
+  margin-top: 1em;
+  font-size: x-large;
+}
 
-  .demo-tabs>.el-tabs__content {
-    margin-top: 32px;
-    color: #6b778c;
-    font-size: 32px;
-    font-weight: 600;
-  }
+.demo-tabs>.el-tabs__content {
+  margin-top: 32px;
+  color: #6b778c;
+  font-size: 32px;
+  font-weight: 600;
+}
 
-  .demo-tabs /deep/ .el-tabs__header {
-    width: 90%;
-    margin: 0 auto;
-  }
+.demo-tabs /deep/ .el-tabs__header {
+  width: 90%;
+  margin: 0 auto;
+}
 </style>
