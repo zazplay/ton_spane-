@@ -1,66 +1,67 @@
 <template>
     <el-menu default-active="1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
         <h5>SiteName</h5>
-        <el-menu-item index="1">
-            <router-link to="/tape">
+        
+        <router-link to="/tape">
+            <el-menu-item index="1">
                 <el-icon>
                     <House />
                 </el-icon>
                 <span>Лента</span>
-            </router-link>
-        </el-menu-item>
+            </el-menu-item>
+        </router-link>
 
-        <el-menu-item index="2">
-            <router-link to="/clips">
+        <router-link to="/clips">
+            <el-menu-item index="2">
                 <el-icon>
                     <Film />
                 </el-icon>
                 <span>Клипы</span>
-            </router-link>
-        </el-menu-item>
+            </el-menu-item>
+        </router-link>
 
-        <el-menu-item index="3">
-            <router-link to="/message">
+        <router-link to="/message">
+            <el-menu-item index="3">
                 <el-icon>
                     <Message />
                 </el-icon>
                 <span>Сообщения</span>
-            </router-link>
-        </el-menu-item>
+            </el-menu-item>
+        </router-link>
 
-        <el-menu-item index="4">
-            <router-link to="/notifications">
+        <router-link to="/notifications">
+            <el-menu-item index="4">
                 <el-icon>
                     <BellFilled />
                 </el-icon>
                 <span>Обновления</span>
-            </router-link>
-        </el-menu-item>
+            </el-menu-item>
+        </router-link>
 
-        <el-menu-item index="5">
-            <router-link to="/search">
+        <router-link to="/search">
+            <el-menu-item index="5">
                 <el-icon>
                     <Search />
                 </el-icon>
                 <span>Поиск</span>
-            </router-link>
-        </el-menu-item>
+            </el-menu-item>
+        </router-link>
 
-        <el-menu-item index="6">
-            <router-link to="/purchased">
+        <router-link to="/purchased">
+            <el-menu-item index="6">
                 <img src="../assets/dollar-svgrepo-com.svg" style="margin-left: -5px;" />
                 <span>Покупки</span>
-            </router-link>
-        </el-menu-item>
+            </el-menu-item>
+        </router-link>
 
-        <el-menu-item index="7">
-            <router-link to="/more">
+        <router-link to="/more">
+            <el-menu-item index="7">
                 <el-icon>
                     <IconMenu />
                 </el-icon>
                 <span>Еще</span>
-            </router-link>
-        </el-menu-item>
+            </el-menu-item>
+        </router-link>
     </el-menu>
 </template>
 

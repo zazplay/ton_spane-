@@ -225,7 +225,7 @@ const handleChange = (val) => {
   letter-spacing: 0.01em;
   font-weight: 600;
   background: linear-gradient(90deg, var(--el-color-primary), var(--el-color-primary-light-3));
-  -webkit-background-clip: text;
+  /* -webkit-background-clip: text; */
   -webkit-text-fill-color: transparent;
   text-shadow: 0 0 30px rgba(var(--el-color-primary-rgb), 0.2);
 }

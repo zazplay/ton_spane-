@@ -91,7 +91,7 @@ export default {
   font-size: 1.5em;
   cursor: pointer;
   color: #E5EAF3;
-  padding: 0.1em;
+  padding: 0.3em;
   transition: transform 0.3s ease;
 }
 
