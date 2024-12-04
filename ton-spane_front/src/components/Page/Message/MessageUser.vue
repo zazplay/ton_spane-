@@ -13,6 +13,7 @@
             <span style="color: aliceblue;">Имя</span>
             <span>Текст сообщения</span>
         </el-main>
+        
     </el-container>
 </template>
 
