@@ -1,6 +1,6 @@
 <template>
     <el-menu default-active="1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-        <h5>SiteName</h5>
+        <h2>DreamScape</h2>
         
         <router-link to="/tape">
             <el-menu-item index="1">

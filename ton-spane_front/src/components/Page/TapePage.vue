@@ -4,7 +4,7 @@
       <!-- Заголовок с добавленной иконкой -->
       <el-header class="header-style">
         <div class="header-content">
-          <div class="site-name">SiteName</div>
+          <div class="site-name">DreamScape</div>
           <div class="icon-container">
             <router-link to="/notifications">
               <el-icon class="icon-style">
@@ -115,7 +115,7 @@ export default {
 }
 
 .site-name {
-  font-size: 24px;
+  font-size: 16px;
   font-weight: bold;
   color: #E5EAF3;
   text-align: center;
