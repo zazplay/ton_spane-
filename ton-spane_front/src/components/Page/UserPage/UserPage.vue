@@ -1,9 +1,5 @@
 <script lang="js" setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'  // Добавьте этот импорт
-import ListPostCards from '../../ListPostCards.vue'
-// import userSubscribeDonate from '../UserSubsribeModal/UserSubscribe.vue'
-
+import {ref} from 'vue'
 
 const srcPagePhoto = 'https://bannerplus.ru/files/img/pics/devushka-krasivye-kartinki/devushka-krasivye-kartinki-56.webp'
 const srcHeaderPhoto = 'https://focus.ua/static/storage/thumbs/920x465/2/19/69ab9b9f-41b9ca57261cb2dc97ea7ca6a4fc5192.jpg?v=8030_1'
@@ -17,17 +13,11 @@ const activeNames = ref(['1'])
 const handleChange = (val) => {
   console.log(val)
 }
-const router = useRouter()  // Добавьте эту строку
-
-const openDonatePage = () => {
-  // Используйте существующий router если он уже импортирован
-  router.push('/userSubscribeDonate')}
-
 </script>
 
 <template>
   <div class="common-layout">
-    <el-container style="margin-bottom: 30px;">
+    <el-container>
       <el-header class="page-header">
         <el-image class="header-image" :src="srcHeaderPhoto" fit="cover" />
       </el-header>
@@ -77,21 +67,13 @@ const openDonatePage = () => {
                 </div>
               </el-collapse-item>
             </el-collapse>
-            <el-button 
-              type="warning" 
-              class="firsMonthDonateBtn" 
-              plain 
-              @click="openDonatePage"
-              >
-              Станьте спонором всего за 5$ первый месяц
-            </el-button>         
-           <el-button type="success" class="oneYearSubscribe"  plain>Купить годовую подписку за 150$</el-button>
+            <el-button type="warning" class="firsMonthDonateBtn"  plain>Станьте спонором всего за 5$ первый месяц</el-button>
+            <el-button type="success" class="oneYearSubscribe"  plain>Купить годовую подписку за 150$</el-button>
 
           </el-main>
         </el-container>
       </el-container>
     </el-container>
-      <ListPostCards></ListPostCards>
   </div>
 </template>
 
@@ -99,7 +81,7 @@ const openDonatePage = () => {
 
 .common-layout {
   width: 880px;
-  align-self: left;
+  align-self: center;
 }
 
 .page-header {
@@ -243,7 +225,7 @@ const openDonatePage = () => {
   letter-spacing: 0.01em;
   font-weight: 600;
   background: linear-gradient(90deg, var(--el-color-primary), var(--el-color-primary-light-3));
-  -webkit-background-clip: text;
+  /* -webkit-background-clip: text; */
   -webkit-text-fill-color: transparent;
   text-shadow: 0 0 30px rgba(var(--el-color-primary-rgb), 0.2);
 }
