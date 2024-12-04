@@ -1,70 +1,46 @@
 <template>
-  <div class="common-layout main-container-style">
-    <el-container>
-      <el-aside class="left-menu">
-        <MenuComponent />
-      </el-aside>
-      <el-container class="container-content-style">
-        <!-- Динамическое содержимое -->
-        <router-view />
-        <HorizontalMenu class="horizontal-menu"/>
+    <div class="common-layout main-container-style">
+      <el-container>
+        <el-aside class="left-menu">
+          <MenuComponent />
+        </el-aside>
+        <el-container class="container-content-style">
+          <!-- Динамическое содержимое -->
+          <router-view />
+        </el-container>
       </el-container>
-    </el-container>
-  </div>
-</template>
-
-<script>
-import HorizontalMenu from '../HorizontalMenu.vue';
-import MenuComponent from '../MenuComponent.vue';
-
-export default {
-  name: 'MainPage',
-  components: {
-    MenuComponent,
-    HorizontalMenu
-  },
-};
-</script>
-
-<style scoped>
+    </div>
+  </template>
+  
+  <script>
+  import MenuComponent from '../MenuComponent.vue';
+  
+  export default {
+    name: 'MainPage',
+    components: {
+      MenuComponent,
+    },
+  };
+  </script>
+  
+  <style scoped>
 .main-container-style {
-  width: 810px;
-  margin: 0 auto;
+    width: 100%;
+    max-width: 1200px; /* или другое подходящее значение */
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    padding: 0 20px; /* отступы по краям */
+    box-sizing: border-box;
 }
 
 .left-menu {
-  width: 20%;
+    width: 240px; /* фиксированная ширина для меню */
 }
 
 .container-content-style {
-  width: 80%;
-  transition: all 0.3s ease;
+    width: calc(100% - 260px); /* вычитаем ширину меню + немного для отступа */
+    margin-left: 20px; /* отступ от меню */
 }
-
-.horizontal-menu{
-  display: none;
-}
-
-/* Медіа-запити для екранів менше 1200px */
-@media screen and (max-width: 1199px) {
-  .main-container-style {
-    width: 100%;
-  }
-
-  .left-menu {
-    display: none !important;
-  }
-
-  .horizontal-menu{
-    display: flex;
-  }
-  .container-content-style {
-    width: 100%;
-    /* Розтягуємо контейнер */
-    margin: 0 auto;
-    /* Центруємо його */
-    text-align: center;
-    /* Додаємо центрування тексту */
-  }
-}
-</style>
+  </style>
+  

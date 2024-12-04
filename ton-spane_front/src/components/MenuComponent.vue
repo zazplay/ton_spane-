@@ -1,72 +1,73 @@
 <template>
-    <el-menu default-active="1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-        <h2>DreamScape</h2>
-        
-        <router-link to="/tape">
+    <div class="menu-wrapper">
+        <el-menu default-active="1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
+            <h5>SiteName</h5>
             <el-menu-item index="1">
-                <el-icon>
-                    <House />
-                </el-icon>
-                <span>Лента</span>
+                <router-link to="/tape">
+                    <el-icon>
+                        <House />
+                    </el-icon>
+                    <span>Лента</span>
+                </router-link>
             </el-menu-item>
-        </router-link>
 
-        <router-link to="/clips">
             <el-menu-item index="2">
-                <el-icon>
-                    <Film />
-                </el-icon>
-                <span>Клипы</span>
+                <router-link to="/clips">
+                    <el-icon>
+                        <Film />
+                    </el-icon>
+                    <span>Клипы</span>
+                </router-link>
             </el-menu-item>
-        </router-link>
 
-        <router-link to="/message">
             <el-menu-item index="3">
-                <el-icon>
-                    <Message />
-                </el-icon>
-                <span>Сообщения</span>
+                <router-link to="/message">
+                    <el-icon>
+                        <Message />
+                    </el-icon>
+                    <span>Сообщения</span>
+                </router-link>
             </el-menu-item>
-        </router-link>
 
-        <router-link to="/notifications">
             <el-menu-item index="4">
-                <el-icon>
-                    <BellFilled />
-                </el-icon>
-                <span>Обновления</span>
+                <router-link to="/notifications">
+                    <el-icon>
+                        <BellFilled />
+                    </el-icon>
+                    <span>Обновления</span>
+                </router-link>
             </el-menu-item>
-        </router-link>
 
-        <router-link to="/search">
             <el-menu-item index="5">
-                <el-icon>
-                    <Search />
-                </el-icon>
-                <span>Поиск</span>
+                <router-link to="/search">
+                    <el-icon>
+                        <Search />
+                    </el-icon>
+                    <span>Поиск</span>
+                </router-link>
             </el-menu-item>
-        </router-link>
 
-        <router-link to="/purchased">
             <el-menu-item index="6">
-                <img src="../assets/dollar-svgrepo-com.svg" style="margin-left: -5px;" />
-                <span>Покупки</span>
+                <router-link to="/purchased">
+                    <img src="../assets/dollar-svgrepo-com.svg" style="margin-left: -5px;" />
+                    <span>Покупки</span>
+                </router-link>
             </el-menu-item>
-        </router-link>
 
-        <router-link to="/more">
             <el-menu-item index="7">
-                <el-icon>
-                    <IconMenu />
-                </el-icon>
-                <span>Еще</span>
+                <router-link to="/more">
+                    <el-icon>
+                        <IconMenu />
+                    </el-icon>
+                    <span>Еще</span>
+                </router-link>
             </el-menu-item>
-        </router-link>
-    </el-menu>
+        </el-menu>
+    </div>
 </template>
 
 <script setup>
-import { Menu as IconMenu, } from '@element-plus/icons-vue';
+import { Menu as IconMenu } from '@element-plus/icons-vue';
 
 const handleOpen = (key, keyPath) => {
     console.log(key, keyPath)
@@ -76,8 +77,13 @@ const handleClose = (key, keyPath) => {
 }
 </script>
 
-
 <style scoped>
+.menu-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
 .el-menu-vertical-demo {
     border-right: none !important;
     /* Убирает правую границу */

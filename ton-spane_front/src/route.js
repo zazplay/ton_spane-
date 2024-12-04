@@ -7,6 +7,7 @@ import SearchPage from './components/Page/SearchPage.vue';
 import PurchasedPage from './components/Page/PurchasedPage.vue';
 import MorePage from './components/Page/More/MorePage.vue';
 import UserPage from './components/Page/UserPage/UserPage.vue';
+import UserSubscribe from './components/Page/UserSubsribeModal/UserSubscribe.vue';
 
 const routes = [
   { path: '/',  component: TapePage },
@@ -18,6 +19,7 @@ const routes = [
   { path: '/purchased', component: PurchasedPage },
   { path: '/more', component: MorePage},
   { path: '/userTemplate', component:  UserPage },
+  { path: '/userSubscribeDonate', component: UserSubscribe },
 ];
 
 const router = createRouter({
