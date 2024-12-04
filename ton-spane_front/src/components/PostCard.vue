@@ -98,7 +98,6 @@ const handleDonate = () => {
   >
     <template #error>
       <div class="image-slot">
-        <el-icon><Picture-Failed /></el-icon>
       </div>
     </template>
   </el-image>
