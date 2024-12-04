@@ -6,15 +6,15 @@ module.exports = defineConfig({
   configureWebpack: {
     plugins: [
       new webpack.DefinePlugin({
-        '__VUE_OPTIONS_API__': JSON.stringify(true), // Включає Options API
-        '__VUE_PROD_DEVTOOLS__': JSON.stringify(false), // Вимикає DevTools у продакшні
-        '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__': JSON.stringify(false), // Уникає помилок, пов'язаних з гідратацією
+        '__VUE_OPTIONS_API__': JSON.stringify(true), // Включает Options API
+        '__VUE_PROD_DEVTOOLS__': JSON.stringify(false), // Выключает DevTools в продакшене
+        '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__': JSON.stringify(true), // Включает подробные сообщения о гидратации
       }),
     ],
   },
   devServer: {
     host: '0.0.0.0',
-    port: 8080, // Ваш бажаний порт
+    port: 8080, // Ваш желаемый порт
     allowedHosts: 'all',
     client: {
       webSocketURL: {
