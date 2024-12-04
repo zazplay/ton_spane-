@@ -4,14 +4,14 @@
        <el-icon class="back-arrow" @click="goBack">
         <ArrowLeftBold />
       </el-icon>
-      <h1>Поиск</h1>
-      <p>Здесь будут отображаться поиск.</p>
+      <h1>Еще</h1>
+      <p>Здесь будут отображаться "Еще".</p>
     </div>
   </template>
   
   <script>
   export default {
-    name: 'SearchPage',
+    name: 'MorePage',
     methods: {
       goBack() {
         // Возвращаемся на предыдущую страницу

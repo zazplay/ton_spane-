@@ -1,17 +1,17 @@
 <template>
   <div>
-     <!-- Стрелка назад для возврата на предыдущую страницу -->
-     <el-icon class="back-arrow" @click="goBack">
+    <!-- Стрелка назад для возврата на предыдущую страницу -->
+    <el-icon class="back-arrow" @click="goBack">
       <ArrowLeftBold />
     </el-icon>
-    <h1>Уведомления</h1>
-    <p>Здесь будут отображаться уведомления.</p>
+    <h1>Сообщения</h1>
+    <p>Здесь будут отображаться сообщения.</p>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'NotificationsPage',
+  name: 'MessagePage',
   methods: {
     goBack() {
       // Возвращаемся на предыдущую страницу

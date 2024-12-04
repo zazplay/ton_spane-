@@ -1,21 +1,20 @@
 <template>
-  <div class="common-layout containet-style">
+  <div class="common-layout  containet-style">
     <el-container>
       <!-- Заголовок с добавленной иконкой -->
       <el-header class="header-style">
+        <!-- Контейнер для выравнивания элементов -->
         <div class="header-content">
-          <div class="site-name">DreamScape</div>
+          <div class="site-name">SiteName</div>
           <div class="icon-container">
             <router-link to="/notifications">
               <el-icon class="icon-style">
                 <BellFilled />
               </el-icon>
             </router-link>
-            <el-icon class="icon-style" @click="openForm">
+            <el-icon class="icon-style" @click="switchToTab('second')">
               <CirclePlusFilled />
             </el-icon>
-            <!-- Передача пропа isOpen -->
-            <AddPostForm :isOpen="isFormOpen" @close="closeForm" />
           </div>
         </div>
       </el-header>
@@ -23,7 +22,7 @@
       <!-- Основной контент -->
       <el-main style="padding-top: 0;">
         <el-container>
-          <el-tabs v-model="activeTab" class="demo-tabs containet-style" @tab-click="handleTabClick">
+          <el-tabs v-model="activeName" class="demo-tabs containet-style" @tab-click="handleClick">
             <el-tab-pane label="Для вас" name="first">
               <ListPostCards />
             </el-tab-pane>
@@ -36,40 +35,28 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue';
 import { BellFilled, CirclePlusFilled } from '@element-plus/icons-vue';
 import ListPostCards from '../ListPostCards.vue';
-import AddPostForm from '../AddPostForm.vue';
 
-export default {
-  components: {
-    AddPostForm,
-    ListPostCards,
-    BellFilled,
-    CirclePlusFilled,
-  },
-  data() {
-    return {
-      isFormOpen: false,  // Управління відкриттям форми
-      activeTab: 'first', // Управління активною вкладкою
-    };
-  },
-  methods: {
-    openForm() {
-      this.isFormOpen = true; // Відкриваємо форму
-    },
-    closeForm() {
-      this.isFormOpen = false; // Закриваємо форму
-    },
-    handleTabClick(tab) {
-      console.log('Вибрана вкладка:', tab.name);
-    },
-  },
+// Управление активной вкладкой
+const activeName = ref('first');
+
+// Обработчик кликов по вкладкам
+const handleClick = (tab, event) => {
+  console.log(tab, event);
+};
+
+// Функция для переключения вкладок
+const switchToTab = (tabName) => {
+  activeName.value = tabName;
 };
 </script>
 
 <style>
 .demo-tabs>.el-tabs__content {
+  /* padding: 10px; */
   color: #6b778c;
   font-size: 32px;
   font-weight: 600;
@@ -89,17 +76,24 @@ export default {
 
 .icon-style {
   font-size: 1.5em;
+  /* Увеличивает размер иконки */
   cursor: pointer;
+  /* Делает иконку кликабельной */
   color: #E5EAF3;
-  padding: 0.3em;
+  /* Настраивает цвет (по желанию) */
+  padding: 0.1em;
   transition: transform 0.3s ease;
+  /* Добавляет эффект при наведении */
 }
 
 .icon-style:hover {
   transform: scale(1.2);
+  /* Увеличивает иконку при наведении */
   color: #8D9095;
+  /* Изменяет цвет при наведении (опционально) */
 }
 
+/* Стиль для хедера */
 .header-style {
   display: flex;
   align-items: center;
@@ -107,22 +101,30 @@ export default {
   padding: 0 20px;
 }
 
+/* Контейнер для содержания хедера */
 .header-content {
   display: flex;
   justify-content: space-between;
+  /* Распределение элементов по краям */
   align-items: center;
   width: 100%;
+  /* Растягиваем на всю ширину */
 }
 
+/* Стили для текста SiteName */
 .site-name {
-  font-size: 16px;
+  font-size: 24px;
   font-weight: bold;
   color: #E5EAF3;
   text-align: center;
   flex: 1;
+  /* Занимает все свободное пространство */
 }
 
+/* Контейнер для иконок */
 .icon-container {
   display: flex;
+  /* gap: 10px; */
+  /* Отступы между иконками */
 }
 </style>
