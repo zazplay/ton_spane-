@@ -5,8 +5,7 @@ import MessagePage from './components/Page/Message/MessagePage.vue';
 import TapePage from './components/Page/TapePage.vue';
 import SearchPage from './components/Page/SearchPage.vue';
 import PurchasedPage from './components/Page/PurchasedPage.vue';
-import MorePage from './components/Page/MorePage.vue';
-
+import MorePage from './components/Page/More/MorePage.vue';
 import userTemplate from './components/Page/UserPage/UserPage.vue'
 import UserSubscribe from './components/Page/UserSubsribeModal/UserSubscribe.vue';
 
