@@ -46,9 +46,13 @@ export default {
     goBack() {
       // Возвращаемся на предыдущую страницу
       this.$router.go(-1);
+    },
+    handleClick(tab, event) {
+      console.log(tab, event)
     }
   }
 };
+
 </script>
 
 <style scoped>
