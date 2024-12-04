@@ -66,7 +66,7 @@
 </template>
 
 <script setup>
-import { Menu as IconMenu, } from '@element-plus/icons-vue';
+import { Menu as IconMenu } from '@element-plus/icons-vue';
 
 const handleOpen = (key, keyPath) => {
     console.log(key, keyPath)
@@ -76,8 +76,13 @@ const handleClose = (key, keyPath) => {
 }
 </script>
 
-
 <style scoped>
+.menu-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
 .el-menu-vertical-demo {
     border-right: none !important;
     /* Убирает правую границу */
