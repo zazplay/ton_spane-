@@ -1,9 +1,8 @@
 <template>
-    <el-menu :class="[{ 'horizontal-menu': isSmallScreen }]" default-active="1"
+    <el-menu class='horizontal-menu'  default-active="1"
         @open="handleOpen" @close="handleClose">
-        <h5 v-if="!isSmallScreen">SiteName</h5>
-        
-        <router-link to="/tape" v-if="isSmallScreen || !isSmallScreen">
+
+        <router-link to="/tape">
             <el-menu-item index="1">
                 <el-icon>
                     <House />
@@ -12,7 +11,7 @@
             </el-menu-item>
         </router-link>
 
-        <router-link to="/clips" v-if="isSmallScreen || !isSmallScreen">
+        <router-link to="/clips" >
             <el-menu-item index="2">
                 <el-icon>
                     <Film />
@@ -21,7 +20,7 @@
             </el-menu-item>
         </router-link>
 
-        <router-link to="/message" v-if="isSmallScreen || !isSmallScreen">
+        <router-link to="/message">
             <el-menu-item index="3">
                 <el-icon>
                     <Message />
@@ -30,7 +29,7 @@
             </el-menu-item>
         </router-link>
 
-        <router-link to="/search" v-if="isSmallScreen || !isSmallScreen">
+        <router-link to="/search" >
             <el-menu-item index="5">
                 <el-icon>
                     <Search />
@@ -39,13 +38,12 @@
             </el-menu-item>
         </router-link>
 
-        <!-- Условное отображение элемента "Еще" или "Профиль" -->
-        <router-link :to="isSmallScreen ? '/profile' : '/more'">
+        <router-link to="/more">
             <el-menu-item index="7">
                 <el-icon>
                     <IconMenu />
                 </el-icon>
-                <span>{{ isSmallScreen ? 'Профиль' : 'Еще' }}</span>
+                <span>Профиль</span>
             </el-menu-item>
         </router-link>
 
@@ -54,22 +52,22 @@
 
 <script setup>
 import { Menu as IconMenu, House, Film, Message, Search } from '@element-plus/icons-vue';
-import { ref, onMounted, onUnmounted } from 'vue';
+// import { ref } from 'vue';
 
-const isSmallScreen = ref(false);
+// const isSmallScreen = ref(false);
 
-const updateScreenSize = () => {
-    isSmallScreen.value = window.innerWidth < 1200;
-};
+// const updateScreenSize = () => {
+//     isSmallScreen.value = window.innerWidth < 1200;
+// };
 
-onMounted(() => {
-    updateScreenSize();
-    window.addEventListener('resize', updateScreenSize);
-});
+// onMounted(() => {
+//     updateScreenSize();
+//     window.addEventListener('resize', updateScreenSize);
+// });
 
-onUnmounted(() => {
-    window.removeEventListener('resize', updateScreenSize);
-});
+// onUnmounted(() => {
+//     window.removeEventListener('resize', updateScreenSize);
+// });
 
 const handleOpen = (key, keyPath) => {
     console.log(key, keyPath);
@@ -99,11 +97,10 @@ const handleClose = (key, keyPath) => {
     bottom: 0;
     width: 100%;
     background: #2c2c2c;
-    justify-content: space-around;
+    justify-content: space-evenly;
     z-index: 1000;
     margin-left: -7px;
-    
-    /* padding-bottom: 5px; */
+    padding-left: 10px;
 }
 
 .horizontal-menu .el-menu-item {
@@ -111,7 +108,7 @@ const handleClose = (key, keyPath) => {
     flex-direction: column;
     align-items: center;
     padding-top: 10px;
-    padding-left: 10px !important;
+    padding-left: 0 !important;
 
 }
 
