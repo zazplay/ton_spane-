@@ -154,7 +154,7 @@ const handleDonate = () => {
 
 <style scoped>
 .post-card {
-  width: 600px;
+  width: auto;
   margin-bottom: 30px;
 }
 
@@ -207,6 +207,21 @@ const handleDonate = () => {
 }
 
 .description {
-  margin-left: 15px;
+  width: 500px;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  padding: 5x;
+  border-radius: 5px;
+  width: 500px;
+  padding: 5px;
+  box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
+  background-color: transparent;
+  transition: all 0.3s ease;
+}
+
+.description:hover {
+  box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
+  border-color: #357abd;
 }
 </style>
