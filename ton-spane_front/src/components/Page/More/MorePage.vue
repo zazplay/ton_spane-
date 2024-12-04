@@ -8,24 +8,27 @@
           <el-icon class="back-arrow" @click="goBack">
             <ArrowLeftBold />
           </el-icon>
-          <div>Уведомления</div>
-          <el-icon>
-            <Setting />
-          </el-icon>
+          <div>Еще</div>
+          <div></div>
         </el-container>
       </el-header>
 
       <el-main>
-       
+       <GoToProfile/>
       </el-main>
     </el-container>
   </div>
 </template>
 
 <script>
+import GoToProfile from './GoToProfile.vue';
+
 
   export default {
-    name: 'NotificationsPage',
+    name: 'MorePage',
+    components:{
+      GoToProfile
+    },
     methods: {
       goBack() {
         // Возвращаемся на предыдущую страницу
