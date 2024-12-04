@@ -5,9 +5,7 @@ import MessagePage from './components/Page/MessagePage.vue';
 import TapePage from './components/Page/TapePage.vue';
 import SearchPage from './components/Page/SearchPage.vue';
 import PurchasedPage from './components/Page/PurchasedPage.vue';
-import MorePage from './components/Page/MorePage.vue';
-
-import userTemplate from './components/Page/UserPage/UserPage.vue'
+import UserPage from './components/Page/UserPage/UserPage.vue';
 
 const routes = [
   { path: '/',  component: TapePage },
@@ -17,11 +15,7 @@ const routes = [
   { path: '/message', component: MessagePage },
   { path: '/search', component: SearchPage },
   { path: '/purchased', component: PurchasedPage },
-  { path: '/more', component: MorePage },
-
-  { path: '/userTemplate', component: userTemplate },
-
-
+  { path: '/more', component: UserPage },
 
 ];
 
