@@ -1,6 +1,6 @@
 <template>
     <el-menu default-active="1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-        <h2>DreamScape</h2>
+        <el-text type="Default" class="dreamscape-title">DreamScape</el-text>
         
         <router-link to="/tape">
             <el-menu-item index="1">
@@ -77,6 +77,16 @@ const handleClose = (key, keyPath) => {
 </script>
 
 <style scoped>
+
+.dreamscape-title {
+  font-size: 25px;
+  margin-left: 10px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  margin-top: 30px; /* or padding-top: 30px; - adjust the value as needed */
+  display: block;
+}
+
 .menu-wrapper {
     display: flex;
     justify-content: center;
