@@ -28,7 +28,8 @@
                 </div>
 
                 <div class="mb-4">
-                    <el-button type="success" style="margin-top: 15px;" plain @click.prevent="handleSubmit">Опубликовать</el-button>
+                    <el-button type="success" class="custom-file-btn" style="margin-top: 15px;" plain
+                        @click.prevent="handleSubmit">Опубликовать</el-button>
                 </div>
             </form>
         </div>
@@ -129,8 +130,8 @@ export default {
     background: rgba(0, 0, 0, 0.6);
     z-index: 1000;
     display: flex;
-    align-items: center;
     justify-content: center;
+    /* align-items: center; Центровка по вертикали */
 }
 
 /* Содержимое модального окна */
@@ -142,6 +143,7 @@ export default {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     width: 90%;
     max-width: 600px;
+    max-height: max-content;
     color: #ffffff;
 }
 
@@ -191,6 +193,7 @@ export default {
     margin-bottom: 15px;
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
 .form-control {
@@ -215,14 +218,6 @@ export default {
 .custom-file-btn {
     width: 30%;
     margin: 15px auto;
-    /* background-color: #5865f2;
-    color: #fff; */
-    /* padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.3s; */
 }
 
 .custom-file-btn:hover {
@@ -234,5 +229,50 @@ export default {
     margin-top: 10px;
     font-size: 1rem;
     color: #f1f1f1;
+}
+
+/* Адаптивность для экранов меньше 1200px */
+@media (max-width: 1200px) {
+    .modal-content {
+        width: 95%;
+        /* Уменьшаем ширину */
+        padding: 15px;
+        /* Уменьшаем отступы */
+    }
+
+    .form-control {
+        font-size: 0.4rem;
+        /* Уменьшаем размер текста */
+    }
+
+    .custom-file-btn {
+        width: 50%;
+        /* Увеличиваем ширину кнопки */
+    }
+
+    .close-btn {
+        font-size: 0.8rem;
+        /* Уменьшаем размер кнопки закрытия */
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        
+    }
+
+    .custom-file-btn {
+        position: sticky;
+        width: 40%;
+        margin: 0 auto;
+        font-size: 14px !important;
+        padding: 10px !important;
+    }
+
+    .custom-file-btn:hover {
+        background-color: #4752c4;
+    }
 }
 </style>

@@ -1,7 +1,8 @@
 <template>
-    <el-menu default-active="1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
+    <el-menu default-active="1" class="el-menu-vertical-demo" style="width: 100px;" @open="handleOpen"
+        @close="handleClose">
         <h2>DreamScape</h2>
-        
+
         <router-link to="/tape">
             <el-menu-item index="1">
                 <el-icon>
@@ -77,22 +78,20 @@ const handleClose = (key, keyPath) => {
 </script>
 
 <style scoped>
-.menu-wrapper {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-}
-
 .el-menu-vertical-demo {
+    width: max-content !important;
     border-right: none !important;
     /* Убирает правую границу */
     color: #E5EAF3;
     margin-top: 1em;
+    
 }
 
 .el-menu-item {
     border-right: none !important;
     /* Убирает границу у каждого элемента */
+    font-size: 18px;
+    font-weight: bold;
 }
 
 /* Сброс стилей для всех ссылок */

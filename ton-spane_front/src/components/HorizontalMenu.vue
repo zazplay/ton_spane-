@@ -1,8 +1,7 @@
 <template>
     <el-menu class='horizontal-menu' default-active="1" @open="handleOpen" @close="handleClose">
-
         <router-link to="/tape">
-            <el-menu-item index="1">
+            <el-menu-item index="1" >
                 <el-icon>
                     <House />
                 </el-icon>
@@ -69,11 +68,12 @@ const handleClose = (key, keyPath) => {
 
 .el-menu-item {
     border-right: none !important;
+    font-size: medium !important;
 }
 
 /* Для горизонтального меню */
 .horizontal-menu {
-    height: 90px;
+    height: 80px;
     display: flex;
     flex-direction: row;
     position: fixed;
@@ -82,8 +82,8 @@ const handleClose = (key, keyPath) => {
     background: #2c2c2c;
     justify-content: space-evenly;
     z-index: 1000;
-    margin-left: -7px;
     padding-left: 10px;
+
 }
 
 .horizontal-menu .el-menu-item {

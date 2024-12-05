@@ -1,15 +1,14 @@
 <template>
-  <div class="common-layout main-container-style">
-    <el-container>
-      <el-aside class="left-menu">
-        <MenuComponent />
-      </el-aside>
-      <el-container class="container-content-style">
-        <!-- Динамическое содержимое -->
-        <router-view />
-        <HorizontalMenu class="horizontal-menu"/>
-      </el-container>
-    </el-container>
+  <div class="main-container">
+    <div class="left-container">
+      <MenuComponent />
+    </div>
+    <div class="right-container">
+      <!--Динамическое содержимое-->
+      <router-view />
+      
+    </div>
+    <HorizontalMenu class="horizontal-menu" />
   </div>
 </template>
 
@@ -18,53 +17,73 @@ import HorizontalMenu from '../HorizontalMenu.vue';
 import MenuComponent from '../MenuComponent.vue';
 
 export default {
-  name: 'MainPage',
-  components: {
+  name: "ResponsiveContainers",
+  components:{
     MenuComponent,
     HorizontalMenu
-  },
+  }
 };
 </script>
 
 <style scoped>
-.main-container-style {
-  width: 810px;
-  margin: 0 auto;
+.main-container {
+  display: flex;
+  justify-content: center;
+  /* Центрирует правый контейнер */
+  position: relative;
+  width: 100%;
+  /* height: 100vh; */
+  /* Высота экрана */
 }
 
-.left-menu {
-  width: 20%;
-}
-
-.container-content-style {
-  width: 80%;
-  transition: all 0.3s ease;
-}
-
-.horizontal-menu{
+.horizontal-menu {
   display: none;
 }
 
-/* Медіа-запити для екранів менше 1200px */
-@media screen and (max-width: 1199px) {
-  .main-container-style {
-    width: 100%;
-  }
-
-  .left-menu {
-    display: none !important;
-  }
-
-  .horizontal-menu{
-    display: flex;
-  }
-  .container-content-style {
-    width: 100%;
-    /* Розтягуємо контейнер */
-    margin: 0 auto;
-    /* Центруємо його */
-    text-align: center;
-    /* Додаємо центрування тексту */
-  }
+.left-container {
+  width: 300px;
+  /* Ширина левого контейнера */
+  /* height: 100%; */
+  /* background-color: lightblue; */
+  position: absolute;
+  right: 50%;
+  /* Совмещаем правую границу с центром экрана */
+  transform: translateX(-105%);
+  /* Сдвигаем левый контейнер к правому */
 }
+
+.right-container {
+  width: 800px;
+  /* Ширина правого контейнера */
+  /* height: 100%; */
+  /* background-color: lightgreen; */
+  font-size: 14px;
+  position: absolute;
+  left: 50%;
+  /* Центрируем правый контейнер по горизонтали экрана */
+  transform: translateX(-50%);
+}
+
+@media (max-width: 1200px) {
+  .left-container {
+    display: none;
+    /* Скрываем левый контейнер при ширине экрана < 1200px */
+  }
+
+  .horizontal-menu {
+  display: flex;
+}
+
+.right-container {
+  width: 100%;
+  /* Ширина правого контейнера */
+  /* height: 100%; */
+  position: absolute;
+  left: 50%;
+  /* Центрируем правый контейнер по горизонтали экрана */
+  transform: translateX(-50%);
+}
+}
+
+
 </style>

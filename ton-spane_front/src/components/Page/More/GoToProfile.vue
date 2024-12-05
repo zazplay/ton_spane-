@@ -36,8 +36,8 @@ const url = "https://shutok.ru/uploads/posts/2023-01/1675019582_shutok.ru.01.jpg
 }
 
 .container-img {
-    padding: 7px;
-    padding-left: 15px;
+    padding: 0 !important;
+    padding-left: 10px !important;
 }
 
 .info-container-profile {

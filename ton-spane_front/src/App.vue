@@ -1,53 +1,53 @@
 <script>
 import MainPage from './components/Page/MainPage.vue';
-import { ref, onMounted } from 'vue'
-import { Moon, Sunny } from '@element-plus/icons-vue'
+// import { ref, onMounted } from 'vue'
+// import { Moon, Sunny } from '@element-plus/icons-vue'
 
 export default {
   name: 'App',
   components: {
     MainPage,
-    Moon,
-    Sunny
+    // Moon,
+    // Sunny
   },
-  setup() {
-    const isDark = ref(document.documentElement.className === 'dark')
+  // setup() {
+  //   const isDark = ref(document.documentElement.className === 'dark')
 
-    const toggleTheme = () => {
-      isDark.value = !isDark.value
-      document.documentElement.className = isDark.value ? 'dark' : ''
-      localStorage.setItem('theme', isDark.value ? 'dark' : '')
-    }
+  //   const toggleTheme = () => {
+  //     isDark.value = !isDark.value
+  //     document.documentElement.className = isDark.value ? 'dark' : ''
+  //     localStorage.setItem('theme', isDark.value ? 'dark' : '')
+  //   }
 
-    onMounted(() => {
-      // Добавляем обработчики ошибок при монтировании компонента
-      window.addEventListener('error', (event) => {
-        if (event.message && event.message.includes('ResizeObserver')) {
-          event.stopImmediatePropagation();
-          return;
-        }
-        if (event.message === 'Script error.') {
-          event.stopImmediatePropagation();
-          return;
-        }
-      });
+  //   onMounted(() => {
+  //     // Добавляем обработчики ошибок при монтировании компонента
+  //     window.addEventListener('error', (event) => {
+  //       if (event.message && event.message.includes('ResizeObserver')) {
+  //         event.stopImmediatePropagation();
+  //         return;
+  //       }
+  //       if (event.message === 'Script error.') {
+  //         event.stopImmediatePropagation();
+  //         return;
+  //       }
+  //     });
 
-      window.addEventListener('unhandledrejection', (event) => {
-        event.stopImmediatePropagation();
-        event.preventDefault();
-      });
-    })
+  //     window.addEventListener('unhandledrejection', (event) => {
+  //       event.stopImmediatePropagation();
+  //       event.preventDefault();
+  //     });
+  //   })
 
-    return {
-      isDark,
-      toggleTheme
-    }
-  }
+  //   return {
+  //     isDark,
+  //     toggleTheme
+  //   }
+  // }
 }
 </script>
 
 <template>
-  <div class="floating-theme-switcher">
+  <!-- <div class="floating-theme-switcher">
     <el-button
       circle
       class="theme-button"
@@ -60,7 +60,7 @@ export default {
         <Sunny />
       </el-icon>
     </el-button>
-  </div>
+  </div> -->
   <MainPage />
 </template>
 

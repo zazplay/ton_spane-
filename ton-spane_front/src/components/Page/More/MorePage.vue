@@ -15,6 +15,7 @@
 
       <el-main>
        <GoToProfile/>
+       <ThemeSwitcher/>
       </el-main>
     </el-container>
   </div>
@@ -22,12 +23,13 @@
 
 <script>
 import GoToProfile from './GoToProfile.vue';
-
+import ThemeSwitcher from '../../../assets/ThemeSwitcher.vue';
 
   export default {
     name: 'MorePage',
     components:{
-      GoToProfile
+      GoToProfile,
+      ThemeSwitcher
     },
     methods: {
       goBack() {
