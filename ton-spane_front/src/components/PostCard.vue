@@ -125,7 +125,6 @@ const handleDonate = () => {
           <el-icon size="25px"><Money /></el-icon>
         </el-check-tag>
       </div>
-
       <el-text class="description" tag="b" emphasis>
         {{ postDesc.length > 100 ? postDesc.slice(0, 100) + '...' : postDesc }}
       </el-text>
@@ -164,7 +163,6 @@ const handleDonate = () => {
 .subBtn {
  width: auto !important;
  font-size: 16px !important;
-
  @media (max-width: 480px) {
    width: 40% !important;
    height: 30px !important; 
@@ -182,11 +180,9 @@ const handleDonate = () => {
 
 .post-image {
  min-height: 400px;
-
  width: 80%;
  object-fit: cover;
  object-position: center center;
- 
  @media (max-width: 480px) {
    max-height: 400px;
    min-height: 300px;

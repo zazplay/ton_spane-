@@ -81,7 +81,6 @@
 .bottom-fixed {
   position: absolute;
   bottom:10px;
-  margin-left: 69,9%;
   transform: translateX(-50%);
   padding-left: 145px;
   padding-right: 145px;
@@ -89,19 +88,32 @@
   padding-bottom: 25px;
   font-size: 30px;
   color: white;
-
-
+  @media (max-width: 480px) {
+      position: absolute;
+      top:20px;
+      height: 20px !important;
+      padding-left: 15px !important; 
+      padding-right: 15px !important; 
+      font-size: 25px !important;
+      right: -100px;
+      border-radius: 15px;
+      margin-top: 0px !important;
+    }
 }
   /* Container Styles */
   .sp-container {
-    width: 100%;
+    width: 95%;
     border: #8eb2ff;
     border-radius: 5%;
     border: solid;
     padding-left: 0px;
     padding: 20px;
     margin-left: 20px;
-
+    @media (max-width: 480px) {
+      border-radius: 20px;
+      padding: 0px !important;
+      margin-left: 8px !important;
+    }
   }
   
   /* Header Styles */
@@ -112,6 +124,11 @@
     gap: 10px;
     padding: 0px;
     width: 100%;
+    @media (max-width: 480px) {
+      width: 100%;
+
+    }
+
   }
   
   /* Main Content Styles */
@@ -133,13 +150,22 @@
       border-color: rgb(75, 165, 255);
       display: flex;
       align-items: center;
-      width: 480px;
+      width: 90%;
       padding: 20px;
       background: linear-gradient(145deg, rgba(13, 23, 33, 0.692), rgba(32, 45, 58, 0.544));
       border-radius: 10px;
       transition: all 0.3s ease;
       cursor: pointer;
       height: 30px;
+      @media (max-width: 480px) {
+        width: 80%;
+        font-size: 0.55rem;
+        padding: 15px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+
+
+    }
   }
   
   .sp-subscription-item:hover {
@@ -155,7 +181,11 @@
       letter-spacing: 0.5px;
       margin-left: 15px;
       position: absolute;
-      margin-top: 8px
+      margin-top: 8px;
+      @media (max-width: 480px) {
+        margin-left: 5px;
+
+      }
   }
   
   .sp-item-icon {
@@ -191,6 +221,13 @@
     backdrop-filter: blur(8px);
     margin-left: 0px;
     width: 50px;
+    @media (max-width: 480px) {
+        width: 50px !important;
+        height: 40px !important;
+        margin-top: 5px !important;
+
+    }
+
   }
   
   .sp-back-btn:hover {
@@ -240,10 +277,17 @@
       width: 150px;
       border-radius: 10px;
       align-self: center;
+      @media (max-width: 480px) {
+        width: 100px;
+        height: 100px;
+
+      }
   }
   
   /* Title Styles */
   .sp-title {
+    width: 92% !important;
+    
       font-weight: 800;
       font-size: 22px;
       color: rgb(0, 0, 0);
@@ -257,7 +301,6 @@
       margin-top: 10px;
       display: flex;
       border-radius: 8px;
-      position: relative;
       box-shadow: 0 2px 15px rgba(142,178,255,0.3),
                   0 0 30px rgba(178,105,255,0.2);
       background: linear-gradient(135deg, #8eb2ff, #b269ff);
@@ -267,6 +310,15 @@
       align-self: center;
       width: 501px;
       transition: all 0.3s ease;
+      display: flex !important;
+    text-align: center !important;
+    justify-content: center !important;
+      @media (max-width: 480px) {
+      width: 85% !important;
+      font-size: 0.55rem;
+      padding: 7px;
+
+    }
   }
   
   .sp-title:hover {

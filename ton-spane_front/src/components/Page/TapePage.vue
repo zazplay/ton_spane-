@@ -4,7 +4,7 @@
       <!-- Заголовок с добавленной иконкой -->
       <el-header class="header-style">
         <div class="header-content">
-          <el-text class="site-name" type = "Default">DreamScape</el-text>
+          <el-text class="site-name" >DreamScape</el-text>
           <div class="icon-container">
             <router-link to="/notifications">
               <el-icon class="icon-style">
@@ -25,7 +25,7 @@
         <el-container>
           <el-tabs v-model="activeTab" class="demo-tabs containet-style" @tab-click="handleTabClick">
             <el-tab-pane label="Для вас" name="first">
-              <ListPostCards />
+              <ListPostCards  :posts="posts" />
             </el-tab-pane>
             <el-tab-pane label="Подписки" name="second">Config</el-tab-pane>
             <el-tab-pane label="Понравилось" name="third">Role</el-tab-pane>
@@ -40,6 +40,7 @@
 import { BellFilled, CirclePlusFilled } from '@element-plus/icons-vue';
 import ListPostCards from '../ListPostCards.vue';
 import AddPostForm from '../AddPostForm.vue';
+import { ref } from 'vue'
 
 export default {
   components: {
@@ -50,8 +51,10 @@ export default {
   },
   data() {
     return {
-      isFormOpen: false,  // Управління відкриттям форми
-      activeTab: 'first', // Управління активною вкладкою
+      isFormOpen: false,  
+      activeTab: 'first', 
+      isDataLoaded: false,
+      posts: ref([])
     };
   },
   methods: {
@@ -64,8 +67,25 @@ export default {
     handleTabClick(tab) {
       console.log('Вибрана вкладка:', tab.name);
     },
+    async fetchPosts() {
+      try {
+        const response = await fetch('https://ton-back-e015fa79eb60.herokuapp.com/api/posts')
+        const data = await response.json()
+        console.log('Posts data:', data)
+        this.posts = data
+      } catch (error) {
+        console.error('Error fetching posts:', error)
+      }
+    }
   },
+  mounted() {
+    this.fetchPosts()
+  }
 };
+
+  
+
+
 </script>
 
 <style>
