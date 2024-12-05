@@ -79,9 +79,9 @@
   <style>
 
 .bottom-fixed {
-  position: fixed;
-  bottom: 20px;
-  left: 57,9%;
+  position: absolute;
+  bottom:10px;
+  margin-left: 69,9%;
   transform: translateX(-50%);
   padding-left: 145px;
   padding-right: 145px;
@@ -94,13 +94,13 @@
 }
   /* Container Styles */
   .sp-container {
-    /* Если нужны стили для основного контейнера */
+    width: 100%;
     border: #8eb2ff;
     border-radius: 5%;
     border: solid;
-    padding-left: 30px;
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding-left: 0px;
+    padding: 20px;
+    margin-left: 20px;
 
   }
   
@@ -111,14 +111,14 @@
     flex-direction: column;
     gap: 10px;
     padding: 0px;
-    width: 700px;
+    width: 100%;
   }
   
   /* Main Content Styles */
   .sp-content {
     padding: 0;
     display: flex;
-    width: 700px;
+    width: 100%;
     padding-top: 20px;
     flex-direction: column;
     gap: 10px;

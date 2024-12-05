@@ -8,8 +8,10 @@ import ListPostCards from '../../ListPostCards.vue'
 const srcPagePhoto = 'https://bannerplus.ru/files/img/pics/devushka-krasivye-kartinki/devushka-krasivye-kartinki-56.webp'
 const srcHeaderPhoto = 'https://focus.ua/static/storage/thumbs/920x465/2/19/69ab9b9f-41b9ca57261cb2dc97ea7ca6a4fc5192.jpg?v=8030_1'
 const username = 'vikpix'
-const about = `Привет! Я фотограф и путешественник.В свободное время занимаюсь йогой и читаю книги 
-по искусству. Всегда открыта для новых проектов и коллабораций.`
+const about = `Привет! 🌟  Здорово познакомиться!
+Я фотограф и путешественник 📸 🌎. В свободное время занимаюсь йогой 🧘‍♀️ и читаю книги по искусству 🎨 📚. Всегда открыта для новых проектов и коллабораций ✨.`
+const subscribes = "6789"
+const subscriptions = "229"
 
 
 const activeNames = ref(['1'])
@@ -45,7 +47,7 @@ const openDonatePage = () => {
         </el-aside>
         <el-container>
           <el-main class="main-content" >
-            <el-text tag="h2" size="large" type="primary" class="username">
+            <el-text tag="h2" size="large" type="Default" class="username">
     {{ username }}
     <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0,0,256,256">
       <g fill="#25c1fd" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" 
@@ -58,8 +60,8 @@ const openDonatePage = () => {
         </g>
       </g>
     </svg>
-    <el-text class="text-shadow-blue custom-rounded" size="large" type="primary">6789 подпищиков</el-text>
-    <el-text class="text-shadow-blue custom-rounded" size="large" type="primary">20149 лайков</el-text>
+    <el-text class="text-shadow-blue custom-rounded" size="large" type="primary"> <el-text type = "Default">{{subscribes}} подпищиков</el-text> </el-text>
+    <el-text class="text-shadow-blue custom-rounded" size="large" type="primary"><el-text type = "Default">{{subscriptions}} лайков</el-text></el-text>
   </el-text>
              <el-collapse 
               v-model="activeNames"
@@ -77,19 +79,15 @@ const openDonatePage = () => {
                 </div>
               </el-collapse-item>
             </el-collapse>
-            <el-button 
-              type="warning" 
-              class="firsMonthDonateBtn" 
-              plain 
-              @click="openDonatePage"
-              >
-              Станьте спонором всего за 5$ первый месяц
-            </el-button>         
-           <el-button type="success" class="oneYearSubscribe"  plain>Купить годовую подписку за 150$</el-button>
+            
 
           </el-main>
+          
         </el-container>
+        
       </el-container>
+      <el-button type="warning" class="firsMonthDonateBtn" plain @click="openDonatePage">Станьте спонором всего за 5$ первый месяц</el-button>         
+           <el-button type="success" class="oneYearSubscribe"  plain>Купить годовую подписку за 150$</el-button>
     </el-container>
       <ListPostCards></ListPostCards>
   </div>
@@ -98,56 +96,63 @@ const openDonatePage = () => {
 <style scoped>
 
 .common-layout {
-  width: 880px;
+  width: 100%;
   align-self: left;
+  margin-left: 30px;
 }
 
 .page-header {
-  height: 270px;
+  height: 100%;
   display: flex;
   justify-content: center;
+  padding: 0px;
 }
 
 .header-image {
-  width: 820px;
-  height: 250px;
-  border-radius: 10px;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  margin-bottom: 10px;
+
 }
 
 .page-aside {
-  width: 340px;
+  width: 28.6%;
 }
 
 .main-content {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  width: 530px;
+  width: 70%;
   padding: 0;
+  overflow-x: hidden;  /* Скрываем горизонтальную прокрутку */
+  overflow-y: hidden;    /* Разрешаем вертикальную прокрутку если нужно */
+  box-sizing: border-box; /* Учитываем padding в общей ширине */
 }
 
 .demo-image_placeholder {
-  width: 300px;
+  width: auto;
 }
 
 .block {
   text-align: center;
   border-right: solid 1px var(--el-border-color);
   display: inline-block;
-  width: 300px;
+  width: auto;
   box-sizing: border-box;
   vertical-align: top;
-  margin-top: 20px;
+  margin-top: 2.3%;
 }
 
 .demo-image__placeholder .el-image {
   display: flex;
-  padding: 0 0px;
-  max-width: 280px;
-  max-height: 500px;
-  border-radius: 10px;
-  align-items: center;
-  justify-content: center;
+  padding: 0;
+  max-width: 90%;
+  max-height: 60vh;
+  border-radius: 20px;
+  align-items: flex-start;
+  justify-content: flex-start;
 }
 
 .demo-image__placeholder.image-slot {
@@ -156,33 +161,34 @@ const openDonatePage = () => {
   align-items: center;
   background: var(--el-fill-color-light);
   color: var(--el-text-color-secondary);
-  font-size: 14px;
+  font-size: 1rem;
 }
 
 .text-shadow-blue {
   color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 0 2px rgba(64, 158, 255, 0.4);
+  text-shadow: 0 0 0.2% rgba(64, 158, 255, 0.4);
   font-weight: 500;
-  border: 2px solid rgba(64, 158, 255, 0.4);
-  box-shadow: 0 0 24px rgba(64, 158, 255, 0.4);
-  padding: 12px 20px;
+  border: 0.2% solid rgba(64, 158, 255, 0.4);
+  box-shadow: 0 0 2.7% rgba(64, 158, 255, 0.4);
+  padding: 1.4% 2.3%;
   background: rgba(64, 158, 255, 0.12);
   transition: all 0.3s ease;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.03em;
   width: auto;
   text-align: center;
-  margin-left: 29px;
+  margin-left: 3.3%;
   cursor: default;
 }
 
 .text-shadow-blue:hover {
-  text-shadow: 0 0 3px rgba(64, 158, 255, 0.5);
-  box-shadow: 0 0 28px rgba(64, 158, 255, 0.5);
+  text-shadow: 0 0 0.3% rgba(64, 158, 255, 0.5);
+  box-shadow: 0 0 3.2% rgba(64, 158, 255, 0.5);
   background: rgba(64, 158, 255, 0.2);
 }
 
 .custom-rounded {
-  border-radius: 8px;
+  border-radius: 10px;
+  width: 170px;
 }
 
 .username {
@@ -191,112 +197,107 @@ const openDonatePage = () => {
   font-weight: 600;
   margin: 0;
   padding: 0;
-  font-size: 20px;
-  
+  font-size: 1.25rem;
 }
+
 .custom-collapse {
-  border-radius: 0.75rem;
-  border: none;
-  background-color: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1),
-              0 0 0 1px rgba(var(--el-color-primary-rgb), 0.1);
-  width: 31rem;
-  margin-top: 20px;
-  transition: box-shadow 0.3s ease;
-  text-align: left;
+  width: 95%;
+  min-height: 150px;
+  margin: 1.5% 0 0 5px;
+  background: transparent;
+  border: 1px solid rgba(var(--el-color-primary-rgb), 0.08);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.custom-collapse:hover {
+  border-color: rgba(var(--el-color-primary-rgb), 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .custom-collapse :deep(.el-collapse-item__header) {
-  background-color: transparent;
-  border-bottom: 1px solid rgba(var(--el-color-primary-rgb), 0.15);
-  padding: 0.35rem 0.75rem;
+  padding: 0.4rem 0.6rem;
+  background: transparent;
+  border-bottom: 1px solid rgba(var(--el-color-primary-rgb), 0.08);
   color: var(--el-text-color-primary);
-  font-weight: 600;
-  height: auto;
-  width: 31rem;
-  box-sizing: border-box;
-  transition: all 0.3s ease;
+  font-weight: 500;
+  width: 100%;
+  transition: background 0.2s ease;
+  cursor: pointer;
+  /* Убрали фиксированную высоту */
+  display: flex;
+  align-items: center;
 }
 
-.custom-collapse :deep(.el-collapse-item__wrap) {
-  width: 31rem;
-  box-sizing: border-box;
+.custom-collapse :deep(.el-collapse-item__arrow) {
+  margin-left: auto;
+  transition: transform 0.2s;
+  font-weight: 600;
+}
+
+.custom-collapse :deep(.el-collapse-item__header.is-active .el-collapse-item__arrow) {
+  transform: rotate(90deg);
+}
+
+.custom-collapse :deep(.el-collapse-item__header:hover) {
+  background: rgba(var(--el-color-primary-rgb), 0.03);
+}
+
+.custom-collapse :deep(.el-collapse-item__header.is-active) {
+  border-bottom: 1px solid rgba(var(--el-color-primary-rgb), 0.2);
 }
 
 .custom-collapse :deep(.el-collapse-item__content) {
-  background-color: transparent;
-  padding: 0.35rem 0.75rem;
+  padding: 0.4rem 0.6rem;
+  background: transparent;
   color: var(--el-text-color-regular);
-  box-sizing: border-box;
+  width: 95%;
+}
+
+.custom-collapse :deep(.el-collapse-item__wrap) {
+  background: transparent;
 }
 
 .collapse-header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .collapse-header .title {
-  font-size: 0.875rem;
-  line-height: 1.2;
-  letter-spacing: 0.01em;
-  font-weight: 600;
-  background: linear-gradient(90deg, var(--el-color-primary), var(--el-color-primary-light-3));
-  /* -webkit-background-clip: text; */
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 30px rgba(var(--el-color-primary-rgb), 0.2);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--el-color-primary);
+  transition: color 0.2s ease;
 }
 
 .collapse-content {
   font-size: 0.875rem;
   line-height: 1.4;
-  white-space: pre-line;
   color: var(--el-text-color-regular);
-  text-shadow: 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
-/* Стили для активного состояния */
-.custom-collapse :deep(.el-collapse-item__header.is-active) {
-  border-bottom-color: var(--el-color-primary);
-  background: linear-gradient(180deg, 
-    rgba(var(--el-color-primary-rgb), 0.05),
-    transparent
-  );
-}
 
-/* Стили для hover эффекта */
-.custom-collapse :deep(.el-collapse-item__header:hover) {
-  background: linear-gradient(90deg,
-    rgba(var(--el-color-primary-rgb), 0.08),
-    rgba(var(--el-color-primary-rgb), 0.02)
-  );
-  border-bottom-color: var(--el-color-primary);
-}
 
-/* Добавляем эффект свечения при наведении на весь компонент */
-.custom-collapse:hover {
-  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1),
-              0 0 0 1px rgba(var(--el-color-primary-rgb), 0.2),
-              0 0 15px rgba(var(--el-color-primary-rgb), 0.1);
-}
-
-.firsMonthDonateBtn{
+.firsMonthDonateBtn {
   font-weight: bold;
-  font-size: 20px;
-  margin-top: 20px;
-  width: 500px;
-  height: 50px;
+  font-size: 1.25rem;
+  margin-top: 2.3%;
+  width: 90%;
+  height: 5.7%;
+  align-self: center;
 }
 
-.oneYearSubscribe{
+.oneYearSubscribe {
   font-weight: bold;
-  font-size: 20px;
-  margin-top: 20px;
-  width: 500px;
-  height: 50px;
-  margin-left: 0px;
-  margin-bottom: 20px ;
+  font-size: 1.25rem;
+  margin-top: 2.3%;
+  width: 90%;
+  height: 5.7%;
+  margin-left: 0;
+  align-self: center;
+
 }
 
 </style>
