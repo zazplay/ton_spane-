@@ -9,7 +9,6 @@ import MorePage from './components/Page/More/MorePage.vue';
 import userTemplate from './components/Page/UserPage/UserPage.vue';
 import UserSubscribe from './components/Page/UserSubsribeModal/UserSubscribe.vue';
 
-
 const routes = [
   { path: '/',  component: TapePage },
   { path: '/tape',  component: TapePage },

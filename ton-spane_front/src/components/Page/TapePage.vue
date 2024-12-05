@@ -21,7 +21,7 @@
       </el-header>
 
       <!-- Основной контент -->
-      <el-main style="padding-top: 0;">
+      <el-main class="main-container-content">
         <el-container>
           <el-tabs v-model="activeTab" class="demo-tabs containet-style" @tab-click="handleTabClick">
             <el-tab-pane label="Для вас" name="first">
@@ -75,14 +75,6 @@ export default {
   font-weight: 600;
 }
 
-.header-style {
-  color: #E5EAF3;
-  height: max-content;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .containet-style {
   width: 100%;
 }
@@ -101,10 +93,12 @@ export default {
 }
 
 .header-style {
+  color: #E5EAF3;
+  height: max-content;
   display: flex;
   align-items: center;
-  height: 64px;
-  padding: 0 20px;
+  justify-content: space-between;
+  padding: 0 !important;
 }
 
 .header-content {
@@ -112,6 +106,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  padding: 0 !important;
 }
 
 .site-name {
@@ -124,5 +119,19 @@ export default {
 
 .icon-container {
   display: flex;
+  padding-right: 20px !important;
+
+}
+
+@media (max-width: 1200px) {
+  .containet-style {
+    width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .main-container-content {
+    padding: 0 !important;
+    padding-top: 0 !important;
+  }
 }
 </style>
