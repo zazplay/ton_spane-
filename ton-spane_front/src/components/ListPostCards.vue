@@ -1,5 +1,4 @@
 <script setup>
-// Импортируем вашу карточку
 import PostCard from './PostCard.vue'
 
 // Фиксированный набор данных для карточек

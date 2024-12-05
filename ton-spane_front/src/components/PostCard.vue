@@ -135,127 +135,141 @@ const handleDonate = () => {
 
 <style scoped>
 .post-card {
-  width: auto;
-  margin-bottom: 30px;
-  @media (max-width: 480px) {
-    width: 95%;
-    align-self: center;
-  }
+ width: auto;
+ margin-bottom: 30px;
+ @media (max-width: 480px) {
+   width: 95%;
+   align-self: center;
+ }
 }
 
 .header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
+ display: flex;
+ align-items: center;
+ margin-bottom: 15px;
 }
 
 .username {
-  font-size: 20px;
-  margin-left: 15px;
-  margin-right: auto;
-  @media (max-width: 480px) {
-    width: 25%;
-    align-self: center;
-    font-size: 0.5em !important;
-  }
+ font-size: 20px;
+ margin-left: 15px;
+ margin-right: auto;
+ @media (max-width: 480px) {
+   width: 35%;
+   align-self: left;
+   font-size: 14px !important;
+   text-align: left;
+ }
 }
 
 .subBtn {
-  width: auto !important;
-  font-size: 0.5em !important;
+ width: auto !important;
+ font-size: 16px !important;
 
-  @media (max-width: 480px) {
-    width: 40% !important;
-    height: 8px !important;
-    font-size: 0.37em !important;
-  }
+ @media (max-width: 480px) {
+   width: 40% !important;
+   height: 30px !important; 
+   font-size: 12px !important;
+   padding: 0 10px !important;
+ }
 }
 
-.avatar{
-  @media (max-width: 480px) {
-    width: 3em !important;
-    height: 3em !important;
-    
-  }
+.avatar {
+ @media (max-width: 480px) {
+   width: 40px !important;
+   height: 40px !important;
+ }
 }
-
 
 .post-image {
-  max-height: 400px;
+ min-height: 400px;
+
+ width: 80%;
+ object-fit: cover;
+ object-position: center center;
+ 
+ @media (max-width: 480px) {
+   max-height: 400px;
+   min-height: 300px;
+   width: 100%;
+   object-fit: cover;
+   object-position: center center;
+ }
 }
 
 .blurred {
-  filter: blur(30px);
+ filter: blur(30px);
 }
 
 .actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 15px;
-  
-  @media (max-width: 480px) {
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
+ display: flex;
+ align-items: center;
+ gap: 10px;
+ margin-top: 15px;
+ 
+ @media (max-width: 480px) {
+   flex-wrap: wrap;
+   justify-content: flex-start;
+ }
 }
 
 .action-buttons {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  min-width: fit-content;
+ display: flex;
+ gap: 10px;
+ align-items: center;
+ min-width: fit-content;
 }
 
 .action-tag {
-  display: flex;
-  align-items: center;
-  padding: 5px;
+ display: flex;
+ align-items: center;
+ padding: 5px;
 }
 
 .action-tag.heart { 
-  border-color: red;
-  color: red;
+ border-color: red;
+ color: red;
 }
 
 .action-tag.share {
-  border-color: #E6A23C;
-  color: #E6A23C;
+ border-color: #E6A23C;
+ color: #E6A23C;
 }
 
 .action-tag.donate {
-  border-color: green;
-  color: green;
+ border-color: green;
+ color: green;
 }
 
 .description {
-  width: 500px;
-  display: flex;
-  justify-content: center;
-  text-align: center;
-  padding: 5px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
-  background-color: transparent;
-  transition: all 0.3s ease;
-  margin-left: auto;
+ width: 500px;
+ display: flex;
+ justify-content: center;
+ text-align: center;
+ padding: 5px;
+ border-radius: 5px;
+ box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
+ background-color: transparent;
+ transition: all 0.3s ease;
+ margin-left: auto;
+ font-size: 16px;
 
-  @media (max-width: 480px) {
-    width: 100%;
-    margin-left: 0;
-    font: 0.35em sans-serif;
-    text-align: left;
-    justify-content: flex-start;
-    display: block; /* Важно для работы text-overflow */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: calc(100% - 10px); /* Учитываем padding */
-  }
+ @media (max-width: 480px) {
+   width: 100%;
+   margin-left: 0;
+   font-size: 12px;
+   text-align: left;
+   justify-content: flex-start;
+   display: block;
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   max-width: calc(100% - 10px);
+   padding: 5px;
+ }
 }
 
 .description:hover {
-  box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
-  border-color: #357abd;
+ box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
+ border-color: #357abd;
 }
 </style>
