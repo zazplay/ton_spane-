@@ -73,7 +73,7 @@ const handleClose = (key, keyPath) => {
 
 /* Для горизонтального меню */
 .horizontal-menu {
-    height: 80px;
+    height: 90px;
     display: flex;
     flex-direction: row;
     position: fixed;
