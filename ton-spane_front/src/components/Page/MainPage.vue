@@ -75,7 +75,7 @@ export default {
 }
 
 .right-container {
-  width: 110%;
+  width: 105%;
   /* Ширина правого контейнера */
   /* height: 100%; */
   position: absolute;
