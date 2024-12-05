@@ -24,6 +24,7 @@ const url = "https://shutok.ru/uploads/posts/2023-01/1675019582_shutok.ru.01.jpg
 
 <style scoped>
 .common-layout {
+    width: 90%;
     margin: 0 auto;
 }
 
@@ -36,7 +37,7 @@ const url = "https://shutok.ru/uploads/posts/2023-01/1675019582_shutok.ru.01.jpg
 }
 
 .container-img {
-    padding: 0 !important;
+    padding: 7px;
     padding-left: 10px !important;
 }
 
@@ -52,7 +53,8 @@ const url = "https://shutok.ru/uploads/posts/2023-01/1675019582_shutok.ru.01.jpg
     justify-content: start;
     color: darkslategrey;
 }
-.link-style:hover{
+
+.link-style:hover {
     color: white;
 }
 
@@ -79,5 +81,12 @@ const url = "https://shutok.ru/uploads/posts/2023-01/1675019582_shutok.ru.01.jpg
 
 .demo-basic .el-col:not(:last-child) {
     border-right: 1px solid var(--el-border-color);
+}
+
+@media (max-width: 1200px) {
+    .container-img {
+        padding: 0 !important;
+        padding-left: 10px !important;
+    }
 }
 </style>
