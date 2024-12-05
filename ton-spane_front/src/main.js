@@ -16,6 +16,25 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
 
+// eslint-disable-next-line no-unused-vars
+app.config.errorHandler = (err, vm, info) => {
+  // Игнорируем определенные ошибки
+  if (err.message === 'Script error.') {
+    return
+  }
+  // Обработка других ошибок
+  console.error(err)
+}
+
+// Глобальный обработчик для uncaught ошибок
+// eslint-disable-next-line no-unused-vars
+window.onerror = function(msg, url, lineNo, columnNo, error) {
+  if (msg === 'Script error.') {
+    return false
+  }
+  return true
+}
+
 app.use(ElementPlus)
 app.use(router)
 app.mount('#app')

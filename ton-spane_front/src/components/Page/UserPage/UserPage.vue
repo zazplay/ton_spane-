@@ -97,8 +97,8 @@ const openDonatePage = () => {
 
 .common-layout {
   width: 100%;
-  align-self: left;
-  margin-left: 30px;
+  align-self: center;
+  margin-left: 0px;
 }
 
 .page-header {
