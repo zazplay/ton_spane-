@@ -17,24 +17,18 @@
 </template>
 
 <script setup>
-const size = 40;
+const size = 58;
 const url = 'https://www.ifoto.ai/blog/wp-content/uploads/ai-swimsuit-models.jpg';
 </script>
 
 <style scoped>
-container-img {
-    padding: 7px;
-    padding-left: 15px;
-}
-
-.common-layout {
-    margin: 0 auto;
-}
-
 .container-profile {
+    flex: none !important;
+    width: 80% !important;
+    margin: 0 auto;
     background-color: grey;
     border-radius: 15px;
-    height: 88px;
+    height: 75px;
     overflow: hidden;
 
 }
@@ -52,14 +46,6 @@ container-img {
     padding: 0;
 }
 
-.link-style {
-    justify-content: start;
-    color: darkslategrey;
-}
-
-.link-style:hover {
-    color: white;
-}
 
 .demo-basic {
     text-align: center;
@@ -84,5 +70,30 @@ container-img {
 
 .demo-basic .el-col:not(:last-child) {
     border-right: 1px solid var(--el-border-color);
+}
+
+@media (max-width: 1200px) {
+    .container-profile {
+        flex: none !important;
+        width: 80% !important;
+        margin: 0 auto !important;
+        background-color: grey;
+        border-radius: 15px;
+        height: 75px;
+        overflow: hidden;
+
+    }
+
+    .container-img {
+        padding: 0 !important;
+        padding-left: 7px !important;
+    }
+
+    .info-container-profile {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        text-align: start;
+    }
 }
 </style>
