@@ -1,6 +1,6 @@
 <template>
   <div class="common-layout containet-style">
-    <el-container>
+    <el-container style="padding: 0 !important;">
       <!-- Заголовок с добавленной иконкой -->
       <el-header class="header-style">
         <div class="header-content">
