@@ -1,5 +1,5 @@
 <template>
-    <el-container class="container-profile">
+    <el-container class="container-profile" @click="handleClickMess">
         <el-aside width="100px" style="padding: 0; margin: 0;">
             <el-container class="container-img">
                 <div class="demo-basic--circle">
@@ -17,6 +17,18 @@
 </template>
 
 <script setup>
+
+import { useRouter } from 'vue-router'; // Импортируйте useRouter
+const router = useRouter(); // Получите экземпляр маршрутизатора
+
+
+// Метод для обработки клика и перехода на страницу чата
+const handleClickMess = () => {
+    console.log("chat");
+    const chatId = '123'; // Замените на реальный ID чата
+    router.push({ name: 'UserChat', params: { id: chatId } }); // Переход на страницу чата с передачей id
+};
+
 const size = 58;
 const url = 'https://www.ifoto.ai/blog/wp-content/uploads/ai-swimsuit-models.jpg';
 </script>
