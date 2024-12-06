@@ -1,8 +1,7 @@
 <script lang="js" setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import {  useRouter, useRoute, onMounted} from 'vue-router'
 import ListPostCards from '../../ListPostCards.vue'
-import { ElLoading } from 'element-plus'
 
 const router = useRouter()
 const route = useRoute()
@@ -80,14 +79,14 @@ const fetchUserData = async () => {
   }
 }
 
-// Handle image errors
-const handleImageError = (type) => {
-  if (type === 'header') {
-    userData.value.profileHeader = DEFAULT_HEADER
-  } else if (type === 'avatar') {
-    userData.value.profilePicture = DEFAULT_AVATAR
-  }
-}
+// // Handle image errors
+// const handleImageError = (type) => {
+//   if (type === 'header') {
+//     userData.value.profileHeader = DEFAULT_HEADER
+//   } else if (type === 'avatar') {
+//     userData.value.profilePicture = DEFAULT_AVATAR
+//   }
+// }
 
 // Navigation
 const openDonatePage = () => router.push(`/userSubscribeDonate/${userId}`)

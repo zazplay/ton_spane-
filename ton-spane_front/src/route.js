@@ -25,12 +25,18 @@ const routes = [
   { path: '/more', component: MorePage },
   { path: '/userTemplate', component: userTemplate },
   { path: '/userSubscribeDonate', component: UserSubscribe },
-  {
-    path: '/user_chat/:id',
-    name:'UserChat',
-    component: ()=>import ('./components/Page/Message/UserChat.vue'),
-    props: true // Передаем параметры как пропсы
+  { 
+    path: '/user/:id', 
+    component: userTemplate,
+    name: 'userProfile'
   },
+  // Маршрут для подписки/доната
+  { 
+    path: '/userSubscribeDonate/:id',
+    component: UserSubscribe,
+    name: 'userSubscribe'
+  }
+
 ];
 
 const router = createRouter({
