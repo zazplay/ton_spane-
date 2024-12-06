@@ -19,7 +19,7 @@ defineProps({
       :key="post.id"
       :user="post.user"
       :imageUrl="post.imageUrl"
-      :postDesc="post.caption"
+      :caption="post.caption"
       :isBlurred="post.isBlurred"
       :price="post.price"
       :created-at="post.createdAt"

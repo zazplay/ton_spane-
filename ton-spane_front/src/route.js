@@ -13,9 +13,9 @@ import UserSubscribe from './components/Page/UserSubsribeModal/UserSubscribe.vue
 const routes = [
   // { path: '/auth', component: AuthPage },
   // { path: '/', redirect: '/auth' }, // Редирект на страницу авторизации
-
+  
   { path: '/', redirect: '/tape' },
-
+  
   { path: '/tape', component: TapePage },
   { path: '/notifications', component: NotificationsPage },
   { path: '/clips', component: ClipsPage },
@@ -25,6 +25,13 @@ const routes = [
   { path: '/more', component: MorePage },
   { path: '/userTemplate', component: userTemplate },
   { path: '/userSubscribeDonate', component: UserSubscribe },
+  
+  // Новый маршрут для профиля пользователя
+  { 
+    path: '/user/:id',
+    component: userTemplate,
+    props: true
+  }
 ];
 
 const router = createRouter({

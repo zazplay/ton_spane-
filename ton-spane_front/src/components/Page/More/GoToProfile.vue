@@ -5,21 +5,56 @@
                 <el-container class="container-img">
                     <div class="demo-basic--circle">
                         <div class="block">
-                            <el-avatar shape="square" :size="70" :src="url" />
+                            <el-avatar 
+                                shape="square" 
+                                :size="70" 
+                                :src="userData?.profilePicture || defaultImage"
+                                @error="handleError" 
+                            />
                         </div>
                     </div>
                 </el-container>
             </el-aside>
             <el-main class="info-container-profile">
-                <span style="color: aliceblue;">Имя</span>
-                <el-link :underline="false" href="/userTemplate" class="link-style">Перейти к профилю ></el-link>
+                <span style="color: aliceblue;">{{ userData?.username || 'Loading...' }}</span>
+                <el-link 
+                    :underline="false" 
+                    :href="`/user/${userId}`" 
+                    class="link-style"
+                >
+                    Перейти к профилю >
+                </el-link>
             </el-main>
         </el-container>
     </div>
 </template>
 
 <script setup>
-const url = "https://shutok.ru/uploads/posts/2023-01/1675019582_shutok.ru.01.jpg";
+import { ref, onMounted } from 'vue'
+
+const userId = ref('f26088fd-d4aa-4420-a7f6-1f89baa915c3')
+const userData = ref(null)
+const defaultImage = "https://shutok.ru/uploads/posts/2023-01/1675019582_shutok.ru.01.jpg"
+
+const handleError = () => {
+    userData.value.profilePicture = defaultImage
+}
+
+const fetchUserData = async () => {
+    try {
+        const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/users/${userId.value}`)
+        if (!response.ok) {
+            throw new Error('Failed to fetch user data')
+        }
+        userData.value = await response.json()
+    } catch (error) {
+        console.error('Error fetching user data:', error)
+    }
+}
+
+onMounted(() => {
+    fetchUserData()
+})
 </script>
 
 <style scoped>
@@ -32,8 +67,7 @@ const url = "https://shutok.ru/uploads/posts/2023-01/1675019582_shutok.ru.01.jpg
     background-color: grey;
     border-radius: 15px;
     height: 88px;
-    overflow: hidden;
-
+    overflow: hidden; 
 }
 
 .container-img {
@@ -75,8 +109,7 @@ const url = "https://shutok.ru/uploads/posts/2023-01/1675019582_shutok.ru.01.jpg
 }
 
 .demo-basic .block {
-    flex: 1;
-
+    flex: 1; 
 }
 
 .demo-basic .el-col:not(:last-child) {

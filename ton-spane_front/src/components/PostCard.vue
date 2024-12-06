@@ -4,11 +4,21 @@ import ShareModal from './ShareModal.vue'
 import TipsModal from './TipsModal.vue'
 
 const props = defineProps({
-  username: { type: String, default: 'vikpix' },
-  avatarUrl: { type: String, default: '' },
+  id: { type: String, required: true },
+  caption: { type: String, default: '' },
   imageUrl: { type: String, default: '' },
-  postDesc: { type: String, default: '' },
   isBlurred: { type: Boolean, default: false },
+  price: { type: String, default: '0' },
+  createdAt: { type: String, required: true },
+  user: { 
+    type: Object, 
+    default: () => ({
+      id: '',
+      username: '',
+      email: '',
+      profilePicture: null
+    }) 
+  },
   initialLiked: { type: Boolean, default: false },
   initialShared: { type: Boolean, default: false },
   initialDonated: { type: Boolean, default: false },
@@ -24,6 +34,28 @@ const isDonated = ref(props.initialDonated)
 
 const isShareModalVisible = ref(false)
 const isTipsModalVisible = ref(false)
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffInMinutes = Math.floor((now - date) / (1000 * 60))
+  const diffInHours = Math.floor(diffInMinutes / 60)
+  const diffInDays = Math.floor(diffInHours / 24)
+
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes} мин назад`
+  } else if (diffInHours < 24) {
+    return `${diffInHours} ч назад`
+  } else if (diffInDays < 7) {
+    return `${diffInDays} дн назад`
+  } else {
+    return date.toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    })
+  }
+}
 
 const handleLike = () => {
   isLiked.value = !isLiked.value
@@ -54,8 +86,11 @@ const handleDonate = () => {
 
   <el-card class="post-card">
     <div class="header">
-      <el-avatar :size="50" class="avatar" :src="avatarUrl" />
-      <el-text class="username">{{ username }}</el-text>
+      <el-avatar :size="50" class="avatar" :src="user.profilePicture" />
+      <div class="user-info">
+        <el-text class="username">{{ user.username }}</el-text>
+        <el-text class="date">{{ formatDate(createdAt) }}</el-text>
+      </div>
       <el-button 
         :type="isSubscribed ? 'success' : 'primary'" 
         @click="handleSubscribe"
@@ -126,7 +161,7 @@ const handleDonate = () => {
         </el-check-tag>
       </div>
       <el-text class="description" tag="b" emphasis>
-        {{ postDesc.length > 100 ? postDesc.slice(0, 100) + '...' : postDesc }}
+        {{ caption.length > 100 ? caption.slice(0, 100) + '...' : caption }}
       </el-text>
     </div>
   </el-card>
@@ -134,138 +169,162 @@ const handleDonate = () => {
 
 <style scoped>
 .post-card {
- width: auto;
- margin-bottom: 30px;
- @media (max-width: 480px) {
-   width: 95%;
-   align-self: center;
- }
+  width: auto;
+  margin-bottom: 30px;
+  @media (max-width: 480px) {
+    width: 95%;
+    align-self: center;
+  }
 }
 
 .header {
- display: flex;
- align-items: center;
- margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  margin-left: 15px;
+  margin-right: auto;
 }
 
 .username {
- font-size: 20px;
- margin-left: 15px;
- margin-right: auto;
- @media (max-width: 480px) {
-   width: 35%;
-   align-self: left;
-   font-size: 14px !important;
-   text-align: left;
- }
+  font-size: 20px;
+  line-height: 1.2;
+  @media (max-width: 480px) {
+    width: 100%;
+    font-size: 14px !important;
+  }
+}
+
+.date {
+  font-size: 12px;
+  margin-left: -10px;
+  color: #909399;
+  @media (max-width: 480px) {
+    font-size: 12px !important;
+  }
 }
 
 .subBtn {
- width: auto !important;
- font-size: 16px !important;
- @media (max-width: 480px) {
-   width: 40% !important;
-   height: 30px !important; 
-   font-size: 12px !important;
-   padding: 0 10px !important;
- }
+  width: auto !important;
+  font-size: 16px !important;
+  @media (max-width: 480px) {
+    width: 40% !important;
+    height: 30px !important; 
+    font-size: 12px !important;
+    padding: 0 10px !important;
+  }
 }
 
 .avatar {
- @media (max-width: 480px) {
-   width: 40px !important;
-   height: 40px !important;
- }
+  @media (max-width: 480px) {
+    width: 40px !important;
+    height: 40px !important;
+  }
 }
 
 .post-image {
- min-height: 400px;
- width: 80%;
- object-fit: cover;
- object-position: center center;
- @media (max-width: 480px) {
-   max-height: 400px;
-   min-height: 300px;
-   width: 100%;
-   object-fit: cover;
-   object-position: center center;
- }
+  min-height: 400px;
+  width: 80%;
+  object-fit: cover;
+  object-position: center center;
+  @media (max-width: 480px) {
+    max-height: 400px;
+    min-height: 300px;
+    width: 100%;
+    object-fit: cover;
+    object-position: center center;
+  }
 }
 
 .blurred {
- filter: blur(30px);
+  filter: blur(30px);
+}
+
+.price-overlay {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: bold;
 }
 
 .actions {
- display: flex;
- align-items: center;
- gap: 10px;
- margin-top: 15px;
- 
- @media (max-width: 480px) {
-   flex-wrap: wrap;
-   justify-content: flex-start;
- }
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+  
+  @media (max-width: 480px) {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
 }
 
 .action-buttons {
- display: flex;
- gap: 10px;
- align-items: center;
- min-width: fit-content;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: fit-content;
 }
 
 .action-tag {
- display: flex;
- align-items: center;
- padding: 5px;
+  display: flex;
+  align-items: center;
+  padding: 5px;
 }
 
 .action-tag.heart { 
- border-color: red;
- color: red;
+  border-color: red;
+  color: red;
 }
 
 .action-tag.share {
- border-color: #E6A23C;
- color: #E6A23C;
+  border-color: #E6A23C;
+  color: #E6A23C;
 }
 
 .action-tag.donate {
- border-color: green;
- color: green;
+  border-color: green;
+  color: green;
 }
 
 .description {
- width: 500px;
- display: flex;
- justify-content: center;
- text-align: center;
- padding: 5px;
- border-radius: 5px;
- box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
- background-color: transparent;
- transition: all 0.3s ease;
- margin-left: auto;
- font-size: 16px;
+  width: 500px;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
+  background-color: transparent;
+  transition: all 0.3s ease;
+  margin-left: auto;
+  font-size: 16px;
 
- @media (max-width: 480px) {
-   width: 100%;
-   margin-left: 0;
-   font-size: 12px;
-   text-align: left;
-   justify-content: flex-start;
-   display: block;
-   white-space: nowrap;
-   overflow: hidden;
-   text-overflow: ellipsis;
-   max-width: calc(100% - 10px);
-   padding: 5px;
- }
+  @media (max-width: 480px) {
+    width: 100%;
+    margin-left: 0;
+    font-size: 12px;
+    text-align: left;
+    justify-content: flex-start;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: calc(100% - 10px);
+    padding: 5px;
+  }
 }
 
 .description:hover {
- box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
- border-color: #357abd;
+  box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
+  border-color: #357abd;
 }
 </style>
