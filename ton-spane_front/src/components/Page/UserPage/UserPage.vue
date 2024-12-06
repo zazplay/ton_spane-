@@ -1,7 +1,8 @@
 <script lang="js" setup>
-import { ref } from 'vue'
-import {  useRouter, useRoute, onMounted} from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import ListPostCards from '../../ListPostCards.vue'
+import { ElLoading } from 'element-plus'
 
 const router = useRouter()
 const route = useRoute()
@@ -79,14 +80,14 @@ const fetchUserData = async () => {
   }
 }
 
-// // Handle image errors
-// const handleImageError = (type) => {
-//   if (type === 'header') {
-//     userData.value.profileHeader = DEFAULT_HEADER
-//   } else if (type === 'avatar') {
-//     userData.value.profilePicture = DEFAULT_AVATAR
-//   }
-// }
+// Handle image errors
+const handleImageError = (type) => {
+  if (type === 'header') {
+    userData.value.profileHeader = DEFAULT_HEADER
+  } else if (type === 'avatar') {
+    userData.value.profilePicture = DEFAULT_AVATAR
+  }
+}
 
 // Navigation
 const openDonatePage = () => router.push(`/userSubscribeDonate/${userId}`)
@@ -100,85 +101,73 @@ onMounted(() => {
 
 <template>
   <div class="layout">
-    <el-container>
-      <!-- Шапка профиля -->
-      <el-header class="header">
-        <el-image class="header-image" :src="srcHeaderPhoto" fit="cover" />
-      </el-header>
+    <!-- Loading State -->
+    <el-container v-if="loading">
+      <el-main class="loading-state">
+        <el-loading :fullscreen="true" />
+        <p>Loading profile...</p>
+      </el-main>
     </el-container>
-    <!-- Контейнер с основной информацией -->
-    <el-container class="content-container">
-      <el-aside class="aside">
-        <!-- Фото профиля -->
-        <div class="profile-image">
-          <el-image :src="srcPagePhoto">
-            <template #placeholder>
-              <div class="image-slot">Загрузка<span class="dot">...</span></div>
-            </template>
-          </el-image>
-        </div>
-      </el-aside>
+
+    <!-- Error State -->
+    <el-container v-else-if="error">
+      <el-main class="error-state">
+        <el-alert
+          :title="error"
+          type="error"
+          :closable="false"
+        />
+      </el-main>
+    </el-container>
+
+    <!-- Content State -->
+    <template v-else>
       <el-container>
-        <el-main class="main-content">
-          <el-text tag="h2" size="large" class="username">
-            {{ username }}
-            <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0,0,256,256">
-              <g fill="#25c1fd" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt"
-                stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0"
-                font-family="none" font-weight="none" font-size="none" text-anchor="none"
-                style="mix-blend-mode: normal">
-                <g transform="scale(5.12,5.12)">
-                  <path
-                    d="M25,2c-12.682,0 -23,10.318 -23,23c0,12.683 10.318,23 23,23c12.683,0 23,-10.317 23,-23c0,-12.682 -10.317,-23 -23,-23zM35.827,16.562l-11.511,16.963l-8.997,-8.349c-0.405,-0.375 -0.429,-1.008 -0.053,-1.413c0.375,-0.406 1.009,-0.428 1.413,-0.053l7.29,6.764l10.203,-15.036c0.311,-0.457 0.933,-0.575 1.389,-0.266c0.458,0.31 0.577,0.932 0.266,1.39z">
-                  </path>
+        <!-- Profile Header -->
+        <el-header class="header">
+          <el-image 
+            class="header-image" 
+            :src="userData.profileHeader"
+            fit="cover"
+            @error="() => handleImageError('header')"
+          />
+        </el-header>
+        
+        <!-- Main Content -->
+        <el-container class="content-container">
+          <el-aside class="aside">
+            <!-- Profile Picture -->
+            <div class="profile-image">
+              <el-image 
+                :src="userData.profilePicture"
+                @error="() => handleImageError('avatar')"
+              >
+                <template #placeholder>
+                  <div class="image-slot">Загрузка<span class="dot">...</span></div>
+                </template>
+              </el-image>
+            </div>
+            
+            <!-- User Info -->
+            <el-text tag="h2" class="username">
+              {{ userData.username }}
+              <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0,0,256,256">
+                <g fill="#25c1fd" fill-rule="nonzero">
+                  <g transform="scale(5.12,5.12)">
+                    <path d="M25,2c-12.682,0 -23,10.318 -23,23c0,12.683 10.318,23 23,23c12.683,0 23,-10.317 23,-23c0,-12.682 -10.317,-23 -23,-23zM35.827,16.562l-11.511,16.963l-8.997,-8.349c-0.405,-0.375 -0.429,-1.008 -0.053,-1.413c0.375,-0.406 1.009,-0.428 1.413,-0.053l7.29,6.764l10.203,-15.036c0.311,-0.457 0.933,-0.575 1.389,-0.266c0.458,0.31 0.577,0.932 0.266,1.39z"></path>
+                  </g>
                 </g>
-              </g>
-            </svg>
-            <el-text class="text-shadow-blue custom-rounded" size="large" type="primary"> <el-text>{{ subscribes }}
-                подпищиков</el-text> </el-text>
-            <el-text class="text-shadow-blue custom-rounded" size="large" type="primary"><el-text>{{ subscriptions }}
-                лайков</el-text></el-text>
-          </el-text>
-          <el-collapse v-model="activeNames" @change="handleChange" class="custom-collapse">
-            <el-collapse-item name="1">
-              <template #title>
-                <div class="collapse-header">
-                  <span class="title">О себе</span>
-                </div>
-              </template>
-              <div class="collapse-content">
-                {{ about }}
-              </div>
-            </el-collapse-item>
-          </el-collapse>
-
-
-        </el-main>
-        <el-aside>
-          <!-- Имя пользователя и статистика -->
-          <el-text tag="h2" class="username">
-            {{ username }}
-            <!-- Значок верификации -->
-            <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0,0,256,256">
-              <g fill="#25c1fd" fill-rule="nonzero">
-                <g transform="scale(5.12,5.12)">
-                  <path
-                    d="M25,2c-12.682,0 -23,10.318 -23,23c0,12.683 10.318,23 23,23c12.683,0 23,-10.317 23,-23c0,-12.682 -10.317,-23 -23,-23zM35.827,16.562l-11.511,16.963l-8.997,-8.349c-0.405,-0.375 -0.429,-1.008 -0.053,-1.413c0.375,-0.406 1.009,-0.428 1.413,-0.053l7.29,6.764l10.203,-15.036c0.311,-0.457 0.933,-0.575 1.389,-0.266c0.458,0.31 0.577,0.932 0.266,1.39z">
-                  </path>
-                </g>
-              </g>
-            </svg>
-            <!-- Бейджи статистики -->
-
-          </el-text>
-          <el-text class="stat-badge" type="primary">
-            <el-text class="stat-text">{{ subscribes }} подписчиков</el-text>
-          </el-text>
-          <el-text class="stat-badge" type="primary">
-            <el-text class="stat-text">{{ subscriptions }} лайков</el-text>
-          </el-text>
-        </el-aside>
-      </el-container>
+              </svg>
+            </el-text>
+            <!-- Stats -->
+            <el-text class="stat-badge" type="primary">
+              <el-text class="stat-text">{{ userData.posts.length }} публикации</el-text>
+            </el-text>
+            <el-text class="stat-badge" type="primary">
+              <el-text class="stat-text">{{ userData.likes.length }} лайков</el-text>
+            </el-text>
+          </el-aside>
+        </el-container>
 
         <!-- About Section -->
         <el-container>
@@ -198,17 +187,22 @@ onMounted(() => {
           </el-main>
         </el-container>
 
-      <!-- Кнопки подписки -->
-      <el-button type="warning" class="action-button" plain @click="openDonatePage">
-        Станьте спонсором всего за 5$ первый месяц
-      </el-button>
-      <el-button type="success" class="action-button" plain>
-        Купить годовую подписку за 150$
-      </el-button>
-    </el-container>
-
-    <!-- Список постов -->
-    <ListPostCards />
+        <!-- Action Buttons -->
+        <el-button type="warning" class="action-button" plain @click="openDonatePage">
+          Станьте спонсором всего за 5$ первый месяц
+        </el-button>         
+        <el-button type="success" class="action-button" plain>
+          Купить годовую подписку за 150$
+        </el-button>
+      </el-container>
+      
+      <!-- Posts List -->
+      <ListPostCards 
+        v-if="userData.posts.length" 
+        :posts="userData.posts"
+        :user="userData"
+      />
+    </template>
   </div>
 </template>
 
@@ -227,7 +221,7 @@ onMounted(() => {
 
 .header-image {
   width: 100%;
-  max-height: 300px !important;
+  max-height: 300px !important; 
   border-radius: 20px;
   margin-bottom: 10px;
 }
@@ -267,25 +261,29 @@ onMounted(() => {
   padding: 12px 20px;
   width: auto;
   margin-left: 20px;
-  background: linear-gradient(135deg,
-      rgba(64, 158, 255, 0.15) 0%,
-      rgba(100, 180, 255, 0.25) 50%,
-      rgba(64, 158, 255, 0.15) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(64, 158, 255, 0.15) 0%,
+    rgba(100, 180, 255, 0.25) 50%,
+    rgba(64, 158, 255, 0.15) 100%
+  );
   backdrop-filter: blur(5px);
   border: 1px solid rgba(64, 158, 255, 0.2);
-  box-shadow:
+  box-shadow: 
     0 4px 6px rgba(64, 158, 255, 0.1),
     inset 0 1px 2px rgba(255, 255, 255, 0.1);
   transition: all 0.4s ease;
 }
 
 .stat-badge:hover {
-  background: linear-gradient(135deg,
-      rgba(64, 158, 255, 0.25) 0%,
-      rgba(100, 180, 255, 0.35) 50%,
-      rgba(64, 158, 255, 0.25) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(64, 158, 255, 0.25) 0%,
+    rgba(100, 180, 255, 0.35) 50%,
+    rgba(64, 158, 255, 0.25) 100%
+  );
   transform: translateY(-2px);
-  box-shadow:
+  box-shadow: 
     0 8px 12px rgba(64, 158, 255, 0.15),
     inset 0 2px 4px rgba(255, 255, 255, 0.2);
 }
