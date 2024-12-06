@@ -2,6 +2,8 @@
 import { ref, defineProps, defineEmits } from 'vue'
 import ShareModal from './ShareModal.vue' 
 import TipsModal from './TipsModal.vue'
+import { Lock } from '@element-plus/icons-vue' // добавляем импорт иконки
+
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -102,25 +104,35 @@ const handleDonate = () => {
     </div>
 
     <div class="demo-image__preview">
-      <el-image
-        class="post-image"
-        :class="{ 'blurred': isBlurred }"
-        :src="imageUrl"
-        :zoom-rate="1.2"
-        :max-scale="7"
-        :min-scale="0.2"
-        :preview-src-list="isBlurred ? [] : [imageUrl]"
-        :initial-index="4"
-        fit="cover"
-        @error="() => {}"
-        :preview-teleported="true"
-      >
-        <template #error>
-          <div class="image-slot">
-          </div>
-        </template>
-      </el-image>
+  <div class="image-container">
+    <el-image
+      class="post-image"
+      :class="{ 'blurred': isBlurred }"
+      :src="imageUrl"
+      :zoom-rate="1.2"
+      :max-scale="7"
+      :min-scale="0.2"
+      :preview-src-list="isBlurred ? [] : [imageUrl]"
+      :initial-index="4"
+      fit="cover"
+      @error="() => {}"
+      :preview-teleported="true"
+    >
+      <template #error>
+        <div class="image-slot">
+        </div>
+      </template>
+    </el-image>
+    
+    <!-- Добавить этот блок -->
+    <div v-if="isBlurred" class="lock-overlay">
+      <el-icon :size="50" class="lock-icon">
+        <Lock />
+      </el-icon>
+      <span class="lock-text">{{ price }}$</span>
     </div>
+  </div>
+</div>
 
     <div class="actions">
       <div class="action-buttons">
@@ -327,4 +339,58 @@ const handleDonate = () => {
   box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
   border-color: #357abd;
 }
+
+.image-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.lock-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 2;
+}
+
+.lock-icon {
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 15px;
+  border-radius: 50%;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.lock-text {
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 5px 15px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+}
+
+/* Добавить в медиа-запрос для мобильных устройств */
+@media (max-width: 480px) {
+  .lock-icon {
+    font-size: 30px;
+    padding: 10px;
+  }
+
+  .lock-text {
+    font-size: 18px;
+    padding: 3px 10px;
+  }
+}
+
 </style>
