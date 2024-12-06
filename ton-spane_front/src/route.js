@@ -10,8 +10,8 @@ import userTemplate from './components/Page/UserPage/UserPage.vue';
 import UserSubscribe from './components/Page/UserSubsribeModal/UserSubscribe.vue';
 
 const routes = [
-  { path: '/',  component: TapePage },
-  { path: '/tape',  component: TapePage },
+  { path: '/', component: TapePage },
+  { path: '/tape', component: TapePage },
   { path: '/notifications', component: NotificationsPage },
   { path: '/clips', component: ClipsPage },
   { path: '/message', component: MessagePage },
@@ -20,6 +20,12 @@ const routes = [
   { path: '/more', component: MorePage },
   { path: '/userTemplate', component: userTemplate },
   { path: '/userSubscribeDonate', component: UserSubscribe },
+  {
+    path: '/user_chat/:id',
+    name:'UserChat',
+    component: ()=>import ('./components/Page/Message/UserChat.vue'),
+    props: true // Передаем параметры как пропсы
+  },
 ];
 
 const router = createRouter({

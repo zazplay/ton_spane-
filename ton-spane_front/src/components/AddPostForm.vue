@@ -4,21 +4,25 @@
             <button class="close-btn" @click="closeForm">✖</button>
             <form>
                 <div class="form-group" style="margin-top:30px;">
-                    <label for="title">Заголовок</label>
-                    <input type="text" id="title" v-model="post.title" required class="form-control"
-                        placeholder="Введите заголовок" />
+                    <label for="caption">Заголовок</label>
+                    <textarea id="caption" v-model="post.caption" required class="form-control"
+                        placeholder="Введите описание"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="content">Контент</label>
-                    <textarea id="content" v-model="post.content" required class="form-control"
-                        placeholder="Введите текст поста"></textarea>
+                    <label for="price">Цена:</label>
+                    <input type="number" id="price" v-model.number="post.price" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="isBlurred">Размытое изображение:</label>
+                    <input type="checkbox" id="isBlurred" v-model="post.isBlurred" />
                 </div>
 
                 <div class="form-group">
                     <label for="media">Фото или видео</label>
                     <!-- Добавляем реф к input -->
-                    <input type="file" id="media" ref="fileInput" @change="handleFileChange" accept="image/*,video/*"
+                    <input type="file" id="image" ref="fileInput" @change="handleFileChange" accept="image/*,video/*"
                         class="file-input" />
                     <!-- Кнопка для выбора файла -->
                     <el-button type="primary" class="custom-file-btn" @click="triggerFileInput">Выбрать файл</el-button>
@@ -37,6 +41,9 @@
 </template>
 
 <script>
+import axios from "axios";
+import { v4 as uuidv4 } from 'uuid';
+
 export default {
     props: {
         isOpen: {
@@ -47,9 +54,17 @@ export default {
     data() {
         return {
             post: {
-                title: '',
-                content: '',
-                media: null, // Здесь будет храниться выбранный файл
+                // title: '',
+                // content: '',
+                // userId: '',
+                // price: Number,
+                // isBlurred: Boolean,
+                // media: null, // Здесь будет храниться выбранный файл
+                caption: "",
+                userId: "",
+                price: null,
+                isBlurred: false,
+                image: null, // Изображение будет сохраняться как файл
             },
             error: null,
         };
@@ -63,7 +78,7 @@ export default {
 
                 if (!isImage && !isVideo) {
                     this.error = 'Только фото или видео разрешено!';
-                    this.post.media = null;
+                    this.post.image = null;
                     return;
                 }
 
@@ -77,37 +92,55 @@ export default {
 
                         if (width > 2500 || height > 1260 || width < 512 || height < 512) {
                             this.error = `Неверный размер изображения! Мін: 512x512, Макс: 2500x1260`;
-                            this.post.media = null;
+                            this.post.image = null;
                         } else {
                             this.error = null;
-                            this.post.media = file;
+                            this.post.image = file;
                         }
                     };
 
                     img.src = objectUrl;
                 } else {
                     this.error = null;
-                    this.post.media = file;
+                    this.post.image = file;
                 }
             } else {
                 this.error = null;
-                this.post.media = null;
+                this.post.image = null;
             }
         },
-        handleSubmit() {
-            if (!this.post.media) {
+
+        async handleSubmit() {
+            if (!this.post.image) {
                 this.error = 'Пожалуйста, добавте фото или видео!';
                 return;
             }
+            try {
+                const formData = new FormData();
+                const guid = uuidv4();
+                // formData.append('title', this.post.title);
+                // formData.append('content', this.post.content);
+                // formData.append('media', this.post.media);
+                formData.append("caption", this.post.caption);
+                formData.append("userId", guid);
+                formData.append("price", this.post.price);
+                formData.append("isBlurred", this.post.isBlurred);
+                formData.append("image", this.post.image);
 
-            const formData = new FormData();
-            formData.append('title', this.post.title);
-            formData.append('content', this.post.content);
-            formData.append('media', this.post.media);
+                console.log('Дані для відправки:', this.post.caption, guid, this.post.price, this.post.isBlurred, this.post.image );
+                const response = await axios.post("https://ton-back-e015fa79eb60.herokuapp.com/api/posts", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                });
 
-            console.log('Дані для відправки:', formData);
-            alert('Пост добавлено успешно!');
-            this.closeForm();
+                console.log("Ответ сервера:", response.data);
+                alert('Пост добавлено успешно!');
+                this.closeForm();
+            } catch {
+                console.error("Ошибка при отправке поста:", this.error);
+                alert("Ошибка при отправке поста.");
+            }
         },
         closeForm() {
             this.$emit('close');
@@ -260,7 +293,7 @@ export default {
         display: flex;
         flex-direction: column;
         align-items: center;
-        
+
     }
 
     .custom-file-btn {

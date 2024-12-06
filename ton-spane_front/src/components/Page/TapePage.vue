@@ -4,7 +4,7 @@
       <!-- Заголовок с добавленной иконкой -->
       <el-header class="header-style">
         <div class="header-content">
-          <el-text class="site-name" type = "Default">DreamScape</el-text>
+          <el-text class="site-name">DreamScape</el-text>
           <div class="icon-container">
             <router-link to="/notifications">
               <el-icon class="icon-style">

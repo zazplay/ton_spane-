@@ -76,14 +76,13 @@ const handleClose = (key, keyPath) => {
     height: 90px;
     display: flex;
     flex-direction: row;
-    position: fixed;
+    position:fixed;
     bottom: 0;
     width: 100%;
     background: #2c2c2c;
     justify-content: space-evenly;
     z-index: 1000;
     padding-left: 10px;
-
 }
 
 .horizontal-menu .el-menu-item {
