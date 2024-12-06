@@ -8,9 +8,14 @@ import PurchasedPage from './components/Page/PurchasedPage.vue';
 import MorePage from './components/Page/More/MorePage.vue';
 import userTemplate from './components/Page/UserPage/UserPage.vue';
 import UserSubscribe from './components/Page/UserSubsribeModal/UserSubscribe.vue';
+// import AuthPage from './components/Page/AuthPage/AuthPage.vue';
 
 const routes = [
-  { path: '/', component: TapePage },
+  // { path: '/auth', component: AuthPage },
+  // { path: '/', redirect: '/auth' }, // Редирект на страницу авторизации
+
+  { path: '/', redirect: '/tape' },
+
   { path: '/tape', component: TapePage },
   { path: '/notifications', component: NotificationsPage },
   { path: '/clips', component: ClipsPage },

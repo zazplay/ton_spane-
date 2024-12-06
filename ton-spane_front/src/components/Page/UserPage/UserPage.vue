@@ -91,10 +91,10 @@ const openDonatePage = () => router.push('/userSubscribeDonate')
             
           </el-text>
           <el-text class="stat-badge" type="primary">
-              <el-text class="stat-text" type="Default">{{subscribes}} подписчиков</el-text>
+              <el-text class="stat-text" >{{subscribes}} подписчиков</el-text>
             </el-text>
             <el-text class="stat-badge" type="primary">
-              <el-text class="stat-text" type="Default">{{subscriptions}} лайков</el-text>
+              <el-text class="stat-text" >{{subscriptions}} лайков</el-text>
             </el-text>
         </el-aside>
       </el-container>
@@ -146,7 +146,7 @@ const openDonatePage = () => router.push('/userSubscribeDonate')
 
 .header-image {
   width: 100%;
-  height: 100%;
+  max-height: 300px !important; 
   border-radius: 20px;
   margin-bottom: 10px;
 }
@@ -223,11 +223,12 @@ const openDonatePage = () => router.push('/userSubscribeDonate')
   width: 70%;
   padding: 0;
   overflow: hidden;
+  margin-bottom: 0px;
 }
 
 /* Секция "О себе" */
 .about-section {
-  width: 95%;
+  width: 99%;
   min-height: 150px;
   margin: 1.5% 0 0 5px;
   background: transparent;
@@ -235,6 +236,7 @@ const openDonatePage = () => router.push('/userSubscribeDonate')
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   transition: all 0.2s ease;
+  margin-bottom: 0px;
 }
 
 .about-section:hover {
@@ -269,10 +271,15 @@ const openDonatePage = () => router.push('/userSubscribeDonate')
 .action-button {
   font-weight: bold;
   font-size: 1.25rem;
-  margin-top: 2.3%;
-  width: 90%;
+  margin-bottom: 25px;
+  width: 99%;
   height: 5.7%;
   align-self: center;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  margin-left: 0;
+
+
 }
 
 /* Адаптивные стили */
