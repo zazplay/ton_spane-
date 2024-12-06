@@ -13,9 +13,9 @@ import UserSubscribe from './components/Page/UserSubsribeModal/UserSubscribe.vue
 const routes = [
   // { path: '/auth', component: AuthPage },
   // { path: '/', redirect: '/auth' }, // Редирект на страницу авторизации
-
+  
   { path: '/', redirect: '/tape' },
-
+  
   { path: '/tape', component: TapePage },
   { path: '/notifications', component: NotificationsPage },
   { path: '/clips', component: ClipsPage },

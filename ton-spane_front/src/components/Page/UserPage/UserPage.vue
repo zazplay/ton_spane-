@@ -2,20 +2,101 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import ListPostCards from '../../ListPostCards.vue'
+import { ElLoading } from 'element-plus'
 
-// Константы профиля
-const srcPagePhoto = 'https://bannerplus.ru/files/img/pics/devushka-krasivye-kartinki/devushka-krasivye-kartinki-56.webp'
-const srcHeaderPhoto = 'https://focus.ua/static/storage/thumbs/920x465/2/19/69ab9b9f-41b9ca57261cb2dc97ea7ca6a4fc5192.jpg?v=8030_1'
-const username = 'vikpix'
-const about = `Привет! 🌟 Здорово познакомиться!
-Я фотограф и путешественник 📸 🌎. В свободное время занимаюсь йогой 🧘‍♀️ и читаю книги по искусству 🎨 📚. Всегда открыта для новых проектов и коллабораций ✨.`
-const subscribes = "6432"
-const subscriptions = "229"
-
-// Состояние и роутинг
-const activeNames = ref(['1'])
 const router = useRouter()
-const openDonatePage = () => router.push('/userSubscribeDonate')
+const route = useRoute()
+const userId = route.params.id || 'f26088fd-d4aa-4420-a7f6-1f89baa915c3'
+
+// Constants
+const S3_BASE_URL = 'https://tonimages.s3.us-east-1.amazonaws.com/'
+const DEFAULT_HEADER = 'https://placehold.co/600x200'
+const DEFAULT_AVATAR = 'https://placehold.co/150'
+
+// Reactive state
+const userData = ref({
+  id: userId,
+  username: 'Loading...',
+  email: '',
+  profilePicture: DEFAULT_AVATAR,
+  profileHeader: DEFAULT_HEADER,
+  posts: [],
+  likes: [],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString()
+})
+const loading = ref(true)
+const error = ref(null)
+const activeNames = ref(['1'])
+
+// Format image URL
+const formatImageUrl = (imageUrl) => {
+  if (!imageUrl) return null
+  return imageUrl.startsWith('http') ? imageUrl : `${S3_BASE_URL}${imageUrl}`
+}
+
+// Prepare posts data
+const preparePostsData = (posts) => {
+  return posts.map(post => ({
+    ...post,
+    id: post.id,
+    userId: userId,
+    imageUrl: formatImageUrl(post.imageUrl),
+    price: String(post.price),
+    isBlurred: post.isBlurred || false,
+    caption: post.caption || ''
+  }))
+}
+
+// Fetch user data
+const fetchUserData = async () => {
+  try {
+    loading.value = true
+    console.log('Fetching user with ID:', userId)
+    
+    const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/users/${userId}`)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    const data = await response.json()
+    console.log('Received data:', data)
+    
+    // Update user data with proper formatting
+    userData.value = {
+      ...data,
+      id: userId,
+      profilePicture: formatImageUrl(data.profilePicture) || DEFAULT_AVATAR,
+      profileHeader: formatImageUrl(data.profileHeader) || DEFAULT_HEADER,
+      posts: preparePostsData(data.posts || []),
+      likes: data.likes || [],
+      createdAt: data.createdAt || new Date().toISOString(),
+      updatedAt: data.updatedAt || new Date().toISOString()
+    }
+  } catch (err) {
+    console.error('Error fetching user data:', err)
+    error.value = 'Failed to load user data: ' + err.message
+  } finally {
+    loading.value = false
+  }
+}
+
+// Handle image errors
+const handleImageError = (type) => {
+  if (type === 'header') {
+    userData.value.profileHeader = DEFAULT_HEADER
+  } else if (type === 'avatar') {
+    userData.value.profilePicture = DEFAULT_AVATAR
+  }
+}
+
+// Navigation
+const openDonatePage = () => router.push(`/userSubscribeDonate/${userId}`)
+
+// Lifecycle
+onMounted(() => {
+  console.log('Component mounted')
+  fetchUserData()
+})
 </script>
 
 <template>
@@ -100,21 +181,23 @@ const openDonatePage = () => router.push('/userSubscribeDonate')
         </el-aside>
       </el-container>
 
-      <!-- Секция "О себе" -->
-      <el-container>
-        <el-main class="main">
-          <el-collapse v-model="activeNames" class="about-section">
-            <el-collapse-item name="1">
-              <template #title>
-                <div class="collapse-header">
-                  <span class="title">О себе</span>
+        <!-- About Section -->
+        <el-container>
+          <el-main class="main">
+            <el-collapse v-model="activeNames" class="about-section">
+              <el-collapse-item name="1">
+                <template #title>
+                  <div class="collapse-header">
+                    <span class="title">О себе</span>
+                  </div>
+                </template>
+                <div class="collapse-content">
+                  Я та, кто всегда ищет вдохновение в мелочах 🌸✨ Люблю утренний кофе, теплые пледы и закаты, которые красят небо в нежные оттенки 🦋☕ В моем мире — книги, музыка и бесконечные мечты о путешествиях 🌍💖 Обожаю пробовать новое, танцевать под любимые треки и верить, что впереди только лучшее 💃💫 Если ты тоже любишь жизнь во всех ее проявлениях — нам точно по пути! 🌟😊
                 </div>
-              </template>
-              <div class="collapse-content">{{ about }}</div>
-            </el-collapse-item>
-          </el-collapse>
-        </el-main>
-      </el-container>
+              </el-collapse-item>
+            </el-collapse>
+          </el-main>
+        </el-container>
 
       <!-- Кнопки подписки -->
       <el-button type="warning" class="action-button" plain @click="openDonatePage">
@@ -131,13 +214,11 @@ const openDonatePage = () => router.push('/userSubscribeDonate')
 </template>
 
 <style scoped>
-/* Базовые стили */
 .layout {
   width: 100%;
   align-self: center;
 }
 
-/* Стили шапки */
 .header {
   height: 100%;
   padding: 0;
@@ -152,7 +233,6 @@ const openDonatePage = () => router.push('/userSubscribeDonate')
   margin-bottom: 10px;
 }
 
-/* Секция профиля */
 .aside {
   width: 100%;
   display: flex;
@@ -170,7 +250,6 @@ const openDonatePage = () => router.push('/userSubscribeDonate')
   justify-self: flex-start;
 }
 
-/* Имя пользователя и статистика */
 .username {
   display: inline-flex;
   align-items: center;
@@ -212,7 +291,6 @@ const openDonatePage = () => router.push('/userSubscribeDonate')
     inset 0 2px 4px rgba(255, 255, 255, 0.2);
 }
 
-/* Основной контент */
 .main {
   display: flex;
   flex-direction: column;
@@ -223,7 +301,6 @@ const openDonatePage = () => router.push('/userSubscribeDonate')
   margin-bottom: 0px;
 }
 
-/* Секция "О себе" */
 .about-section {
   width: 99%;
   min-height: 150px;
@@ -264,7 +341,6 @@ const openDonatePage = () => router.push('/userSubscribeDonate')
   color: var(--el-text-color-regular);
 }
 
-/* Кнопки действий */
 .action-button {
   font-weight: bold;
   font-size: 1.25rem;
@@ -275,11 +351,17 @@ const openDonatePage = () => router.push('/userSubscribeDonate')
   padding-top: 20px;
   padding-bottom: 20px;
   margin-left: 0;
-
-
 }
 
-/* Адаптивные стили */
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
 @media (max-width: 480px) {
   .content-container {
     flex-direction: column !important;
