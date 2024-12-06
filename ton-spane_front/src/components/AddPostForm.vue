@@ -4,32 +4,41 @@
             <button class="close-btn" @click="closeForm">✖</button>
             <form>
                 <div class="form-group" style="margin-top:30px;">
-                    <label for="caption">Заголовок</label>
-                    <textarea id="caption" v-model="post.caption" required class="form-control"
-                        placeholder="Введите описание"></textarea>
+                    <label for="caption">Описание</label>
+                    <textarea style="resize: none; height: 80px;" id="caption" v-model="post.caption" required
+                        class="form-control" placeholder="Введите описание"></textarea>
                 </div>
 
-                <div class="form-group">
-                    <label for="price">Цена:</label>
-                    <input type="number" id="price" v-model.number="post.price" required />
-                </div>
+                <el-container style="display: flex; flex-direction: row; justify-content: space-between;">
+                    <div class="form-input-price">
+                        <label for="price">Цена:</label>
+                        <input class="input-number" type="number" id="price" v-model.number="post.price" required />
+                    </div>
 
-                <div class="form-group">
-                    <label for="isBlurred">Размытое изображение:</label>
+                    <el-container class="container-img-selection">
+                        <div style="width: 69%; margin-top: 15px;">
+                            <!-- Показать имя выбранного файла -->
+                            <p v-if="post.image" class="selected-file">{{ post.image.name }}</p>
+                            <p v-if="error" class="text-danger">{{ error }}</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="media">Фото или видео</label>
+                            <!-- Добавляем реф к input -->
+                            <input type="file" id="image" ref="fileInput" @change="handleFileChange"
+                                accept="image/*,video/*" class="file-input" />
+                            <!-- Кнопка для выбора файла -->
+                            <el-button type="primary" class="custom-file-btn" @click="triggerFileInput">Выбрать
+                                файл</el-button>
+
+                        </div>
+                    </el-container>
+                </el-container>
+
+                <div class="check-box-isBlurred">
                     <input type="checkbox" id="isBlurred" v-model="post.isBlurred" />
+                    <label for="isBlurred"> Размытое изображение</label>
                 </div>
 
-                <div class="form-group">
-                    <label for="media">Фото или видео</label>
-                    <!-- Добавляем реф к input -->
-                    <input type="file" id="image" ref="fileInput" @change="handleFileChange" accept="image/*,video/*"
-                        class="file-input" />
-                    <!-- Кнопка для выбора файла -->
-                    <el-button type="primary" class="custom-file-btn" @click="triggerFileInput">Выбрать файл</el-button>
-                    <!-- Показать имя выбранного файла -->
-                    <p v-if="post.media" class="selected-file">{{ post.media.name }}</p>
-                    <p v-if="error" class="text-danger">{{ error }}</p>
-                </div>
 
                 <div class="mb-4">
                     <el-button type="success" class="custom-file-btn" style="margin-top: 15px;" plain
@@ -41,8 +50,9 @@
 </template>
 
 <script>
+
 import axios from "axios";
-import { v4 as uuidv4 } from 'uuid';
+import { ref } from 'vue';
 
 export default {
     props: {
@@ -54,21 +64,17 @@ export default {
     data() {
         return {
             post: {
-                // title: '',
-                // content: '',
-                // userId: '',
-                // price: Number,
-                // isBlurred: Boolean,
-                // media: null, // Здесь будет храниться выбранный файл
                 caption: "",
                 userId: "",
                 price: null,
                 isBlurred: false,
-                image: null, // Изображение будет сохраняться как файл
+                image: null,
             },
             error: null,
+            num: ref(0),
         };
     },
+
     methods: {
         handleFileChange(event) {
             const file = event.target.files[0];
@@ -117,17 +123,13 @@ export default {
             }
             try {
                 const formData = new FormData();
-                const guid = uuidv4();
-                // formData.append('title', this.post.title);
-                // formData.append('content', this.post.content);
-                // formData.append('media', this.post.media);
                 formData.append("caption", this.post.caption);
-                formData.append("userId", guid);
+                formData.append("userId", "c06415fa-f9e6-4443-af89-65463f271b34");
                 formData.append("price", this.post.price);
                 formData.append("isBlurred", this.post.isBlurred);
                 formData.append("image", this.post.image);
 
-                console.log('Дані для відправки:', this.post.caption, guid, this.post.price, this.post.isBlurred, this.post.image );
+                console.log('Дані для відправки:', this.post.caption, "c06415fa-f9e6-4443-af89-65463f271b34", this.post.price, this.post.isBlurred, this.post.image);
                 const response = await axios.post("https://ton-back-e015fa79eb60.herokuapp.com/api/posts", formData, {
                     headers: {
                         "Content-Type": "multipart/form-data",
@@ -148,7 +150,10 @@ export default {
         triggerFileInput() {
             this.$refs.fileInput.click();
         },
+
     },
+
+
 };
 </script>
 
@@ -229,6 +234,17 @@ export default {
     align-items: center;
 }
 
+.form-input-price {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+}
+
+.input-number {
+    margin-top: 10px;
+    height: 30px;
+}
+
 .form-control {
     width: 97%;
     margin-top: 15px;
@@ -249,19 +265,48 @@ export default {
 
 /* Стиль для кастомной кнопки */
 .custom-file-btn {
-    width: 30%;
+    width: 90%;
     margin: 15px auto;
 }
 
 .custom-file-btn:hover {
-    background-color: #4752c4;
+    background-color: #333ca2;
 }
 
 /* Стили для отображения имени выбранного файла */
+.container-img-selection {
+    display: flex;
+    justify-content: space-between;
+}
+
 .selected-file {
-    margin-top: 10px;
-    font-size: 1rem;
-    color: #f1f1f1;
+    display: inline-block;
+    max-width: 85%;
+    margin-left: 15px;
+    /* Чтобы адаптировалось под контейнер */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+
+
+.check-box-isBlurred {
+    display: flex;
+    margin-left: 10px;
+    justify-content: start;
+    align-items: center;
+    font-size: 17px;
+}
+
+.check-box-isBlurred>input {
+    width: 16px;
+    height: 16px;
 }
 
 /* Адаптивность для экранов меньше 1200px */
@@ -307,5 +352,11 @@ export default {
     .custom-file-btn:hover {
         background-color: #4752c4;
     }
+
+    .input-number {
+        margin-top: 5px;
+        height: 30px;
+    }
+
 }
 </style>
