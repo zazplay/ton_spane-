@@ -6,18 +6,41 @@
       <form @submit.prevent="submitForm" class="auth-form">
         <div class="form-item">
           <label for="email" class="label-style">Эл. почта</label>
-          <input v-model="ruleForm.email" type="email" id="email" placeholder="example@email.com" required />
+          <input
+            v-model="ruleForm.email"
+            type="email"
+            id="email"
+            placeholder="example@email.com"
+            required
+          />
           <p v-if="errors.email" class="error-text">{{ errors.email }}</p>
         </div>
 
         <div class="form-item">
           <label for="pass" class="label-style">Пароль</label>
-          <input v-model="ruleForm.pass" type="password" id="pass" placeholder="Введите пароль" required />
+          <div class="password-wrapper">
+            <input
+              v-model="ruleForm.pass"
+              :type="showPassword ? 'text' : 'password'"
+              id="pass"
+              placeholder="Введите пароль"
+              required
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              @click="togglePasswordVisibility"
+            >
+              <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
+          </div>
           <p v-if="errors.pass" class="error-text">{{ errors.pass }}</p>
         </div>
 
         <div class="form-actions">
-          <button class="red-btn" type="button" @click="resetForm">Очистить</button>
+          <button class="red-btn" type="button" @click="resetForm">
+            Очистить
+          </button>
           <button type="submit" class="submit-btn blue-btn">Войти</button>
         </div>
       </form>
@@ -26,48 +49,53 @@
 </template>
 
 <script>
-import axios from 'axios';
-import config from '@/config';
+import axios from "axios";
+import config from "@/config";
 
 export default {
-  name: 'AuthPage',
+  name: "AuthPage",
   data() {
     return {
       ruleForm: {
-        email: '',
-        pass: ''
+        email: "",
+        pass: "",
       },
       errors: {
-        email: '',
-        pass: ''
-      }
+        email: "",
+        pass: "",
+      },
+      showPassword: false, // Флаг для управления видимостью пароля
     };
   },
   methods: {
     validateForm() {
       const errors = {};
       // Валидация email
-      const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      const emailPattern =
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!this.ruleForm.email) {
-        errors.email = 'Пожалуйста, введите email';
+        errors.email = "Пожалуйста, введите email";
       } else if (!emailPattern.test(this.ruleForm.email)) {
-        errors.email = 'Пожалуйста, введите корректный email';
+        errors.email = "Пожалуйста, введите корректный email";
       }
 
       // Валидация пароля
       const { pass } = this.ruleForm;
       if (!pass) {
-        errors.pass = 'Пожалуйста, введите пароль';
+        errors.pass = "Пожалуйста, введите пароль";
       } else if (pass.length < 6) {
-        errors.pass = 'Пароль должен быть не менее 6 символов';
+        errors.pass = "Пароль должен быть не менее 6 символов";
       } else if (!/[A-Z]/.test(pass)) {
-        errors.pass = 'Пароль должен содержать хотя бы одну заглавную букву';
+        errors.pass = "Пароль должен содержать хотя бы одну заглавную букву";
       } else if (!/[0-9]/.test(pass)) {
-        errors.pass = 'Пароль должен содержать хотя бы одну цифру';
+        errors.pass = "Пароль должен содержать хотя бы одну цифру";
       }
 
       this.errors = errors;
       return Object.keys(errors).length === 0;
+    },
+    togglePasswordVisibility() {
+      this.showPassword = !this.showPassword;
     },
     async submitForm() {
       if (this.validateForm()) {
@@ -90,7 +118,7 @@ export default {
           // Дополнительно: сохранение токена или переход на другую страницу
           if (response.data.accessToken) {
             localStorage.setItem("authToken", response.data.accessToken);
-            localStorage.setItem('refreshToken',response.data.refreshToken)
+            localStorage.setItem("refreshToken", response.data.refreshToken);
             alert("Вход выполнен успешно!");
             window.location.href = "/app/tape";
           }
@@ -103,11 +131,11 @@ export default {
       }
     },
     resetForm() {
-      this.ruleForm.email = '';
-      this.ruleForm.pass = '';
+      this.ruleForm.email = "";
+      this.ruleForm.pass = "";
       this.errors = {};
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -175,7 +203,7 @@ export default {
 
 .submit-btn,
 form button[type="button"] {
-  color: white;
+  /* color: white; */
   border: none;
   padding: 10px 20px;
   font-size: 22px;
@@ -204,6 +232,35 @@ form button[type="button"] {
   background-color: #0056b3;
 }
 
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  flex: 1;
+  padding-right: 40px;
+}
+
+.toggle-password {
+  position: absolute;
+  top: 7px;
+  right: -10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #25292c;
+}
+
+.toggle-password:focus {
+  outline: none;
+}
+
+.toggle-password i {
+  pointer-events: none;
+}
 /* Адаптивные стили */
 @media screen and (max-width: 768px) {
   .form-card {
