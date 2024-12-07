@@ -6,31 +6,16 @@
       <form @submit.prevent="submitForm" class="auth-form">
         <div class="form-item">
           <label for="email" class="label-style">Эл. почта</label>
-          <input
-            v-model="ruleForm.email"
-            type="email"
-            id="email"
-            placeholder="example@email.com"
-            required
-          />
+          <input v-model="ruleForm.email" type="email" id="email" placeholder="example@email.com" required />
           <p v-if="errors.email" class="error-text">{{ errors.email }}</p>
         </div>
 
         <div class="form-item">
           <label for="pass" class="label-style">Пароль</label>
           <div class="password-wrapper">
-            <input
-              v-model="ruleForm.pass"
-              :type="showPassword ? 'text' : 'password'"
-              id="pass"
-              placeholder="Введите пароль"
-              required
-            />
-            <button
-              type="button"
-              class="toggle-password"
-              @click="togglePasswordVisibility"
-            >
+            <input v-model="ruleForm.pass" :type="showPassword ? 'text' : 'password'" id="pass"
+              placeholder="Введите пароль" required />
+            <button type="button" class="toggle-password" @click="togglePasswordVisibility">
               <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
             </button>
           </div>
@@ -119,6 +104,8 @@ export default {
           if (response.data.accessToken) {
             localStorage.setItem("authToken", response.data.accessToken);
             localStorage.setItem("refreshToken", response.data.refreshToken);
+            this.$store.dispatch('initializeSub', response.data.accessToken); // Инициализируем sub
+            console.log('sub:', this.$store.state.sub); // Проверяем sub
             alert("Вход выполнен успешно!");
             window.location.href = "/app/tape";
           }
@@ -261,6 +248,7 @@ form button[type="button"] {
 .toggle-password i {
   pointer-events: none;
 }
+
 /* Адаптивные стили */
 @media screen and (max-width: 768px) {
   .form-card {

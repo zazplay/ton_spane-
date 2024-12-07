@@ -5,6 +5,7 @@ import 'element-plus/theme-chalk/dark/css-vars.css'
 import App from './App.vue'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import router from './route.js'
+import store from './store';
 
 // Получаем сохраненную тему из localStorage или используем тёмную по умолчанию
 const savedTheme = localStorage.getItem('theme') || 'dark'
@@ -35,6 +36,11 @@ window.onerror = function(msg, url, lineNo, columnNo, error) {
   return true
 }
 
+// Инициализация хранилища Vuex
+store.dispatch('initializeStore'); // Добавлено для инициализации хранилища
+
+app.use(store);
 app.use(ElementPlus)
 app.use(router)
+
 app.mount('#app')

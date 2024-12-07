@@ -17,7 +17,7 @@
 
       <el-main>
         <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-          <el-tab-pane label="Все" name="all">All</el-tab-pane>
+          <el-tab-pane label="Все" name="all" style="color: white;">All {{ sub }}</el-tab-pane>
           <el-tab-pane label="Онлайн" name="Onlin">Online</el-tab-pane>
         </el-tabs>
       </el-main>
@@ -30,7 +30,7 @@
 
 <script>
 import MessageUser from './MessageUser.vue';
-
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'MessagePage',
@@ -42,6 +42,12 @@ export default {
       activeName: 'all', // Управління активною вкладкою
     };
   },
+  computed: {
+    ...mapGetters(['getSub']), // Получаем sub из Vuex
+    sub() {
+      return this.getSub; // Возвращаем значение sub
+    },
+  },
   methods: {
     goBack() {
       // Возвращаемся на предыдущую страницу
@@ -49,8 +55,13 @@ export default {
     },
     handleClick(tab, event) {
       console.log(tab, event)
-    }
-  }
+    },
+    ...mapActions(['login', 'logout']), // Действия для логина и логаута
+    login() {
+      const token = 'your.jwt.token.here'; // Здесь должен быть ваш JWT токен
+      this.login(token); // Вызываем действие login с токеном
+    },
+  },
 };
 
 </script>
