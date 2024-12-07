@@ -1,51 +1,52 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import NotificationsPage from './components/Page/NotificationsPage.vue';
-import ClipsPage from './components/Page/ClipsPage.vue';
-import MessagePage from './components/Page/Message/MessagePage.vue';
-import TapePage from './components/Page/TapePage.vue';
-import SearchPage from './components/Page/SearchPage.vue';
-import PurchasedPage from './components/Page/PurchasedPage.vue';
-import MorePage from './components/Page/More/MorePage.vue';
-import userTemplate from './components/Page/UserPage/UserPage.vue';
-import UserSubscribe from './components/Page/UserSubsribeModal/UserSubscribe.vue';
-// import AuthPage from './components/Page/AuthPage/AuthPage.vue';
+import AuthPage from './components/Page/AuthPage/AuthPage.vue';
+import MainPage from './components/Page/MainPage.vue';
 
 const routes = [
-  // { path: '/auth', component: AuthPage },
-  // { path: '/', redirect: '/auth' }, // Редирект на страницу авторизации
-
-  { path: '/', redirect: '/tape' },
-  { path: '/tape', component: TapePage },
-  { path: '/notifications', component: NotificationsPage },
-  { path: '/clips', component: ClipsPage },
-  { path: '/message', component: MessagePage },
-  { path: '/search', component: SearchPage },
-  { path: '/purchased', component: PurchasedPage },
-  { path: '/more', component: MorePage },
-  { path: '/userTemplate', component: userTemplate },
-  { path: '/userSubscribeDonate', component: UserSubscribe },
+  { path: '/', redirect: '/auth' },
+  { path: '/auth', component: AuthPage },
   {
-    path: '/user-chat/:id',
-    name: 'UserChat',
-    component: () => import('./components/Page/Message/UserChat.vue'),
+    path: '/app',
+    component: MainPage, // Основное приложение
+    children: [
+      { path: 'tape', component: () => import('./components/Page/TapePage.vue') },
+      { path: 'notifications', component: () => import('./components/Page/NotificationsPage.vue') },
+      { path: 'clips', component: () => import('./components/Page/ClipsPage.vue') },
+      { path: 'message', component: () => import('./components/Page/Message/MessagePage.vue') },
+      { path: 'search', component: () => import('./components/Page/SearchPage.vue') },
+      { path: 'purchased', component: () => import('./components/Page/PurchasedPage.vue') },
+      { path: 'more', component: () => import('./components/Page/More/MorePage.vue') },
+      {
+        path: 'user-chat/:id',
+        name: 'UserChat',
+        component: () => import('./components/Page/Message/UserChat.vue'),
+      },
+      {
+        path: 'user/:id',
+        component: () => import('./components/Page/UserPage/UserPage.vue'),
+        name: 'userProfile',
+      },
+      {
+        path: 'userSubscribeDonate/:id',
+        component: () => import('./components/Page/UserSubsribeModal/UserSubscribe.vue'),
+        name: 'userSubscribe',
+      },
+    ],
   },
-  {
-    path: '/user/:id',
-    component: userTemplate,
-    name: 'userProfile'
-  },
-  // Маршрут для подписки/доната
-  {
-    path: '/userSubscribeDonate/:id',
-    component: UserSubscribe,
-    name: 'userSubscribe'
-  }
-
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = localStorage.getItem('authToken'); // Пример проверки авторизации
+  if (to.path.startsWith('/app') && !isAuthenticated) {
+    next('/auth'); // Перенаправить на страницу авторизации
+  } else {
+    next(); // Разрешить переход
+  }
 });
 
 export default router;

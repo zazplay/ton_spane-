@@ -3,7 +3,7 @@
         @close="handleClose">
         <h2>DreamScape</h2>
 
-        <router-link to="/tape">
+        <router-link to="/app/tape">
             <el-menu-item index="1">
                 <el-icon>
                     <House />
@@ -12,7 +12,7 @@
             </el-menu-item>
         </router-link>
 
-        <router-link to="/clips">
+        <router-link to="/app/clips">
             <el-menu-item index="2">
                 <el-icon>
                     <Film />
@@ -21,7 +21,7 @@
             </el-menu-item>
         </router-link>
 
-        <router-link to="/message">
+        <router-link to="/app/message">
             <el-menu-item index="3">
                 <el-icon>
                     <Message />
@@ -30,7 +30,7 @@
             </el-menu-item>
         </router-link>
 
-        <router-link to="/notifications">
+        <router-link to="/app/notifications">
             <el-menu-item index="4">
                 <el-icon>
                     <BellFilled />
@@ -39,7 +39,7 @@
             </el-menu-item>
         </router-link>
 
-        <router-link to="/search">
+        <router-link to="/app/search">
             <el-menu-item index="5">
                 <el-icon>
                     <Search />
@@ -48,14 +48,14 @@
             </el-menu-item>
         </router-link>
 
-        <router-link to="/purchased">
+        <router-link to="/app/purchased">
             <el-menu-item index="6">
                 <img src="../assets/dollar-svgrepo-com.svg" style="margin-left: -5px;" />
                 <span>Покупки</span>
             </el-menu-item>
         </router-link>
 
-        <router-link to="/more">
+        <router-link to="/app/more">
             <el-menu-item index="7">
                 <el-icon>
                     <IconMenu />

@@ -6,7 +6,6 @@
     <div class="right-container">
       <!--Динамическое содержимое-->
       <router-view />
-      
     </div>
     <HorizontalMenu class="horizontal-menu" />
   </div>
@@ -18,7 +17,7 @@ import MenuComponent from '../MenuComponent.vue';
 
 export default {
   name: "ResponsiveContainers",
-  components:{
+  components: {
     MenuComponent,
     HorizontalMenu
   }
@@ -32,8 +31,7 @@ export default {
   /* Центрирует правый контейнер */
   position: relative;
   width: 100%;
-  /* height: 100vh; */
-  /* Высота экрана */
+
 }
 
 .horizontal-menu {
@@ -42,9 +40,6 @@ export default {
 
 .left-container {
   width: 300px;
-  /* Ширина левого контейнера */
-  /* height: 100%; */
-  /* background-color: lightblue; */
   position: absolute;
   right: 50%;
   /* Совмещаем правую границу с центром экрана */
@@ -54,9 +49,6 @@ export default {
 
 .right-container {
   width: 800px;
-  /* Ширина правого контейнера */
-  /* height: 100%; */
-  /* background-color: lightgreen; */
   font-size: 14px;
   position: absolute;
   left: 50%;
@@ -71,19 +63,16 @@ export default {
   }
 
   .horizontal-menu {
-  display: flex;
-}
+    display: flex;
+  }
 
-.right-container {
-  width: 105%;
-  /* Ширина правого контейнера */
-  /* height: 100%; */
-  position: absolute;
-  left: 50%;
-  /* Центрируем правый контейнер по горизонтали экрана */
-  transform: translateX(-50%);
+  .right-container {
+    width: 105%;
+    /* Ширина правого контейнера */
+    position: absolute;
+    left: 50%;
+    /* Центрируем правый контейнер по горизонтали экрана */
+    transform: translateX(-50%);
+  }
 }
-}
-
-
 </style>

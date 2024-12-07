@@ -19,7 +19,7 @@
                 <span style="color: aliceblue;">{{ userData?.username || 'Loading...' }}</span>
                 <el-link 
                     :underline="false" 
-                    :href="`/user/${userId}`" 
+                    :href="`/app/user/${userId}`" 
                     class="link-style"
                 >
                     Перейти к профилю >

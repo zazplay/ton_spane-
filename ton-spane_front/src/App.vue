@@ -1,13 +1,13 @@
 <script>
-import MainPage from './components/Page/MainPage.vue';
+// import MainPage from './components/Page/MainPage.vue';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 export default {
  name: 'App',
- components: {
-   MainPage,
- },
+//  components: {
+//    MainPage,
+//  },
  setup() {
    const route = useRoute();
    const isAuthPage = computed(() => route.path === '/auth');
@@ -20,8 +20,8 @@ export default {
 </script>
 
 <template>
- <MainPage v-if="!isAuthPage" />
- <router-view v-else />
+ <!-- <MainPage v-if="!isAuthPage" /> -->
+ <router-view  />
 </template>
 
 <style>
@@ -29,7 +29,7 @@ export default {
  font-family: Avenir, Helvetica, Arial, sans-serif;
  -webkit-font-smoothing: antialiased;
  -moz-osx-font-smoothing: grayscale;
- text-align: center;
+ /* text-align: center; */
  color: #2c3e50;
  width: 100%;
 }
