@@ -42,7 +42,7 @@
 
 <script>
 import axios from "axios";
-import { v4 as uuidv4 } from 'uuid';
+// import { v4 as uuidv4 } from 'uuid';
 
 export default {
     props: {
@@ -67,7 +67,18 @@ export default {
                 image: null, // Изображение будет сохраняться как файл
             },
             error: null,
+            storedValue: null,
         };
+    },
+    created() {
+        // Отримуємо значення з localStorage
+        const value = localStorage.getItem('userid');
+        if (value) {
+            this.storedValue = value; // Без JSON.parse, если это строка
+        } else {
+            console.error("Значення не знайдено в localStorage");
+            this.storedValue = null;
+        }
     },
     methods: {
         handleFileChange(event) {
@@ -117,17 +128,13 @@ export default {
             }
             try {
                 const formData = new FormData();
-                const guid = uuidv4();
-                // formData.append('title', this.post.title);
-                // formData.append('content', this.post.content);
-                // formData.append('media', this.post.media);
                 formData.append("caption", this.post.caption);
-                formData.append("userId", guid);
+                formData.append("userId", this.storedValue);
                 formData.append("price", this.post.price);
                 formData.append("isBlurred", this.post.isBlurred);
                 formData.append("image", this.post.image);
 
-                console.log('Дані для відправки:', this.post.caption, guid, this.post.price, this.post.isBlurred, this.post.image );
+                console.log('Дані для відправки:', this.post.caption, this.storedValue, this.post.price, this.post.isBlurred, this.post.image);
                 const response = await axios.post("https://ton-back-e015fa79eb60.herokuapp.com/api/posts", formData, {
                     headers: {
                         "Content-Type": "multipart/form-data",
