@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import ListPostCards from '../../ListPostCards.vue'
+import Config from '@/config'
 
 const router = useRouter()
 const route = useRoute()
@@ -41,7 +42,7 @@ const preparePostsData = (posts) => {
 
 const fetchUserData = async () => {
   try {
-    const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/users/${userId}`)
+    const response = await fetch(`${Config.API_BASE_URL}/users/${userId}`)
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
     const data = await response.json()
     
@@ -56,8 +57,43 @@ const fetchUserData = async () => {
     isLoaded.value = true
   } catch (err) {
     console.error('Error fetching user data:', err)
+    isLoaded.value = true
   }
 }
+
+const fetchUserPosts = async () => {
+  try {
+    const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${userId}`);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json();
+    
+    const formattedPosts = data.map(post => ({
+      ...post,
+      id: post.id,
+      imageUrl: formatImageUrl(post.imageUrl),
+      caption: post.caption || '',
+      price: String(post.price),
+      isBlurred: post.isBlurred || false,
+      createdAt: post.createdAt,
+      user: {
+        id: userId,
+        username: userData.value.username,
+        email: userData.value.email || '',
+        profilePicture: userData.value.profilePicture
+      },
+      // Include other boolean flags
+      initialLiked: false,
+      initialShared: false,
+      initialDonated: false,
+      initialSubscribed: false
+    }));
+
+    userData.value.posts = formattedPosts;
+  } catch (err) {
+    console.error('Error fetching user posts:', err);
+    userData.value.posts = [];
+  }
+};
 
 const handleImageError = (type) => {
   if (type === 'header') {
@@ -70,9 +106,15 @@ const handleImageError = (type) => {
 const openDonatePage = () => {
   router.push(`/app/userSubscribeDonate/${userId}`)
 }
-onMounted(fetchUserData)
-</script>
 
+// Sequential fetching to ensure user data is loaded first
+const initializeUserData = async () => {
+  await fetchUserData()
+  await fetchUserPosts()
+}
+
+onMounted(initializeUserData)
+</script>
 <template>
   <div v-if="isLoaded" class="layout">
     <el-container>
@@ -123,7 +165,7 @@ onMounted(fetchUserData)
                 </div>
               </template>
               <div class="collapse-content">
-                Я та, кто всегда ищет вдохновение в мелочах 🌸✨ Люблю утренний кофе, теплые пледы и закаты, которые красят небо в нежные оттенки 🦋☕ В моем мире — книги, музыка и бесконечные мечты о путешествиях 🌍💖 Обожаю пробовать новое, танцевать под любимые треки и верить, что впереди только лучшее 💃💫 Если ты тоже любишь жизнь во всех ее проявлениях — нам точно по пути! 🌟😊
+              {{ userData.profileDescription }}
               </div>
             </el-collapse-item>
           </el-collapse>

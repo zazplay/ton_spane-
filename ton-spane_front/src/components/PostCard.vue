@@ -88,9 +88,15 @@ const handleDonate = () => {
 
   <el-card class="post-card">
     <div class="header">
+      
       <el-avatar :size="50" class="avatar" :src="user.profilePicture" />
       <div class="user-info">
-        <el-text class="username">{{ user.username }}</el-text>
+        <router-link 
+                    :to="`/app/user/${user.id}`" 
+                    class="username"                >
+                {{ user.username }}
+                </router-link>
+        <el-text ></el-text>
         <el-text class="date">{{ formatDate(createdAt) }}</el-text>
       </div>
       <el-button 
@@ -205,6 +211,42 @@ const handleDonate = () => {
 .username {
   font-size: 20px;
   line-height: 1.2;
+  color: #ffffff;
+  text-decoration: none;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding-bottom: 2px;
+  display: inline-block;
+  
+  /* Красивое подчеркивание с анимацией */
+  &::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(90deg, #4f8cff 0%, #2563eb 100%);
+    transition: width 0.3s ease;
+    border-radius: 2px;
+  }
+  
+  /* При наведении */
+  &:hover {
+    color: #4f8cff;
+    transform: translateY(-1px);
+    
+    &::after {
+      width: 100%;
+    }
+  }
+  
+  /* При нажатии */
+  &:active {
+    transform: translateY(1px);
+  }
+  
   @media (max-width: 480px) {
     width: 100%;
     font-size: 14px !important;

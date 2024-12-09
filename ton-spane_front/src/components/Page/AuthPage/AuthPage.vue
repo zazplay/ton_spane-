@@ -160,30 +160,32 @@ export default {
   padding: 10px 20px;
   font-size: 16px;
   font-weight: bold;
-  border: 2px solid transparent;
-  border-radius: 5px;
-  background-color: white;
-  color: #007bff;
+  border: 2px solid rgba(81, 119, 255, 0.2);
+  border-radius: 8px;
+  background-color: rgba(30, 41, 59, 0.8);
+  color: #89a4d1;
   transition: all 0.3s ease;
   cursor: pointer;
 }
 
 .header-btn:hover {
-  background-color: #f1f1f1;
+  background-color: rgba(79, 140, 255, 0.1);
+  border-color: #4f8cff;
+  color: #4f8cff;
 }
 
 .header-btn.active {
-  background-color: #007bff;
+  background: linear-gradient(135deg, #4f8cff 0%, #2563eb 100%);
   color: white;
-  border-color: #0056b3;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.3);
 }
-
 /*стили контейнера*/
 .auth-container {
  display: flex;
  justify-content: center;
  align-items: center;
- height: 100vh;
+ min-height: 80vh;
 }
 
 .form-card {

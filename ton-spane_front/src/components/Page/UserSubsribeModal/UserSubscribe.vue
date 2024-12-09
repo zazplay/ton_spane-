@@ -47,7 +47,7 @@
   
   // Константы с использованием ref для реактивности
   const USER_IMG = ref("https://bannerplus.ru/files/img/pics/devushka-krasivye-kartinki/devushka-krasivye-kartinki-56.webp")
-  const USER_NICKNAME = ref("Vikpix")
+  const USER_NICKNAME = ref("")
   
   // Router
   const router = useRouter()
