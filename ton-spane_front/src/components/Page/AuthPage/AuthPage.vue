@@ -1,14 +1,21 @@
 <template>
   <div class="auth-container">
     <div class="form-card">
-      <h1 class="title">Войдите в аккаунт</h1>
+      <div class="header">
+      <div class="button-group">
+        <button @click="showLogin = true" :class="['header-btn', showLogin && 'active']">Вход</button>
+        <button @click="showLogin = false" :class="['header-btn', !showLogin && 'active']">Регистрация</button>
+      </div>
+    </div>
+      <div v-if="showLogin">
+        <h1 class="title">Войдите в аккаунт</h1>
 
-      <form @submit.prevent="submitForm" class="auth-form">
-        <div class="form-item">
-          <label for="email" class="label-style">Эл. почта</label>
-          <input v-model="ruleForm.email" type="email" id="email" placeholder="example@email.com" required />
-          <p v-if="errors.email" class="error-text">{{ errors.email }}</p>
-        </div>
+        <form @submit.prevent="submitForm" class="auth-form">
+          <div class="form-item">
+            <label for="email" class="label-style">Эл. почта</label>
+            <input v-model="ruleForm.email" type="email" id="email" placeholder="example@email.com" required />
+            <p v-if="errors.email" class="error-text">{{ errors.email }}</p>
+          </div>
 
         <div class="form-item">
           <label for="pass" class="label-style">Пароль</label>
@@ -22,13 +29,17 @@
           <p v-if="errors.pass" class="error-text">{{ errors.pass }}</p>
         </div>
 
-        <div class="form-actions">
-          <button class="red-btn" type="button" @click="resetForm">
-            Очистить
-          </button>
-          <button type="submit" class="submit-btn blue-btn">Войти</button>
-        </div>
-      </form>
+          <div class="form-actions">
+            <button class="red-btn" type="button" @click="resetForm">
+              Очистить
+            </button>
+            <button type="submit" class="submit-btn blue-btn">Войти</button>
+          </div>
+        </form>
+      </div>
+      <div v-else>
+        <RegisterForm />
+      </div>
     </div>
   </div>
 </template>
@@ -36,9 +47,13 @@
 <script>
 import axios from "axios";
 import config from "@/config";
+import RegisterForm from "./RegisterForm.vue";
 
 export default {
   name: "AuthPage",
+  components: {
+    RegisterForm,
+  },
   data() {
     return {
       ruleForm: {
@@ -50,6 +65,7 @@ export default {
         pass: "",
       },
       showPassword: false, // Флаг для управления видимостью пароля
+      showLogin: true, // Управление отображением формы входа/регистрации
     };
   },
   methods: {
@@ -102,8 +118,8 @@ export default {
 
           // Дополнительно: сохранение токена или переход на другую страницу
           if (response.data.accessToken) {
-            localStorage.setItem("authToken", response.data.accessToken);
-            localStorage.setItem("refreshToken", response.data.refreshToken);
+            sessionStorage.setItem("authToken", response.data.accessToken);
+            sessionStorage.setItem("refreshToken", response.data.refreshToken);
             this.$store.dispatch('initializeSub', response.data.accessToken); // Инициализируем sub
             console.log('sub:', this.$store.state.sub); // Проверяем sub
             alert("Вход выполнен успешно!");
@@ -127,6 +143,42 @@ export default {
 </script>
 
 <style scoped>
+/* Контейнер для кнопок */
+.header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+}
+
+/* Стили кнопок */
+.header-btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  background-color: white;
+  color: #007bff;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.header-btn:hover {
+  background-color: #f1f1f1;
+}
+
+.header-btn.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #0056b3;
+}
+
+/*стили контейнера*/
 .auth-container {
  display: flex;
  justify-content: center;
