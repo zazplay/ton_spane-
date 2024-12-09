@@ -13,16 +13,15 @@ export default {
     return {
       post: {
         caption: "",
-        userId: "", // Будет заполнено значением sub
+        userId: "",
         price: 0,
         isBlurred: false,
-        image: null, // Изображение будет сохраняться как файл
+        image: null,
       },
       error: null,
     };
   },
   created() {
-    // Получаем sub из Vuex и устанавливаем в userId
     this.post.userId = this.getSub;
   },
   methods: {
@@ -47,7 +46,7 @@ export default {
             URL.revokeObjectURL(objectUrl);
 
             if (width > 2500 || height > 1260 || width < 512 || height < 512) {
-              this.error = `Неверный размер изображения! Мін: 512x512, Макс: 2500x1260`;
+              this.error = `Неверный размер изображения! Мин: 512x512, Макс: 2500x1260`;
               this.post.image = null;
             } else {
               this.error = null;
@@ -65,28 +64,19 @@ export default {
         this.post.image = null;
       }
     },
-
     async handleSubmit() {
       if (!this.post.image) {
-        this.error = "Пожалуйста, добавте фото или видео!";
+        this.error = "Пожалуйста, добавьте фото или видео!";
         return;
       }
       try {
         const formData = new FormData();
         formData.append("caption", this.post.caption);
-        formData.append("userId", this.post.userId); // Используем sub
+        formData.append("userId", this.post.userId);
         formData.append("price", this.post.price);
         formData.append("isBlurred", this.post.isBlurred);
         formData.append("image", this.post.image);
 
-        console.log(
-          "Дані для відправки:",
-          this.post.caption,
-          this.post.userId,
-          this.post.price,
-          this.post.isBlurred,
-          this.post.image
-        );
         const response = await axios.post(
           "https://ton-back-e015fa79eb60.herokuapp.com/api/posts",
           formData,
@@ -96,12 +86,10 @@ export default {
             }
           }
         );
-
-        console.log("Ответ сервера:", response.data);
-        alert("Пост добавлено успешно!");
+        console.log("response", response);
+        alert("Пост добавлен успешно!");
         this.closeForm();
       } catch {
-        console.error("Ошибка при отправке поста:", this.error);
         alert("Ошибка при отправке поста.");
       }
     },
@@ -113,7 +101,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["getSub"]), // Подключаем геттер getSub из Vuex
+    ...mapGetters(["getSub"]),
   },
 };
 </script>
@@ -132,35 +120,37 @@ export default {
         <div style="display: flex; flex-direction: row; justify-content: space-between;">
           <div class="input-price">
             <label for="price">Цена:</label>
-            <input style="margin-top: 10px;" type="number" id="price" min="0" v-model.number="post.price" required />
-
+            <input style="margin-top: 10px;" type="number" id="price" min="0" max="999" v-model.number="post.price"
+              required />
           </div>
-          <div>
-            <p v-if="post.media" class="selected-file">{{ post.media.name }}</p>
-          </div>
-          <div style="display: flex; flex-direction: column;">
-            <label for="media">Фото или видео</label>
-            <!-- Добавляем реф к input -->
-            <input type="file" id="image" ref="fileInput" @change="handleFileChange" accept="image/*,video/*"
-              class="file-input" />
-            <!-- Кнопка для выбора файла -->
-            <el-button type="primary" class="custom-file-btn" @click="triggerFileInput">Выбрать файл</el-button>
+          <div style="display: flex; flex-direction: row;">
             <!-- Показать имя выбранного файла -->
+            <p v-if="post.image" class="selected-file"> {{ post.image.name }}</p>
+            <div style="display: flex; flex-direction: column;">
+              <label for="media">Фото или видео</label>
+              <!-- Добавляем реф к input -->
+              <input type="file" id="image" ref="fileInput" @change="handleFileChange" accept="image/*,video/*"
+                class="file-input" />
+              <!-- Кнопка для выбора файла -->
+              <el-button type="primary" class="custom-file-btn" @click="triggerFileInput">
+                Выбрать файл
+              </el-button>
+            </div>
 
           </div>
         </div>
         <p v-if="error" class="text-danger">{{ error }}</p>
 
         <div>
-          <input type="checkbox" id="isBlurred" v-model="post.isBlurred" />
+          <input style="width: 15px; height: 15px;" type="checkbox" id="isBlurred" v-model="post.isBlurred" />
           <label for="isBlurred">Размытое изображение:</label>
         </div>
 
-
-
         <div class="mb-4">
           <el-button type="success" class="custom-file-btn" style="margin-top: 15px;" plain
-            @click.prevent="handleSubmit">Опубликовать</el-button>
+            @click.prevent="handleSubmit">
+            Опубликовать
+          </el-button>
         </div>
       </form>
     </div>
@@ -174,7 +164,20 @@ export default {
   justify-content: start;
   max-width: 100px;
 }
-
+/* Стилизация числового input */
+.input-price input {
+  padding: 5px;
+  font-size: 20px;
+  border-radius: 8px;
+  background: #23272a;
+  color: #ffffff;
+  border: 1px solid #5865f2;
+  transition: all 0.3s ease;
+}
+.input-price input:focus {
+  border-color: #7289da;
+  box-shadow: 0 0 8px rgba(114, 137, 218, 0.8);
+}
 /* Затемнение фона */
 .modal-overlay {
   position: fixed;
@@ -250,13 +253,22 @@ export default {
   align-items: center;
 }
 
+/* Стилизация текстового input */
 .form-control {
   width: 97%;
   margin-top: 15px;
   padding: 10px;
   font-size: 1rem;
-  border-radius: 5px;
-  outline: none;
+  border-radius: 8px;
+  background: #2c2f33;
+  color: #ffffff;
+  border: 1px solid #5865f2;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #7289da;
+  box-shadow: 0 0 8px rgba(114, 137, 218, 0.8);
 }
 
 .text-danger {
@@ -280,9 +292,20 @@ export default {
 
 /* Стили для отображения имени выбранного файла */
 .selected-file {
-  margin-top: 10px;
+  justify-content: center;
+  margin-top: 38px;
+
   font-size: 1rem;
   color: #f1f1f1;
+  max-width: 300px;
+  /* Ограничиваем ширину  */
+  white-space: nowrap;
+  /* Отключаем перенос текста */
+  overflow: hidden;
+  /*Скрываем переполнение */
+  text-overflow: ellipsis;
+  /* Добавляем многоточие при переполнении */
+  margin-right: 10px;
 }
 
 /* Адаптивность для экранов меньше 1200px */
@@ -299,10 +322,10 @@ export default {
     /* Уменьшаем размер текста */
   }
 
-  .custom-file-btn {
+  /* .custom-file-btn {
     width: 50%;
-    /* Увеличиваем ширину кнопки */
-  }
+     Увеличиваем ширину кнопки  
+  } */
 
   .close-btn {
     font-size: 0.8rem;
@@ -327,6 +350,13 @@ export default {
 
   .custom-file-btn:hover {
     background-color: #4752c4;
+  }
+
+  .selected-file {
+    font-size: 14px;
+    max-width: 150px;
+    /* Ограничиваем ширину */
+
   }
 }
 </style>
