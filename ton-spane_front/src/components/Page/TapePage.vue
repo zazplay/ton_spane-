@@ -27,7 +27,7 @@
             <el-tab-pane label="Для вас" name="first">
               <ListPostCards  :posts="posts" />
             </el-tab-pane>
-            <el-tab-pane label="Подписки" name="second">Config</el-tab-pane>
+            <el-tab-pane label="Подписки" name="second"><FollowingPage/></el-tab-pane>
             <el-tab-pane label="Понравилось" name="third">Role</el-tab-pane>
           </el-tabs>
         </el-container>
@@ -41,6 +41,7 @@ import { BellFilled, CirclePlusFilled } from '@element-plus/icons-vue';
 import ListPostCards from '../ListPostCards.vue';
 import AddPostForm from '../AddPostForm.vue';
 import { ref } from 'vue'
+import FollowingPage from './FollowingPage/FollowingPage.vue';
 
 export default {
   components: {
@@ -48,6 +49,7 @@ export default {
     ListPostCards,
     BellFilled,
     CirclePlusFilled,
+    FollowingPage
   },
   data() {
     return {
@@ -86,9 +88,9 @@ export default {
   
 
 
-</script>
+</script >
 
-<style>
+<style scoped>
 .demo-tabs>.el-tabs__content {
   color: #6b778c;
   font-size: 32px;
