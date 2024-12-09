@@ -106,8 +106,8 @@ export default {
 
           // Данные для отправки
           const payload = {
-            email: this.ruleForm.email,
-            password: this.ruleForm.pass,
+            email: this.form.email,
+            password: this.form.password,
           };
 
           // Отправка запроса
