@@ -109,7 +109,7 @@ export default {
             email: this.ruleForm.email,
             password: this.ruleForm.pass,
           };
-
+          console.log("payload", payload);
           // Отправка запроса
           const response = await axios.post(apiUrl, payload);
 
