@@ -16,7 +16,7 @@
             <input v-model="ruleForm.pass" :type="showPassword ? 'text' : 'password'" id="pass"
               placeholder="Введите пароль" required />
             <button type="button" class="toggle-password" @click="togglePasswordVisibility">
-              <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              <i :class="showPassword ? 'fas fa-eye'  : 'fas fa-eye-slash'"></i>
             </button>
           </div>
           <p v-if="errors.pass" class="error-text">{{ errors.pass }}</p>
@@ -251,8 +251,8 @@ form button[type="button"] {
 
 .toggle-password {
  position: absolute;
- right: 12px;
- top: 50%;
+ right: 5px;
+ top: 57%;
  transform: translateY(-50%);
  background: none;
  border: none;
