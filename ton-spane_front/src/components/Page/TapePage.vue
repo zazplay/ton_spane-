@@ -6,7 +6,7 @@
         <div class="header-content">
           <el-text class="site-name">DreamScape</el-text>
           <div class="icon-container">
-            <router-link to="/notifications">
+            <router-link to="/app/notifications">
               <el-icon class="icon-style">
                 <BellFilled />
               </el-icon>
