@@ -11,7 +11,7 @@
 
                 <div class="form-group">
                     <label for="price">Цена:</label>
-                    <input type="number" id="price" v-model.number="post.price" required />
+                    <input type="number" id="price" min="0" v-model.number="post.price" required />
                 </div>
 
                 <div class="form-group">
@@ -41,123 +41,125 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 import axios from "axios";
-// import { v4 as uuidv4 } from 'uuid';
 
 export default {
-    props: {
-        isOpen: {
-            type: Boolean,
-            required: true,
-        },
+  props: {
+    isOpen: {
+      type: Boolean,
+      required: true,
     },
-    data() {
-        return {
-            post: {
-                // title: '',
-                // content: '',
-                // userId: '',
-                // price: Number,
-                // isBlurred: Boolean,
-                // media: null, // Здесь будет храниться выбранный файл
-                caption: "",
-                userId: "",
-                price: null,
-                isBlurred: false,
-                image: null, // Изображение будет сохраняться как файл
-            },
-            error: null,
-            storedValue: null,
-        };
-    },
-    created() {
-        // Отримуємо значення з localStorage
-        const value = localStorage.getItem('userid');
-        if (value) {
-            this.storedValue = value; // Без JSON.parse, если это строка
-        } else {
-            console.error("Значення не знайдено в localStorage");
-            this.storedValue = null;
+  },
+  data() {
+    return {
+      post: {
+        caption: "",
+        userId: "", // Будет заполнено значением sub
+        price: 0,
+        isBlurred: false,
+        image: null, // Изображение будет сохраняться как файл
+      },
+      error: null,
+    };
+  },
+  created() {
+    // Получаем sub из Vuex и устанавливаем в userId
+    this.post.userId = this.getSub;
+  },
+  methods: {
+    handleFileChange(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const isImage = file.type.startsWith("image/");
+        const isVideo = file.type.startsWith("video/");
+
+        if (!isImage && !isVideo) {
+          this.error = "Только фото или видео разрешено!";
+          this.post.image = null;
+          return;
         }
-    },
-    methods: {
-        handleFileChange(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const isImage = file.type.startsWith('image/');
-                const isVideo = file.type.startsWith('video/');
 
-                if (!isImage && !isVideo) {
-                    this.error = 'Только фото или видео разрешено!';
-                    this.post.image = null;
-                    return;
-                }
+        if (isImage) {
+          const img = new Image();
+          const objectUrl = URL.createObjectURL(file);
 
-                if (isImage) {
-                    const img = new Image();
-                    const objectUrl = URL.createObjectURL(file);
+          img.onload = () => {
+            const { width, height } = img;
+            URL.revokeObjectURL(objectUrl);
 
-                    img.onload = () => {
-                        const { width, height } = img;
-                        URL.revokeObjectURL(objectUrl);
-
-                        if (width > 2500 || height > 1260 || width < 512 || height < 512) {
-                            this.error = `Неверный размер изображения! Мін: 512x512, Макс: 2500x1260`;
-                            this.post.image = null;
-                        } else {
-                            this.error = null;
-                            this.post.image = file;
-                        }
-                    };
-
-                    img.src = objectUrl;
-                } else {
-                    this.error = null;
-                    this.post.image = file;
-                }
+            if (width > 2500 || height > 1260 || width < 512 || height < 512) {
+              this.error = `Неверный размер изображения! Мін: 512x512, Макс: 2500x1260`;
+              this.post.image = null;
             } else {
-                this.error = null;
-                this.post.image = null;
+              this.error = null;
+              this.post.image = file;
             }
-        },
+          };
 
-        async handleSubmit() {
-            if (!this.post.image) {
-                this.error = 'Пожалуйста, добавте фото или видео!';
-                return;
-            }
-            try {
-                const formData = new FormData();
-                formData.append("caption", this.post.caption);
-                formData.append("userId", this.storedValue);
-                formData.append("price", this.post.price);
-                formData.append("isBlurred", this.post.isBlurred);
-                formData.append("image", this.post.image);
-
-                console.log('Дані для відправки:', this.post.caption, this.storedValue, this.post.price, this.post.isBlurred, this.post.image);
-                const response = await axios.post("https://ton-back-e015fa79eb60.herokuapp.com/api/posts", formData, {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                });
-
-                console.log("Ответ сервера:", response.data);
-                alert('Пост добавлено успешно!');
-                this.closeForm();
-            } catch {
-                console.error("Ошибка при отправке поста:", this.error);
-                alert("Ошибка при отправке поста.");
-            }
-        },
-        closeForm() {
-            this.$emit('close');
-        },
-        triggerFileInput() {
-            this.$refs.fileInput.click();
-        },
+          img.src = objectUrl;
+        } else {
+          this.error = null;
+          this.post.image = file;
+        }
+      } else {
+        this.error = null;
+        this.post.image = null;
+      }
     },
+
+    async handleSubmit() {
+      if (!this.post.image) {
+        this.error = "Пожалуйста, добавте фото или видео!";
+        return;
+      }
+      try {
+        const formData = new FormData();
+        formData.append("caption", this.post.caption);
+        formData.append("userId", this.post.userId); // Используем sub
+        formData.append("price", this.post.price);
+        formData.append("isBlurred", this.post.isBlurred);
+        formData.append("image", this.post.image);
+
+        console.log(
+          "Дані для відправки:",
+          this.post.caption,
+          this.post.userId,
+          this.post.price,
+          this.post.isBlurred,
+          this.post.image
+        );
+        const response = await axios.post(
+          "https://ton-back-e015fa79eb60.herokuapp.com/api/posts",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            }
+          }
+        );
+
+        console.log("Ответ сервера:", response.data);
+        alert("Пост добавлено успешно!");
+        this.closeForm();
+      } catch {
+        console.error("Ошибка при отправке поста:", this.error);
+        alert("Ошибка при отправке поста.");
+      }
+    },
+    closeForm() {
+      this.$emit("close");
+    },
+    triggerFileInput() {
+      this.$refs.fileInput.click();
+    },
+  },
+  computed: {
+    ...mapGetters(["getSub"]), // Подключаем геттер getSub из Vuex
+  },
 };
 </script>
+
 
 <style scoped>
 /* Затемнение фона */
