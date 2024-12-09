@@ -18,15 +18,15 @@
 
 <script setup>
 
-import { useRouter } from 'vue-router'; // Импортируйте useRouter
-const router = useRouter(); // Получите экземпляр маршрутизатора
+// import { useRouter } from 'vue-router'; // Импортируйте useRouter
+// const router = useRouter(); // Получите экземпляр маршрутизатора
 
 
 // Метод для обработки клика и перехода на страницу чата
 const handleClickMess = () => {
     console.log("chat");
-    const chatId = '123'; // Замените на реальный ID чата
-    router.push({ name: 'UserChat', params: { id: chatId } }); // Переход на страницу чата с передачей id
+    // const chatId = '123'; // Замените на реальный ID чата
+    // router.push({ name: 'UserChat', params: { id: chatId } }); // Переход на страницу чата с передачей id
 };
 
 const size = 58;

@@ -63,6 +63,8 @@ const paymentModalRef = ref(null)
 
 const showPaymentModal = () => {
   paymentModalRef.value.openDialog()
+  isVisible.value = false
+
 }
 
 const props = defineProps({
