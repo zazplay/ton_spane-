@@ -106,10 +106,10 @@ export default {
 
           // Данные для отправки
           const payload = {
-            email: this.form.email,
-            password: this.form.password,
+            email: this.ruleForm.email,
+            password: this.ruleForm.pass,
           };
-
+          console.log("payload", payload);
           // Отправка запроса
           const response = await axios.post(apiUrl, payload);
 
