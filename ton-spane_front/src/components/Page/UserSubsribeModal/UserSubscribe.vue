@@ -26,75 +26,85 @@
         </el-main>
         
         <el-footer class="sp-footer"> 
-            <el-button type="success" class="bottom-fixed">Купить подписку</el-button>
+            <el-button type="success" class="bottom-fixed"  @click="showPaymentModal"            >Купить подписку</el-button>
 
         </el-footer>
       </el-container>
     </div>
+    <PaymentModal ref="paymentModalRef" />
+
   </template>
   
   <script setup>
-  import { ArrowLeftBold } from '@element-plus/icons-vue'
-  import { useRouter, useRoute } from 'vue-router'
-  import { ref, onMounted } from 'vue'
-  import axios from 'axios'
-  
-  // Импорт иконок
-  import fireIcon from '@/assets/fire-svgrepo-com.svg?url'
-  import hotPepper from '@/assets/hot-pepper-chili-svgrepo-com.svg'
-  import message from '@/assets/message-svgrepo-com.svg'
-  import bonus from '@/assets/plus-add-svgrepo-com.svg'
-  
-  // Константы с использованием ref для реактивности
-  const USER_IMG = ref("https://bannerplus.ru/files/img/pics/devushka-krasivye-kartinki/devushka-krasivye-kartinki-56.webp")
-  const USER_NICKNAME = ref("")
-  
-  // Router
-  const router = useRouter()
-  const route = useRoute()
-  
-  const fetchUserData = async () => {
-    try {
-      const response = await axios.get(`https://ton-back-e015fa79eb60.herokuapp.com/api/users/${route.params.id}`)
-      
-      // Обновляем данные
-      USER_IMG.value = response.data.profilePicture
-      USER_NICKNAME.value = response.data.username.split('@')[0] // используем email как никнейм
-    } catch (error) {
-      console.error('Ошибка при получении данных пользователя:', error)
-    }
+import { ArrowLeftBold } from '@element-plus/icons-vue'
+import { useRouter, useRoute } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+import PaymentModal from '../PaymentPage/PaymantPage.vue'
+
+// Импорт иконок
+import fireIcon from '@/assets/fire-svgrepo-com.svg?url'
+import hotPepper from '@/assets/hot-pepper-chili-svgrepo-com.svg'
+import message from '@/assets/message-svgrepo-com.svg'
+import bonus from '@/assets/plus-add-svgrepo-com.svg'
+
+// Константы с использованием ref для реактивности
+const USER_IMG = ref("")
+const USER_NICKNAME = ref("")
+
+// Router
+const router = useRouter()
+const route = useRoute()
+
+// Ref для модального окна
+const paymentModalRef = ref(null)
+
+const showPaymentModal = () => {
+  paymentModalRef.value.openDialog()
+}
+
+const fetchUserData = async () => {
+  try {
+    const response = await axios.get(`https://ton-back-e015fa79eb60.herokuapp.com/api/users/${route.params.id}`)
+    
+    // Обновляем данные
+    USER_IMG.value = response.data.profilePicture
+    USER_NICKNAME.value = response.data.username.split('@')[0]
+  } catch (error) {
+    console.error('Ошибка при получении данных пользователя:', error)
   }
-  
-  const handleGoBack = () => router.go(-1)
-  
-  onMounted(() => {
-    fetchUserData()
-  })
-  
-  // Данные подписок
-  const subscriptionItems = [
-    {
-      icon: fireIcon,
-      text: 'Эксклюзивный контент',
-      shadow: 'always'
-    },
-    {
-      icon: hotPepper,
-      text: 'Самые жаркие фото',
-      shadow: 'hover'
-    },
-    {
-      icon: message,
-      text: 'Личная переписка',
-      shadow: 'never'
-    },
-    {
-      icon: bonus,
-      text: 'Уникальные бонусы',
-      shadow: 'never'
-    }
-  ]
-  </script>
+}
+
+const handleGoBack = () => router.go(-1)
+
+onMounted(() => {
+  fetchUserData()
+})
+
+// Данные подписок
+const subscriptionItems = [
+  {
+    icon: fireIcon,
+    text: 'Эксклюзивный контент',
+    shadow: 'always'
+  },
+  {
+    icon: hotPepper,
+    text: 'Самые жаркие фото',
+    shadow: 'hover'
+  },
+  {
+    icon: message,
+    text: 'Личная переписка',
+    shadow: 'never'
+  },
+  {
+    icon: bonus,
+    text: 'Уникальные бонусы',
+    shadow: 'never'
+  }
+]
+</script>
   
   <style>
 

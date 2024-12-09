@@ -31,6 +31,11 @@ const routes = [
         component: () => import('./components/Page/UserSubsribeModal/UserSubscribe.vue'),
         name: 'userSubscribe',
       },
+      {
+        path: 'userSubscribeDonateYear/:id',
+        component: () => import('./components/Page/UserYearSubPage/YearSubPage.vue'),
+        name: 'userSubscribeYear',
+      },
     ],
   },
 ];

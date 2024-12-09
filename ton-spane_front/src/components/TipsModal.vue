@@ -43,18 +43,27 @@
             ></textarea>
           </div>
 
-          <button class="submit-btn" @click="handleSubmit">
+          <button class="submit-btn" @click="showPaymentModal" >
             Отправить
           </button>
         </div>
       </div>
     </div>
   </Teleport>
+  <PaymentModal ref="paymentModalRef" />
+
 </template>
 
 <script setup>
 import { ref, reactive, computed, watch, onBeforeUnmount,defineProps,defineEmits } from 'vue'
 import { Close } from '@element-plus/icons-vue'
+import PaymentModal from './Page/PaymentPage/PaymantPage.vue'
+
+const paymentModalRef = ref(null)
+
+const showPaymentModal = () => {
+  paymentModalRef.value.openDialog()
+}
 
 const props = defineProps({
   dialogDonateVisible: { type: Boolean, required: true },
@@ -98,6 +107,7 @@ const handleMessageInput = (value) => {
   emit('messageChange', value)
 }
 
+// eslint-disable-next-line no-unused-vars
 const handleSubmit = () => {
   emit('submit', {
     amount: sum.value,

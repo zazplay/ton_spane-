@@ -107,6 +107,10 @@ const openDonatePage = () => {
   router.push(`/app/userSubscribeDonate/${userId}`)
 }
 
+const openDonateYearPage = () => {
+  router.push(`/app/userSubscribeDonateYear/${userId}`)
+}
+
 // Sequential fetching to ensure user data is loaded first
 const initializeUserData = async () => {
   await fetchUserData()
@@ -175,7 +179,7 @@ onMounted(initializeUserData)
       <el-button type="warning" class="action-button" plain @click="openDonatePage">
         Станьте спонсором всего за 5$ первый месяц
       </el-button>         
-      <el-button type="success" class="action-button" plain>
+      <el-button type="success" class="action-button" plain @click="openDonateYearPage">
         Купить годовую подписку за 150$
       </el-button>
     </el-container>
