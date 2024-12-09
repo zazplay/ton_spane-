@@ -26,18 +26,18 @@ export default new Vuex.Store({
     },
     actions: {
         initializeStore({ commit }) {
-            const token = localStorage.getItem('authToken'); // Получаем токен из localStorage
+            const token = sessionStorage.getItem('authToken'); // Получаем токен из localStorage
             if (token) {
                 commit('auth_success', token); // Устанавливаем токен и извлекаем sub
             }
         },
         login({ commit }, token) {
             commit('auth_success', token); // Устанавливаем токен и извлекаем sub
-            localStorage.setItem('authToken', token); // Сохраняем токен в localStorage
+            sessionStorage.setItem('authToken', token); // Сохраняем токен в localStorage
         },
         logout({ commit }) {
             commit('logout'); // Очищаем данные при выходе
-            localStorage.removeItem('authToken'); // Удаляем токен из localStorage
+            sessionStorage.removeItem('authToken'); // Удаляем токен из localStorage
         },
     },
     getters: {

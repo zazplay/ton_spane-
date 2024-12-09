@@ -41,7 +41,7 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = localStorage.getItem('authToken'); // Пример проверки авторизации
+  const isAuthenticated = sessionStorage.getItem('authToken'); // Пример проверки авторизации
   if (to.path.startsWith('/app') && !isAuthenticated) {
     next('/auth'); // Перенаправить на страницу авторизации
   } else {
