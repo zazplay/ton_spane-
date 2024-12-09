@@ -16,28 +16,31 @@
                 </el-container>
             </el-aside>
             <el-main class="info-container-profile">
-                <span style="color: aliceblue;">{{ userData?.username || 'Loading...' }}</span>
-                <el-link 
-                    :underline="false" 
-                    :href="`/app/user/${userId}`" 
+                <span style="color: aliceblue;">{{ userData?.email || 'Loading...' }}</span>
+                <router-link 
+                    :to="`/app/user/${userId}`" 
                     class="link-style"
                 >
                     Перейти к профилю >
-                </el-link>
+                </router-link>
             </el-main>
         </el-container>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useStore } from 'vuex'
 
-const userId = ref('f26088fd-d4aa-4420-a7f6-1f89baa915c3')
+const store = useStore()
+const userId = computed(() => store.getters.getSub)
 const userData = ref(null)
-const defaultImage = "https://shutok.ru/uploads/posts/2023-01/1675019582_shutok.ru.01.jpg"
+const defaultImage = "https://img.icons8.com/?size=100&id=83151&format=png&color=22C3E6"
 
 const handleError = () => {
-    userData.value.profilePicture = defaultImage
+    if (userData.value) {
+        userData.value.profilePicture = defaultImage
+    }
 }
 
 const fetchUserData = async () => {
@@ -49,11 +52,14 @@ const fetchUserData = async () => {
         userData.value = await response.json()
     } catch (error) {
         console.error('Error fetching user data:', error)
+        userData.value = null
     }
 }
 
 onMounted(() => {
-    fetchUserData()
+    if (userId.value) {
+        fetchUserData()
+    }
 })
 </script>
 

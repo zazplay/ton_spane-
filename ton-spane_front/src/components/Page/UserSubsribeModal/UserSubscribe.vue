@@ -35,7 +35,9 @@
   
   <script setup>
   import { ArrowLeftBold } from '@element-plus/icons-vue'
-  import { useRouter } from 'vue-router'
+  import { useRouter, useRoute } from 'vue-router'
+  import { ref, onMounted } from 'vue'
+  import axios from 'axios'
   
   // Импорт иконок
   import fireIcon from '@/assets/fire-svgrepo-com.svg?url'
@@ -43,13 +45,31 @@
   import message from '@/assets/message-svgrepo-com.svg'
   import bonus from '@/assets/plus-add-svgrepo-com.svg'
   
-  // Константы
-  const USER_IMG = "https://bannerplus.ru/files/img/pics/devushka-krasivye-kartinki/devushka-krasivye-kartinki-56.webp"
-  const USER_NICKNAME = "Vikpix"
+  // Константы с использованием ref для реактивности
+  const USER_IMG = ref("https://bannerplus.ru/files/img/pics/devushka-krasivye-kartinki/devushka-krasivye-kartinki-56.webp")
+  const USER_NICKNAME = ref("Vikpix")
   
   // Router
   const router = useRouter()
+  const route = useRoute()
+  
+  const fetchUserData = async () => {
+    try {
+      const response = await axios.get(`https://ton-back-e015fa79eb60.herokuapp.com/api/users/${route.params.id}`)
+      
+      // Обновляем данные
+      USER_IMG.value = response.data.profilePicture
+      USER_NICKNAME.value = response.data.username.split('@')[0] // используем email как никнейм
+    } catch (error) {
+      console.error('Ошибка при получении данных пользователя:', error)
+    }
+  }
+  
   const handleGoBack = () => router.go(-1)
+  
+  onMounted(() => {
+    fetchUserData()
+  })
   
   // Данные подписок
   const subscriptionItems = [
@@ -81,7 +101,6 @@
 .bottom-fixed {
   position: absolute;
   bottom:10px;
-  transform: translateX(-50%);
   padding-left: 145px;
   padding-right: 145px;
   padding-top: 25px;
@@ -95,7 +114,7 @@
       padding-left: 15px !important; 
       padding-right: 15px !important; 
       font-size: 25px !important;
-      right: -100px;
+      right: 30px;
       border-radius: 15px;
       margin-top: 0px !important;
     }

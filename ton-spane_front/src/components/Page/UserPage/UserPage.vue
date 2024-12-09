@@ -2,40 +2,31 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import ListPostCards from '../../ListPostCards.vue'
-import { ElLoading } from 'element-plus'
 
 const router = useRouter()
 const route = useRoute()
 const userId = route.params.id || 'f26088fd-d4aa-4420-a7f6-1f89baa915c3'
 
-// Constants
 const S3_BASE_URL = 'https://tonimages.s3.us-east-1.amazonaws.com/'
 const DEFAULT_HEADER = 'https://placehold.co/600x200'
-const DEFAULT_AVATAR = 'https://placehold.co/150'
+const DEFAULT_AVATAR = 'https://img.icons8.com/?size=100&id=83151&format=png&color=22C3E6'
 
-// Reactive state
+const isLoaded = ref(false)
 const userData = ref({
   id: userId,
-  username: 'Loading...',
-  email: '',
-  profilePicture: DEFAULT_AVATAR,
-  profileHeader: DEFAULT_HEADER,
+  username: '',
+  profilePicture: '',
+  profileHeader: '',
   posts: [],
   likes: [],
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString()
 })
-const loading = ref(true)
-const error = ref(null)
 const activeNames = ref(['1'])
 
-// Format image URL
 const formatImageUrl = (imageUrl) => {
   if (!imageUrl) return null
   return imageUrl.startsWith('http') ? imageUrl : `${S3_BASE_URL}${imageUrl}`
 }
 
-// Prepare posts data
 const preparePostsData = (posts) => {
   return posts.map(post => ({
     ...post,
@@ -48,20 +39,12 @@ const preparePostsData = (posts) => {
   }))
 }
 
-// Fetch user data
 const fetchUserData = async () => {
   try {
-    loading.value = true
-    console.log('Fetching user with ID:', userId)
-    
     const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/users/${userId}`)
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
     const data = await response.json()
-    console.log('Received data:', data)
     
-    // Update user data with proper formatting
     userData.value = {
       ...data,
       id: userId,
@@ -69,18 +52,13 @@ const fetchUserData = async () => {
       profileHeader: formatImageUrl(data.profileHeader) || DEFAULT_HEADER,
       posts: preparePostsData(data.posts || []),
       likes: data.likes || [],
-      createdAt: data.createdAt || new Date().toISOString(),
-      updatedAt: data.updatedAt || new Date().toISOString()
     }
+    isLoaded.value = true
   } catch (err) {
     console.error('Error fetching user data:', err)
-    error.value = 'Failed to load user data: ' + err.message
-  } finally {
-    loading.value = false
   }
 }
 
-// Handle image errors
 const handleImageError = (type) => {
   if (type === 'header') {
     userData.value.profileHeader = DEFAULT_HEADER
@@ -89,124 +67,87 @@ const handleImageError = (type) => {
   }
 }
 
-// Navigation
-const openDonatePage = () => router.push(`/userSubscribeDonate/${userId}`)
-
-// Lifecycle
-onMounted(() => {
-  console.log('Component mounted')
-  fetchUserData()
-})
+const openDonatePage = () => {
+  router.push(`/app/userSubscribeDonate/${userId}`)
+}
+onMounted(fetchUserData)
 </script>
 
 <template>
-  <div class="layout">
-    <!-- Loading State -->
-    <el-container v-if="loading">
-      <el-main class="loading-state">
-        <el-loading :fullscreen="true" />
-        <p>Loading profile...</p>
-      </el-main>
-    </el-container>
-
-    <!-- Error State -->
-    <el-container v-else-if="error">
-      <el-main class="error-state">
-        <el-alert
-          :title="error"
-          type="error"
-          :closable="false"
+  <div v-if="isLoaded" class="layout">
+    <el-container>
+      <el-header class="header">
+        <el-image 
+          class="header-image" 
+          :src="userData.profileHeader"
+          fit="cover"
+          @error="() => handleImageError('header')"
         />
-      </el-main>
-    </el-container>
-
-    <!-- Content State -->
-    <template v-else>
-      <el-container>
-        <!-- Profile Header -->
-        <el-header class="header">
-          <el-image 
-            class="header-image" 
-            :src="userData.profileHeader"
-            fit="cover"
-            @error="() => handleImageError('header')"
-          />
-        </el-header>
-        
-        <!-- Main Content -->
-        <el-container class="content-container">
-          <el-aside class="aside">
-            <!-- Profile Picture -->
-            <div class="profile-image">
-              <el-image 
-                :src="userData.profilePicture"
-                @error="() => handleImageError('avatar')"
-              >
-                <template #placeholder>
-                  <div class="image-slot">Загрузка<span class="dot">...</span></div>
-                </template>
-              </el-image>
-            </div>
-            
-            <!-- User Info -->
-            <el-text tag="h2" class="username">
-              {{ userData.username }}
-              <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0,0,256,256">
-                <g fill="#25c1fd" fill-rule="nonzero">
-                  <g transform="scale(5.12,5.12)">
-                    <path d="M25,2c-12.682,0 -23,10.318 -23,23c0,12.683 10.318,23 23,23c12.683,0 23,-10.317 23,-23c0,-12.682 -10.317,-23 -23,-23zM35.827,16.562l-11.511,16.963l-8.997,-8.349c-0.405,-0.375 -0.429,-1.008 -0.053,-1.413c0.375,-0.406 1.009,-0.428 1.413,-0.053l7.29,6.764l10.203,-15.036c0.311,-0.457 0.933,-0.575 1.389,-0.266c0.458,0.31 0.577,0.932 0.266,1.39z"></path>
-                  </g>
-                </g>
-              </svg>
-            </el-text>
-            <!-- Stats -->
-            <el-text class="stat-badge" type="primary">
-              <el-text class="stat-text">{{ userData.posts.length }} публикации</el-text>
-            </el-text>
-            <el-text class="stat-badge" type="primary">
-              <el-text class="stat-text">{{ userData.likes.length }} лайков</el-text>
-            </el-text>
-          </el-aside>
-        </el-container>
-
-        <!-- About Section -->
-        <el-container>
-          <el-main class="main">
-            <el-collapse v-model="activeNames" class="about-section">
-              <el-collapse-item name="1">
-                <template #title>
-                  <div class="collapse-header">
-                    <span class="title">О себе</span>
-                  </div>
-                </template>
-                <div class="collapse-content">
-                  Я та, кто всегда ищет вдохновение в мелочах 🌸✨ Люблю утренний кофе, теплые пледы и закаты, которые красят небо в нежные оттенки 🦋☕ В моем мире — книги, музыка и бесконечные мечты о путешествиях 🌍💖 Обожаю пробовать новое, танцевать под любимые треки и верить, что впереди только лучшее 💃💫 Если ты тоже любишь жизнь во всех ее проявлениях — нам точно по пути! 🌟😊
-                </div>
-              </el-collapse-item>
-            </el-collapse>
-          </el-main>
-        </el-container>
-
-        <!-- Action Buttons -->
-        <el-button type="warning" class="action-button" plain @click="openDonatePage">
-          Станьте спонсором всего за 5$ первый месяц
-        </el-button>         
-        <el-button type="success" class="action-button" plain>
-          Купить годовую подписку за 150$
-        </el-button>
-      </el-container>
+      </el-header>
       
-      <!-- Posts List -->
-      <ListPostCards 
-        v-if="userData.posts.length" 
-        :posts="userData.posts"
-        :user="userData"
-      />
-    </template>
+      <el-container class="content-container">
+        <el-aside class="aside">
+          <div class="profile-image">
+            <el-image 
+              :src="userData.profilePicture"
+              @error="() => handleImageError('avatar')"
+            />
+          </div>
+          
+          <el-text tag="h2" class="username">
+            {{ userData.username }}
+            <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0,0,256,256">
+              <g fill="#25c1fd" fill-rule="nonzero">
+                <g transform="scale(5.12,5.12)">
+                  <path d="M25,2c-12.682,0 -23,10.318 -23,23c0,12.683 10.318,23 23,23c12.683,0 23,-10.317 23,-23c0,-12.682 -10.317,-23 -23,-23zM35.827,16.562l-11.511,16.963l-8.997,-8.349c-0.405,-0.375 -0.429,-1.008 -0.053,-1.413c0.375,-0.406 1.009,-0.428 1.413,-0.053l7.29,6.764l10.203,-15.036c0.311,-0.457 0.933,-0.575 1.389,-0.266c0.458,0.31 0.577,0.932 0.266,1.39z"></path>
+                </g>
+              </g>
+            </svg>
+          </el-text>
+          <el-text class="stat-badge" type="primary">
+            <el-text class="stat-text">{{ userData.posts.length }} публикации</el-text>
+          </el-text>
+          <el-text class="stat-badge" type="primary">
+            <el-text class="stat-text">{{ userData.likes.length }} лайков</el-text>
+          </el-text>
+        </el-aside>
+      </el-container>
+
+      <el-container>
+        <el-main class="main">
+          <el-collapse v-model="activeNames" class="about-section">
+            <el-collapse-item name="1">
+              <template #title>
+                <div class="collapse-header">
+                  <span class="title">О себе</span>
+                </div>
+              </template>
+              <div class="collapse-content">
+                Я та, кто всегда ищет вдохновение в мелочах 🌸✨ Люблю утренний кофе, теплые пледы и закаты, которые красят небо в нежные оттенки 🦋☕ В моем мире — книги, музыка и бесконечные мечты о путешествиях 🌍💖 Обожаю пробовать новое, танцевать под любимые треки и верить, что впереди только лучшее 💃💫 Если ты тоже любишь жизнь во всех ее проявлениях — нам точно по пути! 🌟😊
+              </div>
+            </el-collapse-item>
+          </el-collapse>
+        </el-main>
+      </el-container>
+
+      <el-button type="warning" class="action-button" plain @click="openDonatePage">
+        Станьте спонсором всего за 5$ первый месяц
+      </el-button>         
+      <el-button type="success" class="action-button" plain>
+        Купить годовую подписку за 150$
+      </el-button>
+    </el-container>
+    
+    <ListPostCards 
+      v-if="userData.posts.length" 
+      :posts="userData.posts"
+      :user="userData"
+    />
   </div>
 </template>
 
 <style scoped>
+/* Стили остаются без изменений */
 .layout {
   width: 100%;
   align-self: center;
