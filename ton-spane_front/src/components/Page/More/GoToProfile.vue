@@ -1,33 +1,3 @@
-<template>
-    <div class="common-layout">
-        <el-container class="container-profile">
-            <el-aside width="100px" style="padding: 0; margin: 0;">
-                <el-container class="container-img">
-                    <div class="demo-basic--circle">
-                        <div class="block">
-                            <el-avatar 
-                                shape="square" 
-                                :size="70" 
-                                :src="userData?.profilePicture || defaultImage"
-                                @error="handleError" 
-                            />
-                        </div>
-                    </div>
-                </el-container>
-            </el-aside>
-            <el-main class="info-container-profile">
-                <span style="color: aliceblue;">{{ userData?.email || 'Loading...' }}</span>
-                <router-link 
-                    :to="`/app/user/${userId}`" 
-                    class="link-style"
-                >
-                    Перейти к профилю >
-                </router-link>
-            </el-main>
-        </el-container>
-    </div>
-</template>
-
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useStore } from 'vuex'
@@ -63,6 +33,30 @@ onMounted(() => {
 })
 </script>
 
+
+<template>
+    <div class="common-layout">
+        <el-container class="container-profile">
+            <el-aside width="100px" style="padding: 0; margin: 0; ">
+                <el-container class="container-img">
+                    <div class="demo-basic--circle">
+                        <div class="block">
+                            <el-avatar shape="square" :size="70" :src="userData?.profilePicture || defaultImage"
+                                @error="handleError" />
+                        </div>
+                    </div>
+                </el-container>
+            </el-aside>
+            <el-main class="info-container-profile">
+                <span style="color: aliceblue;">{{ userData?.email || 'Loading...' }}</span>
+                <router-link :to="`/app/user/${userId}`" class="link-style">
+                    Перейти к профилю >
+                </router-link>
+            </el-main>
+        </el-container>
+    </div>
+</template>
+
 <style scoped>
 .common-layout {
     width: 90%;
@@ -73,12 +67,18 @@ onMounted(() => {
     background-color: grey;
     border-radius: 15px;
     height: 88px;
-    overflow: hidden; 
+    overflow: hidden;
 }
 
 .container-img {
     padding: 7px;
     padding-left: 10px !important;
+    display: flex;
+    justify-content: center;
+    /* Центруємо зображення по горизонталі */
+    align-items: center;
+    /* Центруємо зображення по вертикалі */
+    overflow: hidden;
 }
 
 .info-container-profile {
@@ -115,7 +115,7 @@ onMounted(() => {
 }
 
 .demo-basic .block {
-    flex: 1; 
+    flex: 1;
 }
 
 .demo-basic .el-col:not(:last-child) {
@@ -124,6 +124,7 @@ onMounted(() => {
 
 @media (max-width: 1200px) {
     .container-img {
+        margin-top: 8px;
         padding: 0 !important;
         padding-left: 10px !important;
     }
