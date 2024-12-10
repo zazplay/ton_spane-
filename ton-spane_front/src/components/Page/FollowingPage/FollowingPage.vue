@@ -27,10 +27,10 @@
                     <el-card v-for="item in lists" :key="item.username"
                         :body-style="{ padding: '0px', marginBottom: '1px' }" class="card"
                         @click="handleCardClick(item)">
-                            <img :src="item.profilePicture || defaultUserImage" class="image" />
-                            <div class="card-content">
-                                <span>{{ item.username }}</span>
-                            </div>
+                        <img :src="item.profilePicture || defaultUserImage" class="image" />
+                        <div class="card-content">
+                            <span>{{ item.username }}</span>
+                        </div>
                     </el-card>
                 </div>
             </template>
@@ -41,6 +41,7 @@
 <script>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router"; // Імпортуємо useRouter
+import { useStore } from 'vuex' // Импортируем useStore
 import axios from "axios";
 import config from "@/config";
 
@@ -50,9 +51,13 @@ export default {
         const lists = ref([]);
         const currentDate = new Date().toDateString();
         const router = useRouter(); // Отримуємо інстанс роутера
+        const store = useStore(); // Получаем инстанс хранилища Vuex
 
         // Устанавливаем изображение пользователя по умолчанию
-        const defaultUserImage = "https://via.placeholder.com/150"; // Поставьте ссылку на изображение по умолчанию
+        const defaultUserImage = "https://via.placeholder.com/150";
+
+        // Получаем sub из Vuex
+        const sub = store.getters.getSub;
 
         const setLoading = () => {
             loading.value = true;
@@ -63,8 +68,11 @@ export default {
 
         const fetchData = async () => {
             try {
-                const userId = "3e5a8e90-f048-4f75-a295-61e29f7e66e7";
+                // const userId = "3e5a8e90-f048-4f75-a295-61e29f7e66e7";//две подписки
+                const userId = "f26088fd-d4aa-4420-a7f6-1f89baa915c3";
                 const response = await axios.get(`${config.API_BASE_URL}/subscriptions/${userId}/following`);
+                console.log("sub ",sub);
+                // const response = await axios.get(`${config.API_BASE_URL}/subscriptions/${sub}/following`);
                 lists.value = response.data;
                 loading.value = false;
             } catch (error) {

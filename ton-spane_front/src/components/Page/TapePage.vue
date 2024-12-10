@@ -23,11 +23,13 @@
       <!-- Основной контент -->
       <el-main class="main-container-content">
         <el-container>
-          <el-tabs v-model="activeTab" class="demo-tabs containet-style" @tab-click="handleTabClick">
+          <el-tabs v-model="activeTab" class="demo-tabs containet-style">
             <el-tab-pane label="Для вас" name="first">
-              <ListPostCards  :posts="posts" />
+              <ListPostCards :posts="posts" />
             </el-tab-pane>
-            <el-tab-pane label="Подписки" name="second"><FollowingPage/></el-tab-pane>
+            <el-tab-pane label="Подписки" name="second">
+              <FollowingPage />
+            </el-tab-pane>
             <el-tab-pane label="Понравилось" name="third">Role</el-tab-pane>
           </el-tabs>
         </el-container>
@@ -37,6 +39,7 @@
 </template>
 
 <script>
+
 import { BellFilled, CirclePlusFilled } from '@element-plus/icons-vue';
 import ListPostCards from '../ListPostCards.vue';
 import AddPostForm from '../AddPostForm.vue';
@@ -53,8 +56,8 @@ export default {
   },
   data() {
     return {
-      isFormOpen: false,  
-      activeTab: 'first', 
+      isFormOpen: false,
+      activeTab: 'first',
       isDataLoaded: false,
       posts: ref([])
     };
@@ -65,9 +68,6 @@ export default {
     },
     closeForm() {
       this.isFormOpen = false; // Закриваємо форму
-    },
-    handleTabClick(tab) {
-      console.log('Вибрана вкладка:', tab.name);
     },
     async fetchPosts() {
       try {
@@ -84,18 +84,16 @@ export default {
     this.fetchPosts()
   }
 };
-
-  
-
-
-</script >
+</script>
 
 <style scoped>
+
 .demo-tabs>.el-tabs__content {
   color: #6b778c;
   font-size: 32px;
   font-weight: 600;
 }
+
 
 .containet-style {
   width: 100%;
@@ -141,7 +139,6 @@ export default {
 .icon-container {
   display: flex;
   padding-right: 20px !important;
-
 }
 
 @media (max-width: 1200px) {
@@ -151,7 +148,7 @@ export default {
   }
 
   .main-container-content {
-    padding: 0 !important;
+    padding: 5px !important;
     padding-top: 0 !important;
   }
 }

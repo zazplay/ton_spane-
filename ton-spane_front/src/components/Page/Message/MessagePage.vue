@@ -58,7 +58,7 @@ export default {
     },
     ...mapActions(['login', 'logout']), // Действия для логина и логаута
     login() {
-      const token = 'your.jwt.token.here'; // Здесь должен быть ваш JWT токен
+      const token = 'your.jwt.token.here'; // Здесь должен быть JWT токен
       this.login(token); // Вызываем действие login с токеном
     },
   },
