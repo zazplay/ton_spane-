@@ -106,8 +106,10 @@ const yearlySubscriptionItems = [
 
   <style>
 .bottom-fixed {
-  position: absolute;
+  position: fixed; /* меняем на fixed для фиксированного положения */
   bottom: 10px;
+  left: 5%; /* центрируем по горизонтали */
+  transform: translateX(-50%); /* смещаем назад на половину своей ширины */
   padding: 25px 145px;
   font-size: 30px;
   color: white;
@@ -119,6 +121,8 @@ const yearlySubscriptionItems = [
   transition: all 0.3s ease;
   border: 2px solid rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
+  white-space: nowrap; /* предотвращает перенос текста */
+  z-index: 1000; /* обеспечивает отображение поверх других элементов */
 }
 
 .bottom-fixed:hover {
