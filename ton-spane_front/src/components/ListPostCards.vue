@@ -2,7 +2,6 @@
 import PostCard from './PostCard.vue'
 import { defineProps } from 'vue'
 
-
 defineProps({
   posts: {
     type: Array,
@@ -24,10 +23,9 @@ defineProps({
       :isBlurred="post.isBlurred"
       :price="post.price"
       :createdAt="post.createdAt"
-      :initialLiked="post.liked"
-      :initialShared="post.shared"
-      :initialDonated="post.donated"
-      :initialSubscribed="post.subscribed"
+      :updatedAt="post.updatedAt"
+      :comments="post.comments"
+      :likes="post.likes"
     />
   </div>
 </template>

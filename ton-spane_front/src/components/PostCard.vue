@@ -1,8 +1,10 @@
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue'
+import { ref, defineProps, defineEmits, computed } from 'vue'
 import ShareModal from './ShareModal.vue' 
 import TipsModal from './TipsModal.vue'
+import { useStore } from 'vuex'
 import { Lock } from '@element-plus/icons-vue' // добавляем импорт иконки
+
 
 
 const props = defineProps({
@@ -12,24 +14,37 @@ const props = defineProps({
   isBlurred: { type: Boolean, default: false },
   price: { type: String, default: '0' },
   createdAt: { type: String, required: true },
-  user: { 
-    type: Object, 
+  updatedAt: { type: String, required: true },
+  user: {
+    type: Object,
     default: () => ({
       id: '',
       username: '',
       email: '',
-      profilePicture: null
-    }) 
+      password: '',
+      profilePicture: null,
+      profileHeader: null,
+      profileDescription: '',
+      createdAt: '',
+      updatedAt: ''
+    })
   },
-  initialLiked: { type: Boolean, default: false },
-  initialShared: { type: Boolean, default: false },
-  initialDonated: { type: Boolean, default: false },
-  initialSubscribed: { type: Boolean, default: false }
+  comments: {
+    type: Array,
+    default: () => []
+  },
+  likes: {
+    type: Array,
+    default: () => []
+  }
 })
 
 const emit = defineEmits(['like', 'share', 'donate', 'subscribe'])
 
+
 const isLiked = ref(props.initialLiked)
+const likes = ref(props.likes.length); 
+
 const isSubscribed = ref(props.initialSubscribed)
 const isShared = ref(props.initialShared)
 const isDonated = ref(props.initialDonated)
@@ -59,11 +74,37 @@ const formatDate = (dateString) => {
   }
 }
 
-const handleLike = () => {
-  isLiked.value = !isLiked.value
-  emit('like', isLiked.value)
-}
+const store = useStore()
+const userId = computed(() => store.getters.getSub)
 
+const handleLike = async () => {
+  try {
+    // Определяем URL в зависимости от текущего состояния
+    const endpoint = isLiked.value ? 'unlike' : 'like';
+    const method = isLiked.value ? 'DELETE' : 'POST';
+    
+    const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/likes/${userId.value}/${endpoint}/${props.id}`, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'accept': '*/*'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update like');
+    }
+
+    // Переключаем состояние и обновляем счетчик только после успешного ответа
+    isLiked.value = !isLiked.value;
+    likes.value = isLiked.value ? likes.value + 1 : likes.value - 1;
+    
+    emit('like', isLiked.value);
+
+  } catch (error) {
+    console.error('Error updating like:', error);
+  }
+};
 const handleSubscribe = () => {
   isSubscribed.value = !isSubscribed.value
   emit('subscribe', isSubscribed.value)
@@ -160,6 +201,8 @@ const handleDonate = () => {
           >
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
+          <span style="margin-left: 5px"> {{ likes }}</span>
+
         </el-check-tag>
         
         <el-check-tag 
@@ -189,6 +232,11 @@ const handleDonate = () => {
 .post-card {
   width: auto;
   margin-bottom: 30px;
+  background: #161b22;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+  
   @media (max-width: 480px) {
     width: 95%;
     align-self: center;
@@ -199,6 +247,8 @@ const handleDonate = () => {
   display: flex;
   align-items: center;
   margin-bottom: 15px;
+  padding: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .user-info {
@@ -211,7 +261,7 @@ const handleDonate = () => {
 .username {
   font-size: 20px;
   line-height: 1.2;
-  color: #ffffff;
+  color: #e6edf3;
   text-decoration: none;
   position: relative;
   cursor: pointer;
@@ -219,7 +269,6 @@ const handleDonate = () => {
   padding-bottom: 2px;
   display: inline-block;
   
-  /* Красивое подчеркивание с анимацией */
   &::after {
     content: '';
     position: absolute;
@@ -227,14 +276,13 @@ const handleDonate = () => {
     height: 2px;
     bottom: 0;
     left: 0;
-    background: linear-gradient(90deg, #4f8cff 0%, #2563eb 100%);
+    background: linear-gradient(90deg, #00b4db 0%, #0083b0 100%);
     transition: width 0.3s ease;
     border-radius: 2px;
   }
   
-  /* При наведении */
   &:hover {
-    color: #4f8cff;
+    color: #00b4db;
     transform: translateY(-1px);
     
     &::after {
@@ -242,7 +290,6 @@ const handleDonate = () => {
     }
   }
   
-  /* При нажатии */
   &:active {
     transform: translateY(1px);
   }
@@ -256,7 +303,7 @@ const handleDonate = () => {
 .date {
   font-size: 12px;
   margin-left: -10px;
-  color: #909399;
+  color: #8b949e;
   @media (max-width: 480px) {
     font-size: 12px !important;
   }
@@ -265,7 +312,47 @@ const handleDonate = () => {
 .subBtn {
   width: auto !important;
   font-size: 16px !important;
-  @media (max-width: 480px) {
+  border: none !important;
+  transition: all 0.3s ease;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* Стиль для неподписанного состояния */
+.subBtn.el-button--primary {
+  background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%) !important;
+  box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
+  color: white !important;
+}
+
+.subBtn.el-button--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 180, 219, 0.4);
+  background: linear-gradient(135deg, #00d2ff 0%, #00b4db 100%) !important;
+}
+
+/* Стиль для подписанного состояния */
+.subBtn.el-button--success {
+  background: linear-gradient(135deg, #34d399 0%, #059669 100%) !important;
+  box-shadow: 0 4px 15px rgba(52, 211, 153, 0.3);
+  color: white !important;
+}
+
+.subBtn.el-button--success:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(52, 211, 153, 0.4);
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%) !important;
+}
+
+/* Стиль для активного состояния (при нажатии) */
+.subBtn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 480px) {
+  .subBtn {
     width: 40% !important;
     height: 30px !important; 
     font-size: 12px !important;
@@ -274,6 +361,9 @@ const handleDonate = () => {
 }
 
 .avatar {
+  border: 2px solid rgba(0, 180, 219, 0.3);
+  box-shadow: 0 0 20px rgba(0, 180, 219, 0.2);
+  
   @media (max-width: 480px) {
     width: 40px !important;
     height: 40px !important;
@@ -285,12 +375,13 @@ const handleDonate = () => {
   width: 80%;
   object-fit: cover;
   object-position: center center;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  
   @media (max-width: 480px) {
     max-height: 400px;
     min-height: 300px;
     width: 100%;
-    object-fit: cover;
-    object-position: center center;
   }
 }
 
@@ -302,11 +393,13 @@ const handleDonate = () => {
   position: absolute;
   bottom: 16px;
   right: 16px;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #e6edf3;
+  padding: 8px 16px;
+  border-radius: 8px;
   font-weight: bold;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .actions {
@@ -314,6 +407,7 @@ const handleDonate = () => {
   align-items: center;
   gap: 10px;
   margin-top: 15px;
+  padding: 0 15px;
   
   @media (max-width: 480px) {
     flex-wrap: wrap;
@@ -331,22 +425,44 @@ const handleDonate = () => {
 .action-tag {
   display: flex;
   align-items: center;
-  padding: 5px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  
 }
 
 .action-tag.heart { 
-  border-color: red;
-  color: red;
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  color: #ff4d4d;
+  
+  &:hover {
+    background: rgba(244, 67, 54, 0.2);
+    transform: translateY(-1px);
+  }
 }
 
 .action-tag.share {
-  border-color: #E6A23C;
-  color: #E6A23C;
+  background: rgba(255, 152, 0, 0.1);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  color: #ffa726;
+  
+  &:hover {
+    background: rgba(255, 152, 0, 0.2);
+    transform: translateY(-1px);
+  }
 }
 
 .action-tag.donate {
-  border-color: green;
-  color: green;
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  color: #66bb6a;
+  
+  &:hover {
+    background: rgba(76, 175, 80, 0.2);
+    transform: translateY(-1px);
+  }
 }
 
 .description {
@@ -354,13 +470,20 @@ const handleDonate = () => {
   display: flex;
   justify-content: center;
   text-align: center;
-  padding: 5px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
-  background-color: transparent;
+  padding: 10px 15px;
+  border-radius: 8px;
+  background: rgba(22, 27, 34, 0.8);
+  border: 1px solid rgba(0, 180, 219, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 180, 219, 0.1);
   transition: all 0.3s ease;
   margin-left: auto;
   font-size: 16px;
+  color: #e6edf3;
+
+  &:hover {
+    border-color: rgba(0, 180, 219, 0.4);
+    box-shadow: 0 6px 20px rgba(0, 180, 219, 0.2);
+  }
 
   @media (max-width: 480px) {
     width: 100%;
@@ -375,11 +498,6 @@ const handleDonate = () => {
     max-width: calc(100% - 10px);
     padding: 5px;
   }
-}
-
-.description:hover {
-  box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
-  border-color: #357abd;
 }
 
 .image-container {
@@ -397,32 +515,37 @@ const handleDonate = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 15px;
   z-index: 2;
 }
 
 .lock-icon {
-  color: white;
-  background: rgba(0, 0, 0, 0.5);
-  padding: 15px;
+  color: #e6edf3;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 20px;
   border-radius: 50%;
-  backdrop-filter: blur(4px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  &:hover {
+    transform: scale(1.05);
+  }
 }
 
 .lock-text {
-  color: white;
+  color: #e6edf3;
   font-size: 24px;
   font-weight: bold;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  background: rgba(0, 0, 0, 0.5);
-  padding: 5px 15px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 10px 20px;
   border-radius: 20px;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Добавить в медиа-запрос для мобильных устройств */
 @media (max-width: 480px) {
   .lock-icon {
     font-size: 30px;
@@ -434,5 +557,4 @@ const handleDonate = () => {
     padding: 3px 10px;
   }
 }
-
 </style>

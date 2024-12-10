@@ -216,9 +216,7 @@ onMounted(initializeUserData)
   transition: transform 0.3s ease;
 }
 
-.header-image:hover {
-  transform: scale(1.02);
-}
+
 
 .aside {
   width: 100%;
