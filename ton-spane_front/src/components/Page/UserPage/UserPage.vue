@@ -176,10 +176,10 @@ onMounted(initializeUserData)
         </el-main>
       </el-container>
 
-      <el-button type="warning" class="action-button" plain @click="openDonatePage">
+      <el-button type="warning" class="action-buttonMonthSub" plain @click="openDonatePage">
         Станьте спонсором всего за 5$ первый месяц
       </el-button>         
-      <el-button type="success" class="action-button" plain @click="openDonateYearPage">
+      <el-button type="success" class="action-buttonYearSub" plain @click="openDonateYearPage">
         Купить годовую подписку за 150$
       </el-button>
     </el-container>
@@ -193,11 +193,11 @@ onMounted(initializeUserData)
 </template>
 
 <style scoped>
-/* Стили остаются без изменений */
 .layout {
   width: 95%;
   align-self: center;
   margin-left: 10px;
+  background: #0d1117;
 }
 
 .header {
@@ -209,26 +209,39 @@ onMounted(initializeUserData)
 
 .header-image {
   width: 100%;
-  max-height: 300px !important; 
+  max-height: 300px !important;
   border-radius: 20px;
   margin-bottom: 10px;
+  box-shadow: 0 8px 32px rgba(0, 149, 255, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.header-image:hover {
+  transform: scale(1.02);
 }
 
 .aside {
   width: 100%;
   display: flex;
   align-items: center;
+  background: #161b22;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .profile-image {
   width: 15%;
   margin-right: 20px;
+  transition: transform 0.3s ease;
 }
 
 .profile-image :deep(.el-image) {
   border-radius: 20px;
   align-self: flex-start;
   justify-self: flex-start;
+  border: 2px solid rgba(0, 149, 255, 0.3);
+  box-shadow: 0 0 20px rgba(0, 149, 255, 0.2);
 }
 
 .username {
@@ -239,11 +252,13 @@ onMounted(initializeUserData)
   margin: 0;
   padding: 0;
   width: 43%;
+  color: #e6edf3;
+  text-shadow: 0 0 10px rgba(0, 149, 255, 0.3);
 }
 
 .stat-badge {
   color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 2px 4px rgba(64, 158, 255, 0.3);
+  text-shadow: 0 2px 4px rgba(0, 149, 255, 0.3);
   font-weight: 500;
   border-radius: 15px;
   padding: 12px 20px;
@@ -251,14 +266,14 @@ onMounted(initializeUserData)
   margin-left: 20px;
   background: linear-gradient(
     135deg,
-    rgba(64, 158, 255, 0.15) 0%,
-    rgba(100, 180, 255, 0.25) 50%,
-    rgba(64, 158, 255, 0.15) 100%
+    rgba(0, 149, 255, 0.1) 0%,
+    rgba(0, 89, 255, 0.2) 50%,
+    rgba(0, 149, 255, 0.1) 100%
   );
-  backdrop-filter: blur(5px);
-  border: 1px solid rgba(64, 158, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 149, 255, 0.2);
   box-shadow: 
-    0 4px 6px rgba(64, 158, 255, 0.1),
+    0 4px 6px rgba(0, 0, 0, 0.2),
     inset 0 1px 2px rgba(255, 255, 255, 0.1);
   transition: all 0.4s ease;
 }
@@ -266,14 +281,15 @@ onMounted(initializeUserData)
 .stat-badge:hover {
   background: linear-gradient(
     135deg,
-    rgba(64, 158, 255, 0.25) 0%,
-    rgba(100, 180, 255, 0.35) 50%,
-    rgba(64, 158, 255, 0.25) 100%
+    rgba(0, 149, 255, 0.2) 0%,
+    rgba(0, 89, 255, 0.3) 50%,
+    rgba(0, 149, 255, 0.2) 100%
   );
   transform: translateY(-2px);
   box-shadow: 
-    0 8px 12px rgba(64, 158, 255, 0.15),
-    inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    0 8px 12px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.2),
+    0 0 15px rgba(0, 149, 255, 0.3);
 }
 
 .main {
@@ -290,113 +306,243 @@ onMounted(initializeUserData)
   width: 99%;
   min-height: 150px;
   margin: 1.5% 0 0 5px;
-  background: transparent;
-  border: 1px solid rgba(var(--el-color-primary-rgb), 0.08);
+  background: rgba(22, 27, 34, 0.8);
+  border: 1px solid rgba(0, 149, 255, 0.1);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
   margin-bottom: 0px;
+  backdrop-filter: blur(10px);
+  color: white !important;
 }
 
 .about-section:hover {
-  border-color: rgba(var(--el-color-primary-rgb), 0.15);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 149, 255, 0.3);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(0, 149, 255, 0.1);
+  transform: translateY(-2px);
 }
 
 .about-section :deep(.el-collapse-item__header) {
   padding: 0.4rem 0.6rem;
   background: transparent;
-  border-bottom: 1px solid rgba(var(--el-color-primary-rgb), 0.08);
+  border-bottom: 1px solid rgba(0, 149, 255, 0.1);
+  color: #e6edf3;
 }
 
 .about-section :deep(.el-collapse-item__content) {
   padding: 0.4rem 0.6rem;
   width: 95%;
+  color: #ffffff !important;
 }
 
 .collapse-header .title {
   font-size: 0.95rem;
   font-weight: 500;
-  color: var(--el-color-primary);
+  color: #58a6ff;
 }
 
 .collapse-content {
   font-size: 0.875rem;
   line-height: 1.4;
-  color: var(--el-text-color-regular);
+  color: #ffffff;
 }
 
-.action-button {
-  font-weight: bold;
-  font-size: 1.25rem;
-  margin-bottom: 25px;
+/* Базовые стили для всех кнопок */
+.action-button, .action-buttonYearSub, .action-buttonMonthSub {
   width: 99%;
   height: 5.7%;
   align-self: center;
-  padding-top: 20px;
-  padding-bottom: 20px;
-  margin-left: 0;
+  font-weight: bold;
+  padding: 20px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-size: 1.25rem !important;
+
 }
 
-.loading-state,
-.error-state {
+/* Стиль для обычной кнопки */
+.action-button {
+  font-size: 1.25rem;
+  background: linear-gradient(135deg, #0095ff 0%, #0059ff 100%) !important;
+  box-shadow: 0 4px 15px rgba(0, 149, 255, 0.3);
+}
+
+.action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 25px rgba(0, 149, 255, 0.4),
+    0 0 15px rgba(0, 149, 255, 0.3);
+  background: linear-gradient(135deg, #0059ff 0%, #0095ff 100%) !important;
+}
+
+/* Стили для годовой подписки */
+.action-buttonYearSub {
+  font-size: 0.8rem;
+  background: linear-gradient(135deg, #9d50bb 0%, #6e48aa 100%) !important;
+  box-shadow: 0 4px 15px rgba(157, 80, 187, 0.3);
+}
+
+.action-buttonYearSub:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 25px rgba(157, 80, 187, 0.4),
+    0 0 15px rgba(157, 80, 187, 0.3);
+  background: linear-gradient(135deg, #b867d9 0%, #9d50bb 100%) !important;
+}
+
+.action-buttonYearSub:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(157, 80, 187, 0.2);
+}
+
+/* Стили для месячной подписки */
+.action-buttonMonthSub {
+  font-size: 0.8rem;
+  background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%) !important;
+  box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
+}
+
+.action-buttonMonthSub:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 25px rgba(0, 180, 219, 0.4),
+    0 0 15px rgba(0, 180, 219, 0.3);
+  background: linear-gradient(135deg, #00d2ff 0%, #00b4db 100%) !important;
+}
+
+.action-buttonMonthSub:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(0, 180, 219, 0.2);
+}
+
+.loading-state, .error-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 400px;
+  color: #e6edf3;
 }
 
 @media (max-width: 480px) {
   .content-container {
     flex-direction: column !important;
     width: 98%;
-
+    
   }
-
+  
   .main {
     width: 100%;
     padding: 0 15px;
   }
-
+  
   .username {
     font-size: 14px;
     width: 30%;
     flex-wrap: wrap;
     gap: 5px;
   }
-
+  
   .profile-image {
     width: 40%;
     margin-right: 20px;
   }
-
+  
   .stat-badge {
     width: 70.6% !important;
     padding: 10px;
     margin: 5px;
   }
-
+  
   .stat-badge :deep(.el-text) {
     font-size: 12px !important;
   }
-
+  
   .about-section {
-    width: 100%;
+    width: 105%;
     margin: 0px 0;
+    margin-left: -10px;
+    margin-top: 10px;
   }
-
+  
   .collapse-header .title,
   .collapse-content {
     font-size: 14px;
   }
-
-  .action-button {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    font-size: 1rem !important;
-    height: auto;
-    padding: 10px;
-  }
+  
+/* Общие стили для обеих кнопок */
+.action-buttonYearSub, .action-buttonMonthSub {
+  width: 99%;
+  height: 5.7%;
+  align-self: center;
+  font-weight: bold;
+  font-size: 0.8rem !important;
+  padding: 20px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
+
+/* Стили для годовой подписки */
+.action-buttonYearSub {
+  background: linear-gradient(135deg, #9d50bb 0%, #6e48aa 100%) !important;
+  box-shadow: 0 4px 15px rgba(157, 80, 187, 0.3) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-buttonYearSub:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 25px rgba(157, 80, 187, 0.4),
+    0 0 15px rgba(157, 80, 187, 0.3);
+  background: linear-gradient(135deg, #b867d9 0%, #9d50bb 100%);
+}
+
+.action-buttonYearSub:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(157, 80, 187, 0.2);
+}
+
+/* Стили для месячной подписки */
+.action-buttonMonthSub {
+  background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);
+  box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.action-buttonMonthSub:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 25px rgba(0, 180, 219, 0.4),
+    0 0 15px rgba(0, 180, 219, 0.3);
+  background: linear-gradient(135deg, #00d2ff 0%, #00b4db 100%);
+}
+
+.action-buttonMonthSub:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(0, 180, 219, 0.2);
+}
+
+/* Медиа-запрос для мобильных устройств */
+@media (max-width: 480px) {
+  .action-buttonYearSub,
+  .action-buttonMonthSub {
+    width: 100%;
+    margin: 5px 0;
+    padding: 12px;
+    font-size: 0.75rem !important;
+    height: auto;
+  }
+}}
 </style>

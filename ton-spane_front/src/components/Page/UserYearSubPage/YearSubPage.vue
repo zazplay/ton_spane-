@@ -188,7 +188,7 @@ const yearlySubscriptionItems = [
   .bottom-fixed {
     position: absolute;
     top: 16px;
-    width: 120px;
+    width: 220px;
     min-height: 40px !important;
     max-height: fit-content !important;
     height: fit-content !important;
@@ -196,7 +196,7 @@ const yearlySubscriptionItems = [
     font-size: 15px !important;
     border-radius: 15px;
     margin-top: 0 !important;
-    left: 230px !important;
+    left: 130px !important;
     white-space: normal;
     display: flex;
     align-items: center;

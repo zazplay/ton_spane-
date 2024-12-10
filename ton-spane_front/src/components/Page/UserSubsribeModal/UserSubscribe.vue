@@ -124,6 +124,7 @@ const subscriptionItems = [
   transition: all 0.3s ease;
   border: 2px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
+
 }
 
 .bottom-fixed:hover {
@@ -189,7 +190,7 @@ const subscriptionItems = [
   .bottom-fixed {
     position: fixed;
     top: 20px;
-    left: 50% !important;
+    left: 60% !important;
     transform: translateX(-50%);
     height: auto !important;
     padding: 15px !important;
@@ -197,7 +198,7 @@ const subscriptionItems = [
     margin: 0 !important;
     width:auto;
     max-width: 300px;
-    height: 50px !important;
+    height: 40px !important;
   }
   
 
