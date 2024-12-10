@@ -1,3 +1,69 @@
+<script>
+
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router"; // Імпортуємо useRouter
+import { useStore } from 'vuex' // Импортируем useStore
+import axios from "axios";
+import config from "@/config";
+
+export default {
+    setup() {
+        const loading = ref(true);
+        const lists = ref([]);
+        const currentDate = new Date().toDateString();
+        const router = useRouter(); // Отримуємо інстанс роутера
+        const store = useStore(); // Получаем инстанс хранилища Vuex
+
+        // Устанавливаем изображение пользователя по умолчанию
+        const defaultUserImage = "https://via.placeholder.com/150";
+
+        // Получаем sub из Vuex
+        const sub = store.getters.getSub;
+
+        const setLoading = () => {
+            loading.value = true;
+            setTimeout(() => {
+                loading.value = false;
+            }, 2000);
+        };
+
+        const fetchData = async () => {
+            try {
+                const userId = "3e5a8e90-f048-4f75-a295-61e29f7e66e7";//две подписки
+                const response = await axios.get(`${config.API_BASE_URL}/subscriptions/${userId}/following`);
+                console.log("sub ", sub);
+                // const response = await axios.get(`${config.API_BASE_URL}/subscriptions/${sub}/following`);
+                lists.value = response.data;
+                
+                loading.value = false;
+            } catch (error) {
+                console.error("Ошибка при получении данных:", error);
+                loading.value = false;
+            }
+        };
+
+        const handleCardClick = (item) => {
+            console.log("Перейти на профиль пользователя: ", item.username);
+            // перехода на профиль пользователя
+            router.push(`/app/user/${item.id}`);
+        };
+
+        onMounted(() => {
+            fetchData();
+        });
+
+        return {
+            loading,
+            lists,
+            currentDate,
+            setLoading,
+            defaultUserImage, // Возвращаем ссылку на изображение по умолчанию
+            handleCardClick,  // Возвращаем метод для обработки кликов
+        };
+    },
+};
+</script>
+
 <template>
     <!-- Контейнер с элементами skeleton для загрузки данных -->
     <el-space style="width: 100%" fill>
@@ -36,72 +102,11 @@
             </template>
         </el-skeleton>
     </el-space>
+
+    <el-container>
+
+    </el-container>
 </template>
-
-<script>
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router"; // Імпортуємо useRouter
-import { useStore } from 'vuex' // Импортируем useStore
-import axios from "axios";
-import config from "@/config";
-
-export default {
-    setup() {
-        const loading = ref(true);
-        const lists = ref([]);
-        const currentDate = new Date().toDateString();
-        const router = useRouter(); // Отримуємо інстанс роутера
-        const store = useStore(); // Получаем инстанс хранилища Vuex
-
-        // Устанавливаем изображение пользователя по умолчанию
-        const defaultUserImage = "https://via.placeholder.com/150";
-
-        // Получаем sub из Vuex
-        const sub = store.getters.getSub;
-
-        const setLoading = () => {
-            loading.value = true;
-            setTimeout(() => {
-                loading.value = false;
-            }, 2000);
-        };
-
-        const fetchData = async () => {
-            try {
-                // const userId = "3e5a8e90-f048-4f75-a295-61e29f7e66e7";//две подписки
-                const userId = "f26088fd-d4aa-4420-a7f6-1f89baa915c3";
-                const response = await axios.get(`${config.API_BASE_URL}/subscriptions/${userId}/following`);
-                console.log("sub ",sub);
-                // const response = await axios.get(`${config.API_BASE_URL}/subscriptions/${sub}/following`);
-                lists.value = response.data;
-                loading.value = false;
-            } catch (error) {
-                console.error("Ошибка при получении данных:", error);
-                loading.value = false;
-            }
-        };
-
-        const handleCardClick = (item) => {
-            console.log("Перейти на профиль пользователя: ", item.username);
-            // перехода на профиль пользователя
-            router.push(`/app/user/${item.id}`);
-        };
-
-        onMounted(() => {
-            fetchData();
-        });
-
-        return {
-            loading,
-            lists,
-            currentDate,
-            setLoading,
-            defaultUserImage, // Возвращаем ссылку на изображение по умолчанию
-            handleCardClick,  // Возвращаем метод для обработки кликов
-        };
-    },
-};
-</script>
 
 <style scoped>
 .scroll-container {

@@ -1,9 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AuthPage from './components/Page/AuthPage/AuthPage.vue';
 import MainPage from './components/Page/MainPage.vue';
+import AdminPanel from './components/Page/AdminPanel/AdminPanel.vue';
 
 const routes = [
+
   { path: '/', redirect: '/auth' },
+  { path: '/admin', component: AdminPanel },
   { path: '/auth', component: AuthPage },
   {
     path: '/app',
