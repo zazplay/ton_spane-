@@ -61,11 +61,11 @@ import PaymentModal from './Page/PaymentPage/PaymantPage.vue'
 
 const paymentModalRef = ref(null)
 
-// const showPaymentModal = () => {
-//   paymentModalRef.value.openDialog()
-//   isVisible.value = false
+const showPaymentModal = () => {
+  paymentModalRef.value.openDialog()
+  isVisible.value = false
 
-// }
+}
 
 const props = defineProps({
   dialogDonateVisible: { type: Boolean, required: true },
