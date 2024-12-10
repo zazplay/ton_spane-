@@ -67,7 +67,7 @@ const fetchUserData = async () => {
     const response = await axios.get(`https://ton-back-e015fa79eb60.herokuapp.com/api/users/${route.params.id}`)
     
     USER_IMG.value = response.data.profilePicture
-    USER_NICKNAME.value = response.data.username.split('@')[0]
+    USER_NICKNAME.value = response.data.username
   } catch (error) {
     console.error('Ошибка при получении данных пользователя:', error)
   }
@@ -111,8 +111,81 @@ const yearlySubscriptionItems = [
   padding: 25px 145px;
   font-size: 30px;
   color: white;
-  
-  @media (max-width: 480px) {
+  background: linear-gradient(-45deg, #1a1a1a, #2d1f3d, #1f2d3d, #263238);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite, float 6s ease-in-out infinite;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+  border: 2px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+.bottom-fixed:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+  background-size: 200% 200%;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/* Glowing effect */
+.bottom-fixed::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #752c65, #3d5670, #221515, #473061, #742c64);
+  background-size: 400%;
+  border-radius: 15px;
+  z-index: -1;
+  animation: glowing 20s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.bottom-fixed:hover::before {
+  opacity: 1;
+}
+
+@keyframes glowing {
+  0% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: 400% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .bottom-fixed {
     position: absolute;
     top: 16px;
     width: 120px;
@@ -123,20 +196,24 @@ const yearlySubscriptionItems = [
     font-size: 15px !important;
     border-radius: 15px;
     margin-top: 0 !important;
-    left: 220px;
+    left: 230px !important;
     white-space: normal;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     line-height: 1.2;
-    /* Фиксим растягивание */
     flex: 0 0 auto;
     box-sizing: border-box;
+    height: 30px !important;
+  }
+  
+  .bottom-fixed:hover {
+    transform: translateY(-3px);
   }
 }
 
-/* Фиксим внутренние элементы Element Plus */
+/* Element Plus button text fix */
 .bottom-fixed :deep(.el-button__text) {
   white-space: normal;
   height: auto !important;
@@ -167,6 +244,8 @@ const yearlySubscriptionItems = [
   width: 100%;
   @media (max-width: 480px) {
     width: 100%;
+    font-size: 20px !important;
+
   }
 }
 
@@ -186,37 +265,102 @@ const yearlySubscriptionItems = [
   border: 1px solid rgba(147, 51, 234, 0.3);
   display: flex;
   align-items: center;
+  justify-content: center;
   width: 90%;
-  padding: 20px;
-  background: linear-gradient(145deg, rgba(147, 51, 234, 0.1), rgba(192, 132, 252, 0.1));
+  padding: 0px 20px;
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 16px;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   cursor: pointer;
-  height: 30px;
+  height: auto;
+  min-height: 30px;
   backdrop-filter: blur(8px);
-  @media (max-width: 480px) {
-    width: 80%;
-    font-size: 0.55rem;
-    padding: 12px 15px;
-  }
+  -webkit-backdrop-filter: blur(8px);
+  position: relative;
+  text-align: center;
 }
 
-.ys-subscription-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(147, 51, 234, 0.2);
-  border-color: rgba(147, 51, 234, 0.5);
-  background: linear-gradient(145deg, rgba(147, 51, 234, 0.15), rgba(192, 132, 252, 0.15));
+.ys-container {
+  width: 95%;
+  border: solid 2px rgba(147, 51, 234, 0.3);
+  border-radius: 20px;
+  padding: 20px;
+  margin-left: 20px;
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(147, 51, 234, 0.1);
 }
 
 .ys-item-text {
   color: rgb(250, 245, 255);
   font-weight: 500;
   letter-spacing: 0.5px;
-  margin-left: 15px;
-  position: absolute;
-  margin-top: 8px;
-  @media (max-width: 480px) {
-    margin-left: 5px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  position: static;
+}
+
+.ys-item-icon {
+  margin-right: 10px;
+  width: 25px;
+  height: 25px;
+  flex-shrink: 0;
+}
+
+.ys-subscription-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(147, 51, 234, 0.2);
+  border-color: rgba(147, 51, 234, 0.5);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 480px) {
+  .ys-container {
+    padding: 0 !important;
+    margin-left: 8px !important;
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .ys-subscription-item {
+    width: 80%;
+    font-size: 0.9rem;
+    padding: 0px 15px;
+    background-color: rgba(0, 0, 0, 0.2) !important;
+    min-height: 25px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  
+  .ys-item-text {
+    color: rgb(250, 245, 255) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    margin: 0;
+    
+    margin-top: -50px !important;
+  }
+  
+  .ys-item-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    margin-bottom: -10px;
+  }
+
+  .ys-subscription-item:hover {
+    background-color: rgba(0, 0, 0, 0.25) !important;
+  }
+}
+
+/* Добавляем поддержку для Safari и других браузеров */
+@supports not (backdrop-filter: blur(8px)) {
+  .ys-subscription-item,
+  .ys-container {
+    background-color: rgba(0, 0, 0, 0.7);
   }
 }
 
@@ -255,7 +399,9 @@ const yearlySubscriptionItems = [
   @media (max-width: 480px) {
     width: 50px !important;
     height: 40px !important;
-    margin-top: 5px !important;
+    margin-top: 10px !important;
+    margin-left: 10px !important;
+
   }
 }
 
@@ -309,6 +455,7 @@ const yearlySubscriptionItems = [
   @media (max-width: 480px) {
     width: 100px;
     height: 100px;
+    margin-top: 25px;
   }
 }
 
@@ -340,7 +487,7 @@ const yearlySubscriptionItems = [
   box-shadow: 0 8px 32px rgba(147, 51, 234, 0.2);
   @media (max-width: 480px) {
     width: 85% !important;
-    font-size: 0.55rem;
+    font-size: 0.9rem;
     padding: 7px;
   }
 }

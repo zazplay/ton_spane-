@@ -109,25 +109,98 @@ const subscriptionItems = [
   <style>
 
 .bottom-fixed {
-  position: absolute;
-  bottom:10px;
-  padding-left: 145px;
-  padding-right: 145px;
-  padding-top: 25px;
-  padding-bottom: 25px;
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 25px 145px;
   font-size: 30px;
   color: white;
-  @media (max-width: 480px) {
-      position: absolute;
-      top:20px;
-      height: 20px !important;
-      padding-left: 15px !important; 
-      padding-right: 15px !important; 
-      font-size: 25px !important;
-      right: 30px;
-      border-radius: 15px;
-      margin-top: 0px !important;
-    }
+  background: linear-gradient(-45deg, #b2583c, #e73c7e, #23a6d5, #126753);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite, float 6s ease-in-out infinite;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.bottom-fixed:hover {
+  transform: translateX(-50%) translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+  background-size: 200% 200%;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateX(-50%) translateY(0px);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-10px);
+  }
+  100% {
+    transform: translateX(-50%) translateY(0px);
+  }
+}
+
+/* Glowing effect */
+.bottom-fixed::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00,  #002bff, #7a00ff, #ff00c8, #ff0000);
+  background-size: 400%;
+  border-radius: 15px;
+  z-index: -1;
+  animation: glowing 20s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+@keyframes glowing {
+  0% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: 400% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .bottom-fixed {
+    position: fixed;
+    top: 20px;
+    left: 50% !important;
+    transform: translateX(-50%);
+    height: auto !important;
+    padding: 15px !important;
+    border-radius: 15px;
+    margin: 0 !important;
+    width:auto;
+    max-width: 300px;
+    height: 50px !important;
+  }
+  
+
 }
   /* Container Styles */
   .sp-container {
@@ -138,6 +211,7 @@ const subscriptionItems = [
     padding-left: 0px;
     padding: 20px;
     margin-left: 20px;
+    border-color: rgba(0, 136, 255, 0.493);
     @media (max-width: 480px) {
       border-radius: 20px;
       padding: 0px !important;
@@ -192,6 +266,7 @@ const subscriptionItems = [
         padding: 15px;
         padding-top: 12px;
         padding-bottom: 12px;
+        font-size: 17px;
 
 
     }
@@ -253,7 +328,9 @@ const subscriptionItems = [
     @media (max-width: 480px) {
         width: 50px !important;
         height: 40px !important;
-        margin-top: 5px !important;
+        margin-top: 10px !important;
+        margin-left: 10px !important;
+
 
     }
 
@@ -346,6 +423,7 @@ const subscriptionItems = [
       width: 85% !important;
       font-size: 0.55rem;
       padding: 7px;
+      font-size: 17px;
 
     }
   }

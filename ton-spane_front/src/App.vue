@@ -24,10 +24,10 @@ export default {
  <router-view  />
 </template>
 
-<style>
+<style scoped>
 #app {
- font-family: Avenir, Helvetica, Arial, sans-serif;
- -webkit-font-smoothing: antialiased;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 
+  Roboto, 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing: antialiased;
  -moz-osx-font-smoothing: grayscale;
  /* text-align: center; */
  color: #2c3e50;

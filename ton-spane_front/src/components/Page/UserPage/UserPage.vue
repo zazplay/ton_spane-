@@ -195,8 +195,9 @@ onMounted(initializeUserData)
 <style scoped>
 /* Стили остаются без изменений */
 .layout {
-  width: 100%;
+  width: 95%;
   align-self: center;
+  margin-left: 10px;
 }
 
 .header {
@@ -349,6 +350,8 @@ onMounted(initializeUserData)
 @media (max-width: 480px) {
   .content-container {
     flex-direction: column !important;
+    width: 98%;
+
   }
 
   .main {
@@ -375,7 +378,7 @@ onMounted(initializeUserData)
   }
 
   .stat-badge :deep(.el-text) {
-    font-size: 10px !important;
+    font-size: 12px !important;
   }
 
   .about-section {
@@ -389,7 +392,9 @@ onMounted(initializeUserData)
   }
 
   .action-button {
-    font-size: 0.42rem !important;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 1rem !important;
     height: auto;
     padding: 10px;
   }
