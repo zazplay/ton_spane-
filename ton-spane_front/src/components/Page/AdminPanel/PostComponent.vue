@@ -117,6 +117,7 @@ const formatDate = (dateString) => {
     @media (max-width: 480px) {
         width: 95%;
         align-self: center;
+        margin: 0 auto;
     }
 }
 

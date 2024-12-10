@@ -158,37 +158,20 @@ export default {
 </template>
 
 <style scoped>
-.input-price {
-  display: flex;
-  flex-direction: column;
-  justify-content: start;
-  max-width: 100px;
-}
-/* Стилизация числового input */
-.input-price input {
-  padding: 5px;
-  font-size: 20px;
-  border-radius: 8px;
-  background: #23272a;
-  color: #ffffff;
-  border: 1px solid #5865f2;
-  transition: all 0.3s ease;
-}
-.input-price input:focus {
-  border-color: #7289da;
-  box-shadow: 0 0 8px rgba(114, 137, 218, 0.8);
-}
 /* Затемнение фона */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: min-content;
+  height: 100%;
+  /* Используем 100% высоты экрана */
   background: rgba(0, 0, 0, 0.6);
   z-index: 1000;
   display: flex;
   justify-content: center;
+  align-items: center;
+  /* Центрируем окно по вертикали */
 }
 
 /* Содержимое модального окна */
@@ -202,6 +185,8 @@ export default {
   max-width: 600px;
   max-height: max-content;
   color: #ffffff;
+  overflow-y: auto;
+  /* Если контент превышает высоту, появляется скролл */
 }
 
 /* Тёмная тема */
