@@ -1,6 +1,6 @@
 <template>
     <!-- Контейнер с элементами skeleton для загрузки данных -->
-    <el-space style="width: 100%" fill >
+    <el-space style="width: 100%" fill>
         <el-skeleton style="display: flex; gap: 8px" :loading="loading" animated :count="3">
             <!-- Шаблон, который отображается во время загрузки -->
             <template #template>
@@ -25,12 +25,12 @@
             <template #default>
                 <div class="scroll-container">
                     <el-card v-for="item in lists" :key="item.username"
-                        :body-style="{ padding: '0px', marginBottom: '1px' }"
-                        class="card" @click="handleCardClick(item)">
-                        <img :src="item.profilePicture || defaultUserImage" class="image" />
-                        <div class="card-content">
-                            <span>{{ item.username }}</span>
-                        </div>
+                        :body-style="{ padding: '0px', marginBottom: '1px' }" class="card"
+                        @click="handleCardClick(item)">
+                            <img :src="item.profilePicture || defaultUserImage" class="image" />
+                            <div class="card-content">
+                                <span>{{ item.username }}</span>
+                            </div>
                     </el-card>
                 </div>
             </template>
@@ -40,6 +40,7 @@
 
 <script>
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router"; // Імпортуємо useRouter
 import axios from "axios";
 import config from "@/config";
 
@@ -48,6 +49,7 @@ export default {
         const loading = ref(true);
         const lists = ref([]);
         const currentDate = new Date().toDateString();
+        const router = useRouter(); // Отримуємо інстанс роутера
 
         // Устанавливаем изображение пользователя по умолчанию
         const defaultUserImage = "https://via.placeholder.com/150"; // Поставьте ссылку на изображение по умолчанию
@@ -73,9 +75,8 @@ export default {
 
         const handleCardClick = (item) => {
             console.log("Перейти на профиль пользователя: ", item.username);
-            // Здесь в будущем можно добавить логику для перехода на профиль пользователя
-            // Например, использовать Vue Router для перехода:
-            // this.$router.push(`/profile/${item.username}`);
+            // перехода на профиль пользователя
+            router.push(`/app/user/${item.id}`);
         };
 
         onMounted(() => {
@@ -105,31 +106,42 @@ export default {
 
 .el-card {
     display: inline-block;
-    width: 100px;    /* Ширина карточки */
-    height: 150px;  /* Увеличена высота карточки */
+    width: 100px;
+    /* Ширина карточки */
+    height: 150px;
+    /* Увеличена высота карточки */
     margin-right: 20px;
-    border: none;   /* Убрали border */
+    border: none;
+    /* Убрали border */
     transition: transform 0.2s ease-in-out;
-    text-align: center; /* Выравнивание текста */
-    background-color: transparent; /* Прозрачный фон */
-    cursor: pointer; /* Курсор для клика */
+    text-align: center;
+    /* Выравнивание текста */
+    background-color: transparent;
+    /* Прозрачный фон */
+    cursor: pointer;
+    /* Курсор для клика */
 }
 
 .image {
-    width: 100px;    /* Ширина изображения */
-    height: 100px;   /* Высота изображения */
+    width: 100px;
+    /* Ширина изображения */
+    height: 100px;
+    /* Высота изображения */
     object-fit: cover;
     /* margin-bottom: 5px; */
-    border-radius: 10px; /* Закругленные края изображения */
+    border-radius: 10px;
+    /* Закругленные края изображения */
 }
 
 .card:hover {
-    transform: scale(1.1); /* Увеличиваем карточку при наведении */
+    transform: scale(1.1);
+    /* Увеличиваем карточку при наведении */
 }
 
 .card-content {
     padding: 5px 0;
-    font-size: 14px; /* Размер шрифта */
+    font-size: 14px;
+    /* Размер шрифта */
 }
 
 @media (max-width: 1200px) {
