@@ -1,38 +1,65 @@
-<script>
+<script lang="js" setup>
 import { ref } from 'vue';
+import PostsAP from './PostsAP.vue';
 
+const activeIndex = ref('1'); // Визначаємо активний індекс
 
-export default {
+// Функція для отримання контенту в залежності від активної вкладки
+const contentMap = {
+  '1': 'Профили',
+  '2': PostsAP,
+};
 
-    data() {
-        return {
-            activeIndex: ref('1'),
-        };
-    }
-}
+// Функція для обробки вибору вкладки
+const handleSelect = (index) => {
+  activeIndex.value = index;  // Оновлюємо активний індекс
+};
 </script>
 
 <template>
-    <div class="common-layout">
-        <el-container>
-            <el-header>
-                <el-menu :default-active="activeIndex" mode="horizontal">
-                    <el-menu-item index="1">
-                        Профили
-                    </el-menu-item>
-                    <el-menu-item index="2">
-                        Посты
-                    </el-menu-item>
-                </el-menu>
-            </el-header>
-            <el-main>Main</el-main>
-        </el-container>
+  <div class="layout-container">
+    <!-- Закріплене меню -->
+    <div class="fixed-tabs">
+      <el-menu :default-active="activeIndex" mode="horizontal" @select="handleSelect">
+        <el-menu-item index="1">Профили</el-menu-item>
+        <el-menu-item index="2">Посты</el-menu-item>
+      </el-menu>
     </div>
+
+    <!-- Змінюваний контент -->
+    <div class="content">
+      <component :is="contentMap[activeIndex]" />
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.common-layout {
-    width: 80vw;
-    margin: 0 auto;
+.layout-container {
+  width: 80vw;
+  margin: 0 auto;
+  padding-top: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.fixed-tabs {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 80vw;
+  background-color: rgb(22, 22, 22);
+}
+
+.content {
+  padding: 20px;
+  width: 100%;
+  max-width: 80vw;
+  margin-top: 80px;
+  display: flex;
+  justify-content: center;
 }
 </style>
