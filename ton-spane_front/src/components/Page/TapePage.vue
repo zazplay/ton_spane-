@@ -48,6 +48,7 @@ import ListPostCards from '../ListPostCards.vue';
 import AddPostForm from '../AddPostForm.vue';
 import { ref } from 'vue'
 import FollowingPage from './FollowingPage/FollowingPage.vue';
+import config from '../../config';
 
 export default {
   components: {
@@ -74,7 +75,7 @@ export default {
     },
     async fetchPosts() {
       try {
-        const response = await fetch('https://ton-back-e015fa79eb60.herokuapp.com/api/posts')
+        const response = await fetch(`${config.API_BASE_URL}/posts`)
         const data = await response.json()
         console.log('Posts data:', data)
         this.posts = data
