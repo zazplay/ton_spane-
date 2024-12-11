@@ -1,7 +1,6 @@
 <!--ProfileContent-->
 <script lang="js" setup>
-import { ref, onMounted, defineProps } from 'vue'
-// import { useRouter, useRoute } from 'vue-router'
+import { ref, onMounted, defineProps, watch } from 'vue'
 import ListPostCards from '../../ListPostCards.vue'
 import config from '@/config';
 
@@ -13,8 +12,6 @@ const props = defineProps({
 });
 
 console.log("props.userIdProp", props.userIdProp)
-// const router = useRouter()
-// const route = useRoute()
 const userId = props.userIdProp || 'f26088fd-d4aa-4420-a7f6-1f89baa915c3';
 
 const S3_BASE_URL = 'https://tonimages.s3.us-east-1.amazonaws.com/'
@@ -52,7 +49,7 @@ const preparePostsData = (posts) => {
 const fetchUserData = async () => {
     console.log("userId", userId)
     try {
-        const response = await fetch(`${config.API_BASE_URL}/users/${userId}`)
+        const response = await fetch(`${config.API_BASE_URL}/users/${props.userIdProp}`)
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
         const data = await response.json()
 
@@ -74,7 +71,7 @@ const fetchUserData = async () => {
 const fetchUserPosts = async () => {
     console.log("userId", userId)
     try {
-        const response = await fetch(`${config.API_BASE_URL}/posts/user/${userId}`);
+        const response = await fetch(`${config.API_BASE_URL}/posts/user/${props.userIdProp}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
 
@@ -114,19 +111,19 @@ const handleImageError = (type) => {
     }
 }
 
-// const openDonatePage = () => {
-//   router.push(`/app/userSubscribeDonate/${userId}`)
-// }
-
-// const openDonateYearPage = () => {
-//   router.push(`/app/userSubscribeDonateYear/${userId}`)
-// }
-
 // Sequential fetching to ensure user data is loaded first
 const initializeUserData = async () => {
     await fetchUserData()
     await fetchUserPosts()
 }
+
+// Наблюдатель за изменением userIdProp
+watch(() => props.userIdProp, (newValue) => {
+    console.log(props.userIdProp, newValue)
+    if (newValue) {
+        initializeUserData(); // Загружаем данные при изменении userIdProp
+    }
+});
 
 onMounted(initializeUserData)
 </script>
@@ -184,10 +181,10 @@ onMounted(initializeUserData)
                 </el-main>
             </el-container>
 
-            <el-button type="warning" class="action-button" plain @click="openDonatePage">
+            <el-button type="warning" class="action-button" plain >
                 Станьте спонсором всего за 5$ первый месяц
             </el-button>
-            <el-button type="success" class="action-button" plain @click="openDonateYearPage">
+            <el-button type="success" class="action-button" plain >
                 Купить годовую подписку за 150$
             </el-button>
         </el-container>

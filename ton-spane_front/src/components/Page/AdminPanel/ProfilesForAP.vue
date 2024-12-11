@@ -4,7 +4,6 @@
             <ProfilesList @select-user="handleUserSelect" />
         </div>
         <div class="right">
-            <div>right block</div>
             <div v-if="selectedUser">
                 <!-- Передаем selectedUser как userIdProp -->
                 <ProfileContent :userIdProp="selectedUser" />
@@ -44,7 +43,7 @@ const handleUserSelect = (userId) => {
 .right {
     width: 60%;
     /* Права частина займає 60% */
-    background-color: lightblue;
+    background-color: rgb(27, 26, 26);
     /* Трохи для візуалізації */
 }
 </style>
