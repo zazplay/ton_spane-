@@ -1,12 +1,13 @@
 <script lang="js" setup>
 import { ref } from 'vue';
 import PostsAP from './PostsAP.vue';
+import ProfilesForAp from './ProfilesForAP.vue';
 
 const activeIndex = ref('1'); // Визначаємо активний індекс
 
 // Функція для отримання контенту в залежності від активної вкладки
 const contentMap = {
-    '1': 'Профили',
+    '1': ProfilesForAp,
     '2': PostsAP,
 };
 
@@ -57,7 +58,7 @@ const handleSelect = (index) => {
 .content {
     padding: 20px;
     width: 100%;
-    max-width: 40vw;
+    /* max-width: 40vw; */
     display: flex;
     justify-content: center;
 }

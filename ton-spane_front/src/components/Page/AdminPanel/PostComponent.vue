@@ -72,7 +72,7 @@ const props = defineProps({
     caption: { type: String, default: '' },
     imageUrl: { type: String, default: '' },
     isBlurred: { type: Boolean, default: false },
-    price: { type: String, default: '0' },
+    price: { type: Number, default: 0 },
     createdAt: { type: String, required: true },
     user: {
         type: Object,

@@ -1,113 +1,126 @@
-<script>
-import { mapGetters } from "vuex";
+<script setup>
+import { ref, computed, onMounted, defineProps, defineEmits } from "vue";
+import { useStore } from "vuex";
 import axios from "axios";
+import config from "../config";
 
-export default {
-  props: {
-    isOpen: {
-      type: Boolean,
-      required: true,
-    },
+// Define props
+const props = defineProps({
+  isOpen: {
+    type: Boolean,
+    required: true,
   },
-  data() {
-    return {
-      post: {
-        caption: "",
-        userId: "",
-        price: 0,
-        isBlurred: false,
-        image: null,
-      },
-      error: null,
-    };
-  },
-  created() {
-    this.post.userId = this.getSub;
-  },
-  methods: {
-    handleFileChange(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const isImage = file.type.startsWith("image/");
-        const isVideo = file.type.startsWith("video/");
+});
 
-        if (!isImage && !isVideo) {
-          this.error = "Только фото или видео разрешено!";
-          this.post.image = null;
-          return;
-        }
+// Define emits
+const emit = defineEmits(["close"]);
 
-        if (isImage) {
-          const img = new Image();
-          const objectUrl = URL.createObjectURL(file);
+// Reactive state
+const post = ref({
+  caption: "",
+  userId: "936ed3cb-40da-4f18-a6ae-d48b4d34f1b2",  // Здесь будет присвоен sub
+  price: 0,
+  isBlurred: false,
+  image: null,
+});
 
-          img.onload = () => {
-            const { width, height } = img;
-            URL.revokeObjectURL(objectUrl);
+const error = ref(null);
 
-            if (width > 2500 || height > 1260 || width < 512 || height < 512) {
-              this.error = `Неверный размер изображения! Мин: 512x512, Макс: 2500x1260`;
-              this.post.image = null;
-            } else {
-              this.error = null;
-              this.post.image = file;
-            }
-          };
+// Get the `getSub` getter from Vuex store
+const store = useStore();
+const getSub = computed(() => store.getters.getSub);
 
-          img.src = objectUrl;
+// Set userId when component is mounted
+onMounted(() => {
+  post.value.userId = getSub.value;  // Присваиваем значение sub в userId
+});
+
+// Handle file input change
+const handleFileChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
+
+    if (!isImage && !isVideo) {
+      error.value = "Только фото или видео разрешено!";
+      post.value.image = null;
+      return;
+    }
+
+    if (isImage) {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+
+      img.onload = () => {
+        const { width, height } = img;
+        URL.revokeObjectURL(objectUrl);
+
+        if (width > 2500 || height > 1260 || width < 512 || height < 512) {
+          error.value = `Неверный размер изображения! Мин: 512x512, Макс: 2500x1260`;
+          post.value.image = null;
         } else {
-          this.error = null;
-          this.post.image = file;
+          error.value = null;
+          post.value.image = file;
         }
-      } else {
-        this.error = null;
-        this.post.image = null;
-      }
-    },
-    async handleSubmit() {
-      if (!this.post.image) {
-        this.error = "Пожалуйста, добавьте фото или видео!";
-        return;
-      }
-      try {
-        const formData = new FormData();
-        formData.append("caption", this.post.caption);
-        formData.append("userId", this.post.userId);
-        formData.append("price", this.post.price);
-        formData.append("isBlurred", this.post.isBlurred);
-        formData.append("image", this.post.image);
+      };
 
-        const response = await axios.post(
-          "https://ton-back-e015fa79eb60.herokuapp.com/api/posts",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            }
-          }
-        );
-        console.log("response", response);
-        alert("Пост добавлен успешно!");
-        this.closeForm();
-      } catch {
-        alert("Ошибка при отправке поста.");
+      img.src = objectUrl;
+    } else {
+      error.value = null;
+      post.value.image = file;
+    }
+  } else {
+    error.value = null;
+    post.value.image = null;
+  }
+};
+
+// Handle form submission
+const handleSubmit = async () => {
+  if (!post.value.image) {
+    error.value = "Пожалуйста, добавьте фото или видео!";
+    return;
+  }
+  try {
+    const formData = new FormData();
+    formData.append("caption", post.value.caption);
+    formData.append("userId", "936ed3cb-40da-4f18-a6ae-d48b4d34f1b2");
+    formData.append("price", post.value.price);
+    formData.append("isBlurred", post.value.isBlurred);
+    formData.append("image", post.value.image);
+
+    console.log("formData", post.value.caption, formData.userId, post.value.price, post.value.isBlurred, post.value.image);
+    
+    const response = await axios.post(
+      `${config.API_BASE_URL}/posts`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        }
       }
-    },
-    closeForm() {
-      this.$emit("close");
-    },
-    triggerFileInput() {
-      this.$refs.fileInput.click();
-    },
-  },
-  computed: {
-    ...mapGetters(["getSub"]),
-  },
+    );
+    console.log("response", response);
+    alert("Пост добавлен успешно!");
+    closeForm();
+  } catch {
+    alert("Ошибка при отправке поста.");
+  }
+};
+
+// Close form
+const closeForm = () => {
+  emit("close");
+};
+
+// Trigger file input click
+const triggerFileInput = () => {
+  document.querySelector('input[type="file"]').click();
 };
 </script>
 
+
 <template>
-  <div v-if="isOpen" class="modal-overlay">
+  <div v-if="props.isOpen" class="modal-overlay">
     <div class="modal-content dark-theme">
       <button class="close-btn" @click="closeForm">✖</button>
       <form>
@@ -339,8 +352,7 @@ export default {
 
   .selected-file {
     font-size: 14px;
-    max-width: 150px;
-    /* Ограничиваем ширину */
+    max-width: 150px;    /* Ограничиваем ширину */
 
   }
 }
