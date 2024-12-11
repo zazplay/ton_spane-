@@ -412,6 +412,7 @@ const handleDonate = () => {
   @media (max-width: 480px) {
     flex-wrap: wrap;
     justify-content: flex-start;
+    padding: 0px;
   }
 }
 

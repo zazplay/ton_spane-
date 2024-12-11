@@ -18,7 +18,7 @@
             <el-main class="info-container-profile">
                 <span style="color: aliceblue;">{{ userData?.email || 'Loading...' }}</span>
                 <router-link 
-                    :to="`/app/user/${userId}`" 
+                    :to="`/app/myPage/${userId}`" 
                     class="link-style"
                 >
                     Перейти к профилю >

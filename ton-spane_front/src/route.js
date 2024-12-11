@@ -36,6 +36,11 @@ const routes = [
         component: () => import('./components/Page/UserYearSubPage/YearSubPage.vue'),
         name: 'userSubscribeYear',
       },
+      {
+        path: 'myPage/:id',
+        component: () => import('./components/Page/AuthUserPage/AuthUserPage.vue'),
+        name: 'myPage',
+      },
     ],
   },
 ];
