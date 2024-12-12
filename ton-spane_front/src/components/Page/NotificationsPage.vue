@@ -1,48 +1,45 @@
 <template>
-  <div class="common-layout" style="width: 100%;">
-    <el-container>
-
-      <el-header>
-        <el-container class="container-header">
-          <!-- Стрелка назад для возврата на предыдущую страницу -->
-          <el-icon class="back-arrow" @click="goBack">
-            <ArrowLeftBold />
-          </el-icon>
-          <div>Уведомления</div>
-          <el-icon>
-            <Setting />
-          </el-icon>
-        </el-container>
-      </el-header>
-
-      <el-main>
-       
-      </el-main>
-    </el-container>
+  <div>
+    <template v-if="isUnderMaintenance">
+      <maintenance-page />
+    </template>
+    
+    <template v-else>
+      <h1>Уведомления</h1>
+      <p>Здесь будут отображаться уведомления.</p>
+    </template>
   </div>
 </template>
 
 <script>
+import { ref } from 'vue';
+import MaintenancePage from '../Maintenance.vue';
 
-  export default {
-    name: 'NotificationsPage',
-    methods: {
-      goBack() {
-        // Возвращаемся на предыдущую страницу
-        this.$router.go(-1);
-      }
+export default {
+  name: 'NotificationsPage',
+  components: {
+    MaintenancePage,
+  },
+  setup() {
+    const isUnderMaintenance = ref(true); // Установите false для отображения обычного контента
+    
+    return {
+      isUnderMaintenance
+    };
+  },
+  methods: {
+    goBack() {
+      this.$router.go(-1);
     }
-  };
+  }
+};
 </script>
 
 <style scoped>
- .container-header {
-    display: flex;
-    justify-content: space-between;
-    color: white;
-    width: 100%;
-    margin-top: 1em;
-    font-size: x-large;
-  }
-
+.back-arrow {
+  font-size: 24px;
+  cursor: pointer;
+  margin-left: 20px;
+  margin-top: 20px;
+}
 </style>
