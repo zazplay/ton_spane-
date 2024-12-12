@@ -20,7 +20,27 @@ export default defineComponent({
 
         // Получаем sub из Vuex
         // const sub = store.getters.getSub;
+        let isDragging = false;
+        let startX = 0;
+        let scrollLeft = 0;
 
+        const startDrag = (event) => {
+            isDragging = true;
+            startX = event.pageX - event.target.offsetLeft;
+            scrollLeft = event.target.scrollLeft;
+        };
+
+        const dragging = (event) => {
+            if (!isDragging) return;
+            event.preventDefault();
+            const x = event.pageX - event.target.offsetLeft;
+            const walk = (x - startX) * 3; // Кількість переміщення
+            event.target.scrollLeft = scrollLeft - walk;
+        };
+
+        const stopDrag = () => {
+            isDragging = false;
+        };
         const setLoading = () => {
             loading.value = true;
             setTimeout(() => {
@@ -52,6 +72,7 @@ export default defineComponent({
             fetchData();
         });
 
+
         return {
             loading,
             lists,
@@ -59,6 +80,9 @@ export default defineComponent({
             setLoading,
             defaultUserImage, // Возвращаем ссылку на изображение по умолчанию
             handleCardClick,  // Возвращаем метод для обработки кликов
+            startDrag,
+            dragging,
+            stopDrag,
         };
     },
 });
@@ -81,7 +105,8 @@ export default defineComponent({
             </template>
 
             <template #default>
-                <div class="scroll-container">
+                <div class="scroll-container" @mousedown="startDrag" @mousemove="dragging" @mouseup="stopDrag"
+                    @mouseleave="stopDrag">
                     <el-card v-for="item in lists" :key="item.username"
                         :body-style="{ padding: '0px', marginBottom: '1px' }" class="card"
                         @click="handleCardClick(item)">
@@ -102,13 +127,29 @@ export default defineComponent({
     /* Використовуємо Flexbox */
     flex-wrap: wrap;
     /* Додаємо перенесення рядків */
-    gap: 20px;
+    /* gap: 8px; */
     /* Відстань між елементами */
     padding: 10px 0;
+
+}
+
+.scroll-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+    background-color: darkgrey;
+    border-radius: 10px;
+}
+
+.scroll-container::-webkit-scrollbar-track {
+    background-color: lightgrey;
 }
 
 .el-card {
-    flex: 0 0 100px;
+    flex: 0 0 auto;
+    /* Забороняємо карткам масштабуватися */
+    width: 150px;
     /* Фіксована ширина картки */
     height: 150px;
     border: none;
@@ -116,6 +157,8 @@ export default defineComponent({
     text-align: center;
     background-color: transparent;
     cursor: pointer;
+    scroll-snap-align: start;
+    /* Прив'язка картки до початку при прокручуванні */
 }
 
 .image {
@@ -135,8 +178,21 @@ export default defineComponent({
 }
 
 @media (max-width: 1200px) {
+    .scroll-container {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        /* Додаємо горизонтальний скрол */
+        gap: 10px;
+        /* Відстань між елементами */
+        scroll-snap-type: x mandatory;
+        cursor: grab;
+        /* Зміна курсору для натискання */
+        padding: 10px 0;
+    }
+
     .el-card {
         flex: 0 0 90px;
+        /* Фіксована ширина картки */
         height: 110px;
     }
 

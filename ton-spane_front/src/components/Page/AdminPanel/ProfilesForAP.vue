@@ -46,4 +46,23 @@ const handleUserSelect = (userId) => {
     background-color: rgb(27, 26, 26);
     /* Трохи для візуалізації */
 }
+
+@media (max-width: 1200px) {
+
+    .container {
+        flex-direction: column;
+
+    }
+
+    .left {
+        width: 100%;
+        height: max-content;
+    }
+
+    .right {
+        margin-top: 10px;
+        width: 100%;
+        /* Права частина займає 60% */
+    }
+}
 </style>

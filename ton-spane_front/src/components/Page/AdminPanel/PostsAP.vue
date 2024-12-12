@@ -29,24 +29,31 @@
             </form>
         </dialog>
 
-        <!-- Кнопка для додавання нового поста -->
-        <el-button class="add-post-btn" type="success" @click="openForm">Добавить</el-button>
+        <div class="container-btn-add-delete">
+            <!-- Кнопка для додавання нового поста -->
+            <el-button v-if="props.showAddButton" class="add-post-btn" type="success" @click="openForm">
+                Добавить пост
+            </el-button>
 
-        <!-- Кнопка для видалення вибраних постів -->
-        <el-button class="delete-btn" v-if="selectedPosts.length > 0" type="danger" @click="showDeleteConfirmation">
-            Удалить {{ selectedPosts.length }} поста(ов)
-        </el-button>
+            <!-- Кнопка для видалення вибраних постів -->
+            <el-button class="delete-btn" v-if="selectedPosts.length > 0" type="danger" @click="showDeleteConfirmation">
+                Удалить {{ selectedPosts.length }} пост(ов)
+            </el-button>
+            <el-button class="delete-btn" v-if="selectedPosts.length > 0" type="info" @click="resetSelection">
+                Сбросить выбор {{ selectedPosts.length }} пост(ов)
+            </el-button>
+        </div>
+
 
         <!-- Виведення карток постів -->
         <div v-for="post in listPosts" :key="post.id" class="post-item">
-            <div style="display: flex; flex-direction: row; justify-content: space-between;">
-                <input type="checkbox" v-model="selectedPosts" :value="post.id" />
-                <button @click="openEditDialog(post)">Редагувати</button>
-            </div>
-
             <PostComponent :id="post.id" :user="post.user" :imageUrl="post.imageUrl" :caption="post.caption"
                 :isBlurred="post.isBlurred" :price="post.price" :createdAt="post.createdAt" />
             <!-- Кнопка редагування -->
+            <div style="display: flex; flex-direction: row; justify-content: space-between;">
+                <input type="checkbox" v-model="selectedPosts" :value="post.id" class="custom-checkbox" />
+                <el-button class="edit-btn" type="warning" @click="openEditDialog(post)">Редагувати</el-button>
+            </div>
         </div>
 
         <!-- Форма для додавання поста -->
@@ -58,7 +65,7 @@
 
 import axios from 'axios';
 import config from '@/config';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, defineProps } from 'vue';
 import PostComponent from './PostComponent.vue';
 import AddPostForm from '../../AddPostForm.vue';
 
@@ -70,6 +77,12 @@ const isFormOpen = ref(false); // Стан для відкриття форми
 const editDialog = ref(null); // Ссилка на діалог редагування
 const editForm = ref({ caption: '', price: 0, isBlurred: false, id: null }); // Дані для редагування
 
+const props = defineProps({
+    showAddButton: {
+        type: Boolean,
+        default: false, // Кнопка буде відображатися за замовчуванням
+    },
+})
 // Асинхронна функція для отримання постів
 const getPosts = async () => {
     try {
@@ -181,18 +194,31 @@ onMounted(() => {
     margin-bottom: 20px;
 }
 
-.delete-btn {
-    position: fixed;
+.container-btn-add-delete {
+    display: flex;
+    position: sticky;
     top: 50px;
     right: 450px;
     z-index: 100;
 }
 
+.delete-btn {
+    width: max-content;
+}
+
 .add-post-btn {
-    position: fixed;
-    top: 50px;
-    right: 350px;
-    z-index: 100;
+    width: max-content;
+}
+
+.custom-checkbox {
+    width: 20px !important;
+    /* Установите нужный размер */
+    height: 20px !important;
+    /* Установите нужный размер */
+}
+
+.edit-btn {
+    margin-top: 0 !important;
 }
 
 .el-button {
@@ -210,12 +236,26 @@ dialog::backdrop {
 }
 
 @media (max-width: 1200px) {
+    .container-btn-add-delete {
+        display: flex;
+        position: sticky;
+        top: 50px;
+        z-index: 100;
+        margin-left: -10px;
+    }
+
     .delete-btn {
-        right: 120px;
+        padding: 3px;
+
     }
 
     .add-post-btn {
-        right: 20px;
+        padding: 3px;
     }
+
+    .el-button {
+        margin-right: 0;
+    }
+
 }
 </style>
