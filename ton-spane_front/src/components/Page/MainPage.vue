@@ -5,7 +5,9 @@
     </div>
     <div class="right-container">
       <!--Динамическое содержимое-->
-      <router-view />
+      <div class="content-wrapper">
+        <router-view />
+      </div>
     </div>
     <HorizontalMenu class="horizontal-menu" />
   </div>
@@ -28,10 +30,9 @@ export default {
 .main-container {
   display: flex;
   justify-content: center;
-  /* Центрирует правый контейнер */
   position: relative;
   width: 100%;
-
+  min-height: 100vh;
 }
 
 .horizontal-menu {
@@ -42,9 +43,7 @@ export default {
   width: 300px;
   position: absolute;
   right: 50%;
-  /* Совмещаем правую границу с центром экрана */
   transform: translateX(-105%);
-  /* Сдвигаем левый контейнер к правому */
 }
 
 .right-container {
@@ -52,14 +51,17 @@ export default {
   font-size: 14px;
   position: absolute;
   left: 50%;
-  /* Центрируем правый контейнер по горизонтали экрана */
   transform: translateX(-50%);
+}
+
+/* Add a wrapper for the content */
+.content-wrapper {
+  padding-bottom: 90px; /* Base padding for the menu height */
 }
 
 @media (max-width: 1200px) {
   .left-container {
     display: none;
-    /* Скрываем левый контейнер при ширине экрана < 1200px */
   }
 
   .horizontal-menu {
@@ -68,11 +70,16 @@ export default {
 
   .right-container {
     width: 105%;
-    /* Ширина правого контейнера */
     position: absolute;
     left: 50%;
-    /* Центрируем правый контейнер по горизонтали экрана */
     transform: translateX(-50%);
+  }
+  
+  /* Adjust padding for devices with safe-area-inset-bottom */
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .content-wrapper {
+      padding-bottom: calc(90px + env(safe-area-inset-bottom));
+    }
   }
 }
 </style>
