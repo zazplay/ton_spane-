@@ -77,20 +77,38 @@ const isFormOpen = ref(false); // Стан для відкриття форми
 const editDialog = ref(null); // Ссилка на діалог редагування
 const editForm = ref({ caption: '', price: 0, isBlurred: false, id: null }); // Дані для редагування
 
-const props = defineProps({
-    showAddButton: {
-        type: Boolean,
-        default: false, // Кнопка буде відображатися за замовчуванням
-    },
-})
+const props = defineProps(
+    {
+        userId: {
+            type: String,
+            default: null, // Кнопка буде відображатися за замовчуванням
+        },
+        showAddButton: {
+            type: Boolean,
+            default: false, // Кнопка буде відображатися за замовчуванням
+        },
+    })
 // Асинхронна функція для отримання постів
 const getPosts = async () => {
+    let getPostStr = '';
     try {
-        const response = await axios.get(`${config.API_BASE_URL}/posts`);
+        
+        if (props.userId === null) {
+            getPostStr = `${config.API_BASE_URL}/posts`;
+        }
+        else {
+            console.log(props.userId);
+            getPostStr = `${config.API_BASE_URL}/posts/user/${props.userId}`
+        }
+
+        const response = await axios.get(getPostStr);
         listPosts.value = response.data; // Оновлюємо список постів
     } catch (error) {
         console.error('Помилка при отриманні постів:', error);
     }
+
+
+
 };
 
 // Функція для видалення вибраних постів

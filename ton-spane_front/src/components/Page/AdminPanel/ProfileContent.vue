@@ -795,7 +795,7 @@ onMounted(initializeUserData)
         </el-container>
         <div style="position: relative;">
             <!-- <ListPostCards v-if="userData.posts.length" :posts="userData.posts" :user="userData" /> -->
-            <PostsAP v-if="userData.posts.length" :posts="userData.posts" :user="userData" :showAddButton="true"/>
+            <PostsAP v-if="userData.posts.length" :posts="userData.posts" :user="userData" :showAddButton="true" :userId="userData.id"/>
         </div>
 
     </div>
