@@ -63,7 +63,8 @@ const props = defineProps({
 // Используем встроенную функцию defineEmits
 const emit = defineEmits(['update:dialogVisible']);
 
-const shareLink = 'https://example.com/share/123';
+const shareLink = window.location.href; // Получаем текущий URL страницы
+
 const linkInput = ref(null);
 
 const isOpen = computed({
