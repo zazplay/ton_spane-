@@ -47,8 +47,14 @@
 
         <!-- Виведення карток постів -->
         <div v-for="post in listPosts" :key="post.id" class="post-item">
-            <PostComponent :id="post.id" :user="post.user" :imageUrl="post.imageUrl" :caption="post.caption"
-                :isBlurred="post.isBlurred" :price="post.price" :createdAt="post.createdAt" />
+            <PostComponent
+            :id="post.id" 
+            :user="user? user: post.user"
+            :imageUrl="post.imageUrl"
+            :caption="post.caption"
+            :isBlurred="post.isBlurred" 
+            :price="post.price"
+            :createdAt="post.createdAt" />
             <!-- Кнопка редагування -->
             <div style="display: flex; flex-direction: row; justify-content: space-between;">
                 <input type="checkbox" v-model="selectedPosts" :value="post.id" class="custom-checkbox" />
@@ -79,6 +85,10 @@ const editForm = ref({ caption: '', price: 0, isBlurred: false, id: null }); // 
 
 const props = defineProps(
     {
+        user:{
+            type:Object,
+            required:false
+        },
         userId: {
             type: String,
             default: null, // Кнопка буде відображатися за замовчуванням
@@ -92,7 +102,6 @@ const props = defineProps(
 const getPosts = async () => {
     let getPostStr = '';
     try {
-        
         if (props.userId === null) {
             getPostStr = `${config.API_BASE_URL}/posts`;
         }
@@ -106,9 +115,6 @@ const getPosts = async () => {
     } catch (error) {
         console.error('Помилка при отриманні постів:', error);
     }
-
-
-
 };
 
 // Функція для видалення вибраних постів
