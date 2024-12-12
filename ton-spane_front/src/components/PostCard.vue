@@ -1,11 +1,121 @@
+<template>
+  <ShareModal v-model:dialogVisible="isShareModalVisible" />
+  <TipsModal v-model:dialogDonateVisible="isTipsModalVisible" />
+  <SubscriptionModal 
+    v-if="isBlurred" 
+    ref="subscriptionModalRef" 
+    :userId="user.id" 
+  />
+
+  <el-card class="post-card">
+    <div class="header">
+      <el-avatar :size="50" class="avatar" :src="user.profilePicture" />
+      <div class="user-info">
+        <router-link 
+          :to="`/app/user/${user.id}`" 
+          class="username"
+        >
+          {{ user.username }}
+        </router-link>
+        <el-text></el-text>
+        <el-text class="date">{{ formatDate(createdAt) }}</el-text>
+      </div>
+      <el-button 
+        :type="isSubscribed ? 'success' : 'primary'" 
+        @click="handleSubscribe"
+        plain
+        class="subBtn"
+      >
+        {{ isSubscribed ? 'Вы подписаны' : 'Подписаться' }}
+      </el-button>
+    </div>
+
+    <div class="demo-image__preview">
+      <div 
+        class="image-container" 
+        @click="handleImageClick"
+      >
+        <el-image
+          class="post-image"
+          :class="{ 'blurred': isBlurred }"
+          :src="imageUrl"
+          :zoom-rate="1.2"
+          :max-scale="7"
+          :min-scale="0.2"
+          :preview-src-list="isBlurred ? [] : [imageUrl]"
+          :initial-index="4"
+          fit="cover"
+          @error="() => {}"
+          :preview-teleported="true"
+        >
+          <template #error>
+            <div class="image-slot">
+            </div>
+          </template>
+        </el-image>
+        
+        <div v-if="isBlurred" class="lock-overlay">
+          <el-icon :size="50" class="lock-icon">
+            <Lock />
+          </el-icon>
+          <span class="lock-text">{{ price }}$</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <div class="action-buttons">
+        <el-check-tag 
+          :checked="isLiked"
+          @change="handleLike"
+          class="action-tag heart"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="25"
+            height="25"
+            viewBox="0 0 24 24"
+            :fill="isLiked ? 'red' : 'none'"
+            stroke="red"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <span style="margin-left: 5px">{{ likes }}</span>
+        </el-check-tag>
+        
+        <el-check-tag 
+          :checked="isShared"
+          @change="handleShare"
+          class="action-tag share"
+        >
+          <el-icon size="25px"><Share /></el-icon>
+        </el-check-tag>
+
+        <el-check-tag 
+          :checked="isDonated"
+          @change="handleDonate"
+          class="action-tag donate"
+        >
+          <el-icon size="25px"><Money /></el-icon>
+        </el-check-tag>
+      </div>
+      <el-text class="description" tag="b" emphasis>
+        {{ caption.length > 100 ? caption.slice(0, 100) + '...' : caption }}
+      </el-text>
+    </div>
+  </el-card>
+</template>
+
 <script setup>
 import { ref, defineProps, defineEmits, computed } from 'vue'
 import ShareModal from './ShareModal.vue' 
 import TipsModal from './TipsModal.vue'
+import SubscriptionModal from '../components/Page/SubOnCardModal/SubCardModal.vue'
 import { useStore } from 'vuex'
-import { Lock } from '@element-plus/icons-vue' // добавляем импорт иконки
-
-
+import { Lock, Share, Money } from '@element-plus/icons-vue'
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -41,16 +151,23 @@ const props = defineProps({
 
 const emit = defineEmits(['like', 'share', 'donate', 'subscribe'])
 
-
+const subscriptionModalRef = ref(null)
 const isLiked = ref(props.initialLiked)
-const likes = ref(props.likes.length); 
-
+const likes = ref(props.likes.length)
 const isSubscribed = ref(props.initialSubscribed)
 const isShared = ref(props.initialShared)
 const isDonated = ref(props.initialDonated)
-
 const isShareModalVisible = ref(false)
 const isTipsModalVisible = ref(false)
+
+const handleImageClick = () => {
+  if (props.isBlurred && subscriptionModalRef.value) {
+    subscriptionModalRef.value.openDialog()
+  }
+}
+
+const store = useStore()
+const userId = computed(() => store.getters.getSub)
 
 const formatDate = (dateString) => {
   const date = new Date(dateString)
@@ -74,14 +191,10 @@ const formatDate = (dateString) => {
   }
 }
 
-const store = useStore()
-const userId = computed(() => store.getters.getSub)
-
 const handleLike = async () => {
   try {
-    // Определяем URL в зависимости от текущего состояния
-    const endpoint = isLiked.value ? 'unlike' : 'like';
-    const method = isLiked.value ? 'DELETE' : 'POST';
+    const endpoint = isLiked.value ? 'unlike' : 'like'
+    const method = isLiked.value ? 'DELETE' : 'POST'
     
     const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/likes/${userId.value}/${endpoint}/${props.id}`, {
       method: method,
@@ -89,22 +202,22 @@ const handleLike = async () => {
         'Content-Type': 'application/json',
         'accept': '*/*'
       }
-    });
+    })
 
     if (!response.ok) {
-      throw new Error('Failed to update like');
+      throw new Error('Failed to update like')
     }
 
-    // Переключаем состояние и обновляем счетчик только после успешного ответа
-    isLiked.value = !isLiked.value;
-    likes.value = isLiked.value ? likes.value + 1 : likes.value - 1;
+    isLiked.value = !isLiked.value
+    likes.value = isLiked.value ? likes.value + 1 : likes.value - 1
     
-    emit('like', isLiked.value);
+    emit('like', isLiked.value)
 
   } catch (error) {
-    console.error('Error updating like:', error);
+    console.error('Error updating like:', error)
   }
-};
+}
+
 const handleSubscribe = () => {
   isSubscribed.value = !isSubscribed.value
   emit('subscribe', isSubscribed.value)
@@ -122,111 +235,6 @@ const handleDonate = () => {
   emit('donate', isDonated.value)
 }
 </script>
-
-<template>
-  <ShareModal v-model:dialogVisible="isShareModalVisible" />
-  <TipsModal v-model:dialogDonateVisible="isTipsModalVisible" />
-
-  <el-card class="post-card">
-    <div class="header">
-      
-      <el-avatar :size="50" class="avatar" :src="user.profilePicture" />
-      <div class="user-info">
-        <router-link 
-                    :to="`/app/user/${user.id}`" 
-                    class="username"                >
-                {{ user.username }}
-                </router-link>
-        <el-text ></el-text>
-        <el-text class="date">{{ formatDate(createdAt) }}</el-text>
-      </div>
-      <el-button 
-        :type="isSubscribed ? 'success' : 'primary'" 
-        @click="handleSubscribe"
-        plain
-        class="subBtn"
-      >
-        {{ isSubscribed ? 'Вы подписаны' : 'Подписаться' }}
-      </el-button>
-    </div>
-
-    <div class="demo-image__preview">
-  <div class="image-container">
-    <el-image
-      class="post-image"
-      :class="{ 'blurred': isBlurred }"
-      :src="imageUrl"
-      :zoom-rate="1.2"
-      :max-scale="7"
-      :min-scale="0.2"
-      :preview-src-list="isBlurred ? [] : [imageUrl]"
-      :initial-index="4"
-      fit="cover"
-      @error="() => {}"
-      :preview-teleported="true"
-    >
-      <template #error>
-        <div class="image-slot">
-        </div>
-      </template>
-    </el-image>
-    
-    <!-- Добавить этот блок -->
-    <div v-if="isBlurred" class="lock-overlay">
-      <el-icon :size="50" class="lock-icon">
-        <Lock />
-      </el-icon>
-      <span class="lock-text">{{ price }}$</span>
-    </div>
-  </div>
-</div>
-
-    <div class="actions">
-      <div class="action-buttons">
-        <el-check-tag 
-          :checked="isLiked"
-          @change="handleLike"
-          class="action-tag heart"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="25"
-            height="25"
-            viewBox="0 0 24 24"
-            :fill="isLiked ? 'red' : 'none'"
-            stroke="red"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-          </svg>
-          <span style="margin-left: 5px"> {{ likes }}</span>
-
-        </el-check-tag>
-        
-        <el-check-tag 
-          :checked="isShared"
-          @change="handleShare"
-          class="action-tag share"
-        >
-          <el-icon size="25px"><Share /></el-icon>
-        </el-check-tag>
-
-        <el-check-tag 
-          :checked="isDonated"
-          @change="handleDonate"
-          class="action-tag donate"
-        >
-          <el-icon size="25px"><Money /></el-icon>
-        </el-check-tag>
-      </div>
-      <el-text class="description" tag="b" emphasis>
-        {{ caption.length > 100 ? caption.slice(0, 100) + '...' : caption }}
-      </el-text>
-    </div>
-  </el-card>
-</template>
 
 <style scoped>
 .post-card {
@@ -372,8 +380,9 @@ const handleDonate = () => {
 
 .post-image {
   min-height: 400px;
+  max-height: 800px;
   width: 80%;
-  object-fit: cover;
+  object-fit: contain; /* This prevents cropping */
   object-position: center center;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
