@@ -31,6 +31,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useStore } from 'vuex'
+import config from '@/config';
 
 const store = useStore()
 const userId = computed(() => store.getters.getSub)
@@ -45,7 +46,7 @@ const handleError = () => {
 
 const fetchUserData = async () => {
     try {
-        const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/users/${userId.value}`)
+        const response = await fetch(`${config.API_BASE_URL}/users/${userId.value}`)
         if (!response.ok) {
             throw new Error('Failed to fetch user data')
         }

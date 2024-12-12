@@ -14,9 +14,9 @@
                 <BellFilled />
               </el-icon>
             </router-link>
-            <el-icon class="icon-style" @click="openForm">
+            <!-- <el-icon class="icon-style" @click="openForm">
               <CirclePlusFilled />
-            </el-icon>
+            </el-icon> -->
             <!-- Передача пропа isOpen -->
             <AddPostForm :isOpen="isFormOpen" @close="closeForm" />
           </div>
@@ -43,7 +43,8 @@
 
 <script>
 
-import { BellFilled, CirclePlusFilled } from '@element-plus/icons-vue';
+import { BellFilled } from '@element-plus/icons-vue';
+// import {  CirclePlusFilled } from '@element-plus/icons-vue';
 import ListPostCards from '../ListPostCards.vue';
 import AddPostForm from '../AddPostForm.vue';
 import { ref } from 'vue'
@@ -55,7 +56,7 @@ export default {
     AddPostForm,
     ListPostCards,
     BellFilled,
-    CirclePlusFilled,
+    // CirclePlusFilled,
     FollowingPage
   },
   data() {

@@ -22,7 +22,7 @@ const handleSelect = (index) => {
         <!-- Закріплене меню -->
         <div class="fixed-tabs">
             <el-menu :default-active="activeIndex" mode="horizontal" @select="handleSelect">
-                <el-menu-item index="1">Профили</el-menu-item>
+                <el-menu-item index="1" >Профили</el-menu-item>
                 <el-menu-item index="2">Посты</el-menu-item>
             </el-menu>
         </div>
@@ -53,8 +53,11 @@ const handleSelect = (index) => {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     width: 80vw;
     background-color: rgb(22, 22, 22);
+    
 }
-
+.el-menu-item{
+    font-size: larger;
+}
 .content {
     padding: 20px;
     width: 100%;

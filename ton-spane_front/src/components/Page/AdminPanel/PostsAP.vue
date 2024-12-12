@@ -1,3 +1,4 @@
+<!--PostAp.vue-->
 <template>
     <div class="posts-container">
         <!-- Модальне вікно для підтвердження видалення -->
@@ -54,6 +55,7 @@
 </template>
 
 <script lang="js" setup>
+
 import axios from 'axios';
 import config from '@/config';
 import { ref, onMounted } from 'vue';
@@ -66,7 +68,7 @@ const selectedPosts = ref([]); // Массив для вибраних пост�
 const deleteDialog = ref(null); // Ссилка на елемент діалогу видалення
 const isFormOpen = ref(false); // Стан для відкриття форми
 const editDialog = ref(null); // Ссилка на діалог редагування
-const editForm = ref({ caption: '', price: '', isBlurred: false, id: null }); // Дані для редагування
+const editForm = ref({ caption: '', price: 0, isBlurred: false, id: null }); // Дані для редагування
 
 // Асинхронна функція для отримання постів
 const getPosts = async () => {

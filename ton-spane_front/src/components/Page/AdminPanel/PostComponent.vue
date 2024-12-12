@@ -1,3 +1,4 @@
+<!--PostComponent-->
 <template>
     <el-card class="post-card">
         <div class="header">
@@ -64,6 +65,7 @@
 </template>
 
 <script setup>
+
 import { defineProps } from 'vue'
 import { Lock } from '@element-plus/icons-vue' // добавляем импорт иконки
 
