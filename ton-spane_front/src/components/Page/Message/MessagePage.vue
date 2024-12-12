@@ -17,8 +17,8 @@
 
       <el-main>
         <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-          <el-tab-pane label="Все" name="all" style="color: white;">All</el-tab-pane>
-          <el-tab-pane label="Онлайн" name="Onlin">Online</el-tab-pane>
+          <el-tab-pane label="Все" name="all" style="color: white;"></el-tab-pane>
+          <el-tab-pane label="Онлайн" name="Onlin"></el-tab-pane>
         </el-tabs>
       </el-main>
     </el-container>

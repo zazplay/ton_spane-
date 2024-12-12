@@ -5,7 +5,9 @@
       <el-header class="header-style">
         <div class="header-content">
           <el-text class="site-name">
-            <img src="./../../assets/horizontal-logo.png" style="height: 50px; margin-left: 70px !important;"/>
+            <div class="logo-container">
+    <img src="./../../assets/horizontal-logo.png" alt="Logo">
+</div>
           </el-text>
           <div class="icon-container">
             <router-link to="/app/notifications">
@@ -114,6 +116,27 @@ export default {
 </script>
 
 <style scoped>
+
+
+.logo-container img {
+    height: 50px;
+    margin-left: 70px;
+}
+
+/* Стили для мобильных устройств */
+@media screen and (max-width: 768px) {
+    .logo-container img {
+        height: 40px; /* Немного уменьшаем высоту на телефоне */
+        margin-left: 40px; /* Уменьшаем отступ слева для мобильных устройств */
+    }
+}
+
+/* Стили для очень маленьких экранов */
+@media screen and (max-width: 480px) {
+    .logo-container img {
+        margin-left: 25px; /* Еще меньший отступ для самых маленьких экранов */
+    }
+}
 .demo-tabs>.el-tabs__content {
   color: #6b778c;
   font-size: 32px;
