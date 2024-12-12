@@ -1,10 +1,8 @@
 <template>
   <div class="common-layout" style="width: 100%;">
     <el-container>
-
       <el-header>
         <el-container class="container-header">
-          <!-- Стрелка назад для возврата на предыдущую страницу -->
           <el-icon class="back-arrow" @click="goBack">
             <ArrowLeftBold />
           </el-icon>
@@ -14,8 +12,9 @@
       </el-header>
 
       <el-main>
-       <GoToProfile/>
-       <ThemeSwitcher/>
+        <GoToProfile/>
+        <ThemeSwitcher/>
+        <LogoutButton />
       </el-main>
     </el-container>
   </div>
@@ -24,30 +23,30 @@
 <script>
 import GoToProfile from './GoToProfile.vue';
 import ThemeSwitcher from '../../../assets/ThemeSwitcher.vue';
+import LogoutButton from './LogoutButton.vue';
 
-  export default {
-    name: 'MorePage',
-    components:{
-      GoToProfile,
-      ThemeSwitcher
-    },
-    methods: {
-      goBack() {
-        // Возвращаемся на предыдущую страницу
-        this.$router.go(-1);
-      }
+export default {
+  name: 'MorePage',
+  components: {
+    GoToProfile,
+    ThemeSwitcher,
+    LogoutButton
+  },
+  methods: {
+    goBack() {
+      this.$router.go(-1);
     }
-  };
+  }
+};
 </script>
 
 <style scoped>
- .container-header {
-    display: flex;
-    justify-content: space-between;
-    color: white;
-    width: 100%;
-    margin-top: 1em;
-    font-size: x-large;
-  }
-
+.container-header {
+  display: flex;
+  justify-content: space-between;
+  color: white;
+  width: 100%;
+  margin-top: 1em;
+  font-size: x-large;
+}
 </style>

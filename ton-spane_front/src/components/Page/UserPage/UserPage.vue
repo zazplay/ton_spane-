@@ -1,127 +1,24 @@
-<script lang="js" setup>
-import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import ListPostCards from '../../ListPostCards.vue'
-import Config from '@/config'
-
-const router = useRouter()
-const route = useRoute()
-const userId = route.params.id || 'f26088fd-d4aa-4420-a7f6-1f89baa915c3'
-
-const S3_BASE_URL = 'https://tonimages.s3.us-east-1.amazonaws.com/'
-const DEFAULT_HEADER = 'https://placehold.co/600x200'
-const DEFAULT_AVATAR = 'https://img.icons8.com/?size=100&id=83151&format=png&color=22C3E6'
-
-const isLoaded = ref(false)
-const userData = ref({
-  id: userId,
-  username: '',
-  profilePicture: '',
-  profileHeader: '',
-  posts: [],
-  likes: [],
-})
-const activeNames = ref(['1'])
-
-const formatImageUrl = (imageUrl) => {
-  if (!imageUrl) return null
-  return imageUrl.startsWith('http') ? imageUrl : `${S3_BASE_URL}${imageUrl}`
-}
-
-const preparePostsData = (posts) => {
-  return posts.map(post => ({
-    ...post,
-    id: post.id,
-    userId: userId,
-    imageUrl: formatImageUrl(post.imageUrl),
-    price: String(post.price),
-    isBlurred: post.isBlurred || false,
-    caption: post.caption || ''
-  }))
-}
-
-const fetchUserData = async () => {
-  try {
-    const response = await fetch(`${Config.API_BASE_URL}/users/${userId}`)
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-    const data = await response.json()
-    
-    userData.value = {
-      ...data,
-      id: userId,
-      profilePicture: formatImageUrl(data.profilePicture) || DEFAULT_AVATAR,
-      profileHeader: formatImageUrl(data.profileHeader) || DEFAULT_HEADER,
-      posts: preparePostsData(data.posts || []),
-      likes: data.likes || [],
-    }
-    isLoaded.value = true
-  } catch (err) {
-    console.error('Error fetching user data:', err)
-    isLoaded.value = true
-  }
-}
-
-const fetchUserPosts = async () => {
-  try {
-    const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${userId}`);
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const data = await response.json();
-    
-    const formattedPosts = data.map(post => ({
-      ...post,
-      id: post.id,
-      imageUrl: formatImageUrl(post.imageUrl),
-      caption: post.caption || '',
-      price: String(post.price),
-      isBlurred: post.isBlurred || false,
-      createdAt: post.createdAt,
-      user: {
-        id: userId,
-        username: userData.value.username,
-        email: userData.value.email || '',
-        profilePicture: userData.value.profilePicture
-      },
-      // Include other boolean flags
-      initialLiked: false,
-      initialShared: false,
-      initialDonated: false,
-      initialSubscribed: false
-    }));
-
-    userData.value.posts = formattedPosts;
-  } catch (err) {
-    console.error('Error fetching user posts:', err);
-    userData.value.posts = [];
-  }
-};
-
-const handleImageError = (type) => {
-  if (type === 'header') {
-    userData.value.profileHeader = DEFAULT_HEADER
-  } else if (type === 'avatar') {
-    userData.value.profilePicture = DEFAULT_AVATAR
-  }
-}
-
-const openDonatePage = () => {
-  router.push(`/app/userSubscribeDonate/${userId}`)
-}
-
-const openDonateYearPage = () => {
-  router.push(`/app/userSubscribeDonateYear/${userId}`)
-}
-
-// Sequential fetching to ensure user data is loaded first
-const initializeUserData = async () => {
-  await fetchUserData()
-  await fetchUserPosts()
-}
-
-onMounted(initializeUserData)
-</script>
 <template>
-  <div v-if="isLoaded" class="layout">
-    <el-container>
+  <div class="layout">
+    <div v-if="!isLoaded" class="loading-container">
+      <el-card class="loading-card">
+        <el-skeleton style="width: 100%" animated>
+          <template #template>
+            <el-skeleton-item variant="image" style="width: 100%; height: 200px" />
+            <div style="padding: 14px">
+              <el-skeleton-item variant="h3" style="width: 50%" />
+              <div style="display: flex; justify-content: space-between; margin-top: 20px">
+                <el-skeleton-item variant="text" style="width: 30%" />
+                <el-skeleton-item variant="text" style="width: 30%" />
+                <el-skeleton-item variant="text" style="width: 30%" />
+              </div>
+            </div>
+          </template>
+        </el-skeleton>
+      </el-card>
+    </div>
+
+    <el-container v-else>
       <el-header class="header">
         <el-image 
           class="header-image" 
@@ -153,8 +50,11 @@ onMounted(initializeUserData)
           <el-text class="stat-badge" type="primary">
             <el-text class="stat-text">{{ userData.posts.length }} публикации</el-text>
           </el-text>
-          <el-text class="stat-badge" type="primary">
-            <el-text class="stat-text">{{ userData.likes.length }} лайков</el-text>
+          <el-text class="stat-badgeLikes" type="primary">
+            <el-text class="stat-text">{{ userLikes }} лайков</el-text>
+          </el-text>
+          <el-text class="stat-badgeSubs" type="primary">
+            <el-text class="stat-text">{{userSubscription}} подпищиков</el-text>
           </el-text>
         </el-aside>
       </el-container>
@@ -169,7 +69,7 @@ onMounted(initializeUserData)
                 </div>
               </template>
               <div class="collapse-content">
-              {{ userData.profileDescription }}
+                {{ userData.profileDescription || 'Описание не добавлено' }}
               </div>
             </el-collapse-item>
           </el-collapse>
@@ -185,12 +85,230 @@ onMounted(initializeUserData)
     </el-container>
     
     <ListPostCards 
-      v-if="userData.posts.length" 
+      v-if="isLoaded && userData.posts && userData.posts.length > 0" 
       :posts="userData.posts"
       :user="userData"
     />
+    <div v-else-if="isLoaded && (!userData.posts || userData.posts.length === 0)" class="no-posts">
+      <el-empty 
+        description="Нет публикаций" 
+        :image-size="200"
+      />
+    </div>
   </div>
 </template>
+
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import ListPostCards from '../../ListPostCards.vue'
+import Config from '@/config'
+import {
+  ElMessage,
+  ElSkeleton,
+  ElSkeletonItem,
+  ElCard,
+  ElContainer,
+  ElHeader,
+  ElAside,
+  ElMain,
+  ElImage,
+  ElText,
+  ElCollapse,
+  ElCollapseItem,
+  ElButton,
+  ElEmpty
+} from 'element-plus'
+
+const router = useRouter()
+const route = useRoute()
+const userId = route.params.id
+
+const S3_BASE_URL = 'https://tonimages.s3.us-east-1.amazonaws.com/'
+const DEFAULT_HEADER = 'https://placehold.co/600x200'
+const DEFAULT_AVATAR = 'https://img.icons8.com/?size=100&id=83151&format=png&color=22C3E6'
+
+const userLikes = ref(0)
+const userSubscription = ref(0)
+const isLoaded = ref(false)
+const activeNames = ref(['1'])
+const abortController = new AbortController()
+
+const userData = ref({
+  id: userId,
+  username: '',
+  profilePicture: '',
+  profileHeader: '',
+  posts: [],
+  likes: [],
+  profileDescription: ''
+})
+
+const formatImageUrl = (imageUrl) => {
+  if (!imageUrl) return null
+  return imageUrl.startsWith('http') ? imageUrl : `${S3_BASE_URL}${imageUrl}`
+}
+
+const preparePostsData = (posts = []) => {
+  if (!Array.isArray(posts)) return []
+  return posts.map(post => ({
+    ...post,
+    id: post.id,
+    userId: userId,
+    imageUrl: formatImageUrl(post.imageUrl),
+    price: String(post.price || 0),
+    isBlurred: post.isBlurred || false,
+    caption: post.caption || ''
+  }))
+}
+
+const fetchUserData = async () => {
+  try {
+    const response = await fetch(`${Config.API_BASE_URL}/users/${userId}`, {
+      signal: abortController.signal
+    })
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    const data = await response.json()
+    
+    if (!data) {
+      throw new Error('No user data received')
+    }
+    
+    userData.value = {
+      ...data,
+      id: userId,
+      profilePicture: formatImageUrl(data.profilePicture) || DEFAULT_AVATAR,
+      profileHeader: formatImageUrl(data.profileHeader) || DEFAULT_HEADER,
+      posts: preparePostsData(data.posts),
+      likes: data.likes || [],
+      profileDescription: data.profileDescription || ''
+    }
+  } catch (err) {
+    if (err.name === 'AbortError') return
+    console.error('Error fetching user data:', err)
+    ElMessage.error('Ошибка при загрузке данных пользователя')
+    userData.value = {
+      id: userId,
+      username: 'Пользователь',
+      profilePicture: DEFAULT_AVATAR,
+      profileHeader: DEFAULT_HEADER,
+      posts: [],
+      likes: [],
+      profileDescription: ''
+    }
+  }
+}
+
+const fetchUserPosts = async () => {
+  try {
+    const response = await fetch(
+      `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${userId}`,
+      { signal: abortController.signal }
+    )
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    const data = await response.json()
+    
+    if (!Array.isArray(data)) {
+      console.error('Posts data is not an array:', data)
+      return []
+    }
+    
+    const formattedPosts = data.map(post => ({
+      ...post,
+      id: post.id,
+      imageUrl: formatImageUrl(post.imageUrl),
+      caption: post.caption || '',
+      price: String(post.price || 0),
+      isBlurred: post.isBlurred || false,
+      createdAt: post.createdAt,
+      user: {
+        id: userId,
+        username: userData.value.username,
+        email: userData.value.email || '',
+        profilePicture: userData.value.profilePicture
+      },
+      initialLiked: false,
+      initialShared: false,
+      initialDonated: false,
+      initialSubscribed: false
+    }))
+
+    if (formattedPosts.length > 0) {
+      userData.value.posts = formattedPosts
+      userLikes.value = formattedPosts.reduce((total, post) => total + (post.likes?.length || 0), 0)
+    }
+
+    return formattedPosts
+  } catch (err) {
+    if (err.name === 'AbortError') return
+    console.error('Error fetching user posts:', err)
+    ElMessage.error('Ошибка при загрузке постов пользователя')
+    return []
+  }
+}
+
+const fetchUserSubs = async () => {
+  try {
+    const response = await fetch(
+      `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId}/followers`,
+      { signal: abortController.signal }
+    )
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    const data = await response.json()
+    userSubscription.value = Array.isArray(data) ? data.length : 0
+  } catch (err) {
+    if (err.name === 'AbortError') return
+    console.error('Error fetching user subscriptions:', err)
+    ElMessage.error('Ошибка при загрузке подписчиков')
+    userSubscription.value = 0
+  }
+}
+
+const handleImageError = (type) => {
+  if (type === 'header') {
+    userData.value.profileHeader = DEFAULT_HEADER
+  } else if (type === 'avatar') {
+    userData.value.profilePicture = DEFAULT_AVATAR
+  }
+}
+
+const openDonatePage = () => {
+  router.push(`/app/userSubscribeDonate/${userId}`)
+}
+
+const openDonateYearPage = () => {
+  router.push(`/app/userSubscribeDonateYear/${userId}`)
+}
+
+const initializeUserData = async () => {
+  try {
+    isLoaded.value = false
+    await fetchUserData()
+    // Просто вызываем Promise.all без присваивания результатов
+    await Promise.all([
+      fetchUserPosts(),
+      fetchUserSubs()
+    ])
+    setTimeout(() => {
+      isLoaded.value = true
+    }, 300)
+  } catch (error) {
+    if (error.name === 'AbortError') return
+    console.error('Error initializing data:', error)
+    ElMessage.error('Ошибка при загрузке данных')
+    isLoaded.value = true
+  }
+}
+
+onMounted(() => {
+  initializeUserData()
+})
+
+onUnmounted(() => {
+  abortController.abort()
+})
+</script>
+
 
 <style scoped>
 .layout {
@@ -216,7 +334,10 @@ onMounted(initializeUserData)
   transition: transform 0.3s ease;
 }
 
-
+.content-container {
+  flex-direction: column !important;
+  width: 98%;
+}
 
 .aside {
   width: 100%;
@@ -255,6 +376,7 @@ onMounted(initializeUserData)
 }
 
 .stat-badge {
+  text-align: center;
   color: rgba(255, 255, 255, 0.95);
   text-shadow: 0 2px 4px rgba(0, 149, 255, 0.3);
   font-weight: 500;
@@ -288,6 +410,82 @@ onMounted(initializeUserData)
     0 8px 12px rgba(0, 0, 0, 0.3),
     inset 0 2px 4px rgba(255, 255, 255, 0.2),
     0 0 15px rgba(0, 149, 255, 0.3);
+}
+
+.stat-badgeLikes {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 4px rgba(255, 0, 0, 0.5);
+  font-weight: 500;
+  border-radius: 15px;
+  padding: 12px 20px;
+  width: auto;
+  margin-left: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 0, 0, 0.2) 0%,
+    rgba(255, 0, 0, 0.35) 50%, 
+    rgba(255, 0, 0, 0.2) 100%
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 0, 0, 0.3);
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    0 0 15px rgba(255, 0, 0, 0.2);
+  transition: all 0.4s ease;
+}
+
+.stat-badgeLikes:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 0, 0, 0.3) 0%,
+    rgba(255, 0, 0, 0.45) 50%,
+    rgba(255, 0, 0, 0.3) 100%
+  );
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 12px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3),
+    0 0 20px rgba(255, 0, 0, 0.4);
+}
+
+.stat-badgeSubs {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 4px rgba(147, 51, 234, 0.5);
+  font-weight: 500;
+  border-radius: 15px;
+  padding: 12px 20px;
+  width: auto;
+  margin-left: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(147, 51, 234, 0.2) 0%,
+    rgba(168, 85, 247, 0.35) 50%,
+    rgba(147, 51, 234, 0.2) 100%
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(147, 51, 234, 0.3);
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    0 0 15px rgba(147, 51, 234, 0.2);
+  transition: all 0.4s ease;
+}
+
+.stat-badgeSubs:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(147, 51, 234, 0.3) 0%,
+    rgba(168, 85, 247, 0.45) 50%,
+    rgba(147, 51, 234, 0.3) 100%
+  );
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 12px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3),
+    0 0 20px rgba(147, 51, 234, 0.4);
 }
 
 .main {
@@ -347,8 +545,9 @@ onMounted(initializeUserData)
   color: #ffffff;
 }
 
-/* Базовые стили для всех кнопок */
-.action-button, .action-buttonYearSub, .action-buttonMonthSub {
+/* Стили кнопок */
+.action-buttonYearSub,
+.action-buttonMonthSub {
   width: 99%;
   height: 5.7%;
   align-self: center;
@@ -361,27 +560,9 @@ onMounted(initializeUserData)
   transition: all 0.3s ease;
   cursor: pointer;
   font-size: 1.25rem !important;
-
 }
 
-/* Стиль для обычной кнопки */
-.action-button {
-  font-size: 1.25rem;
-  background: linear-gradient(135deg, #0095ff 0%, #0059ff 100%) !important;
-  box-shadow: 0 4px 15px rgba(0, 149, 255, 0.3);
-}
-
-.action-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 8px 25px rgba(0, 149, 255, 0.4),
-    0 0 15px rgba(0, 149, 255, 0.3);
-  background: linear-gradient(135deg, #0059ff 0%, #0095ff 100%) !important;
-}
-
-/* Стили для годовой подписки */
 .action-buttonYearSub {
-  font-size: 0.8rem;
   background: linear-gradient(135deg, #9d50bb 0%, #6e48aa 100%) !important;
   box-shadow: 0 4px 15px rgba(157, 80, 187, 0.3);
 }
@@ -394,14 +575,7 @@ onMounted(initializeUserData)
   background: linear-gradient(135deg, #b867d9 0%, #9d50bb 100%) !important;
 }
 
-.action-buttonYearSub:active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 10px rgba(157, 80, 187, 0.2);
-}
-
-/* Стили для месячной подписки */
 .action-buttonMonthSub {
-  font-size: 0.8rem;
   background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%) !important;
   box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
 }
@@ -414,25 +588,44 @@ onMounted(initializeUserData)
   background: linear-gradient(135deg, #00d2ff 0%, #00b4db 100%) !important;
 }
 
-.action-buttonMonthSub:active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 10px rgba(0, 180, 219, 0.2);
+/* Стили для состояния загрузки */
+.loading-container {
+  padding: 20px;
+  background: #0d1117;
+  min-height: 100vh;
 }
 
-.loading-state, .error-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  color: #e6edf3;
+.loading-card {
+  background: #161b22;
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
 }
 
+.loading-card :deep(.el-card__body) {
+  padding: 0;
+}
+
+.loading-card :deep(.el-skeleton__item) {
+  background: linear-gradient(90deg, #1c2128 25%, #2d333b 50%, #1c2128 75%);
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.4s ease infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+/* Медиа-запросы для мобильных устройств */
 @media (max-width: 480px) {
   .content-container {
     flex-direction: column !important;
     width: 98%;
-    
   }
   
   .main {
@@ -440,25 +633,37 @@ onMounted(initializeUserData)
     padding: 0 15px;
   }
   
-  .username {
-    font-size: 14px;
-    width: 30%;
+  .aside {
+    width: 100%;
+    display: inline-flex;
     flex-wrap: wrap;
-    gap: 5px;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 20px;
   }
   
   .profile-image {
-    width: 40%;
-    margin-right: 20px;
+    width: 25%;
+    margin-right: 10px;
   }
   
-  .stat-badge {
+  .username {
+    font-size: 14px;
+    width: 30%;
+  }
+  
+  .stat-badge,
+  .stat-badgeLikes, 
+  .stat-badgeSubs {
     width: 70.6% !important;
     padding: 10px;
     margin: 5px;
+    margin-top: 15px;
   }
   
-  .stat-badge :deep(.el-text) {
+  .stat-badge :deep(.el-text),
+  .stat-badgeLikes :deep(.el-text),
+  .stat-badgeSubs :deep(.el-text) {
     font-size: 12px !important;
   }
   
@@ -473,67 +678,7 @@ onMounted(initializeUserData)
   .collapse-content {
     font-size: 14px;
   }
-  
-/* Общие стили для обеих кнопок */
-.action-buttonYearSub, .action-buttonMonthSub {
-  width: 99%;
-  height: 5.7%;
-  align-self: center;
-  font-weight: bold;
-  font-size: 0.8rem !important;
-  padding: 20px;
-  margin: 10px 0;
-  border: none;
-  border-radius: 12px;
-  color: white;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
 
-/* Стили для годовой подписки */
-.action-buttonYearSub {
-  background: linear-gradient(135deg, #9d50bb 0%, #6e48aa 100%) !important;
-  box-shadow: 0 4px 15px rgba(157, 80, 187, 0.3) !important;
-  position: relative;
-  overflow: hidden;
-}
-
-.action-buttonYearSub:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 8px 25px rgba(157, 80, 187, 0.4),
-    0 0 15px rgba(157, 80, 187, 0.3);
-  background: linear-gradient(135deg, #b867d9 0%, #9d50bb 100%);
-}
-
-.action-buttonYearSub:active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 10px rgba(157, 80, 187, 0.2);
-}
-
-/* Стили для месячной подписки */
-.action-buttonMonthSub {
-  background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);
-  box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
-  position: relative;
-  overflow: hidden;
-}
-
-.action-buttonMonthSub:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 8px 25px rgba(0, 180, 219, 0.4),
-    0 0 15px rgba(0, 180, 219, 0.3);
-  background: linear-gradient(135deg, #00d2ff 0%, #00b4db 100%);
-}
-
-.action-buttonMonthSub:active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 10px rgba(0, 180, 219, 0.2);
-}
-
-/* Медиа-запрос для мобильных устройств */
-@media (max-width: 480px) {
   .action-buttonYearSub,
   .action-buttonMonthSub {
     width: 100%;
@@ -542,5 +687,13 @@ onMounted(initializeUserData)
     font-size: 0.75rem !important;
     height: auto;
   }
-}}
+
+  .loading-container {
+    padding: 10px;
+  }
+
+  .loading-card :deep(.el-skeleton__item) {
+    margin-bottom: 10px;
+  }
+}
 </style>

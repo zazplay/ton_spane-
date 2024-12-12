@@ -6,7 +6,6 @@
         <div class="header-content">
           <el-text class="site-name">
             <img src="./../../assets/horizontal-logo.png" style="height: 50px; margin-left: 70px !important;"/>
-
           </el-text>
           <div class="icon-container">
             <router-link to="/app/notifications">
@@ -14,10 +13,6 @@
                 <BellFilled />
               </el-icon>
             </router-link>
-            <!-- <el-icon class="icon-style" @click="openForm">
-              <CirclePlusFilled />
-            </el-icon> -->
-            <!-- Передача пропа isOpen -->
             <AddPostForm :isOpen="isFormOpen" @close="closeForm" />
           </div>
         </div>
@@ -28,7 +23,32 @@
         <el-container>
           <el-tabs v-model="activeTab" class="demo-tabs containet-style">
             <el-tab-pane label="Для вас" name="first">
-              <ListPostCards :posts="posts" />
+              <!-- Состояние загрузки -->
+              <div v-if="!isDataLoaded" class="loading-container">
+                <el-row :gutter="20">
+                  <el-col :span="24" v-for="n in 3" :key="n">
+                    <el-card class="loading-card">
+                      <el-skeleton animated>
+                        <template #template>
+                          <!-- Аватар и имя пользователя -->
+                          <div style="display: flex; align-items: center; margin-bottom: 20px">
+                            <el-skeleton-item variant="circle" style="width: 40px; height: 40px; margin-right: 16px"/>
+                            <el-skeleton-item variant="text" style="width: 30%"/>
+                          </div>
+                          <!-- Изображение поста -->
+                          <el-skeleton-item variant="image" style="width: 100%; height: 240px"/>
+                          <!-- Описание и действия -->
+                          <div style="padding: 14px">
+                            <el-skeleton-item variant="p" style="width: 90%"/>
+                            <el-skeleton-item variant="text" style="width: 60%; margin-top: 16px"/>
+                          </div>
+                        </template>
+                      </el-skeleton>
+                    </el-card>
+                  </el-col>
+                </el-row>
+              </div>
+              <ListPostCards v-else :posts="posts" />
             </el-tab-pane>
             <el-tab-pane label="Подписки" name="second">
               <FollowingPage />
@@ -42,9 +62,7 @@
 </template>
 
 <script>
-
 import { BellFilled } from '@element-plus/icons-vue';
-// import {  CirclePlusFilled } from '@element-plus/icons-vue';
 import ListPostCards from '../ListPostCards.vue';
 import AddPostForm from '../AddPostForm.vue';
 import { ref } from 'vue'
@@ -56,7 +74,6 @@ export default {
     AddPostForm,
     ListPostCards,
     BellFilled,
-    // CirclePlusFilled,
     FollowingPage
   },
   data() {
@@ -69,19 +86,24 @@ export default {
   },
   methods: {
     openForm() {
-      this.isFormOpen = true; // Відкриваємо форму
+      this.isFormOpen = true;
     },
     closeForm() {
-      this.isFormOpen = false; // Закриваємо форму
+      this.isFormOpen = false;
     },
     async fetchPosts() {
       try {
+        this.isDataLoaded = false; // Начало загрузки
         const response = await fetch(`${config.API_BASE_URL}/posts`)
         const data = await response.json()
         console.log('Posts data:', data)
         this.posts = data
+        setTimeout(() => {
+          this.isDataLoaded = true; // Завершение загрузки с небольшой задержкой
+        }, 1000);
       } catch (error) {
         console.error('Error fetching posts:', error)
+        this.isDataLoaded = true; // Убираем загрузку даже при ошибке
       }
     }
   },
@@ -92,13 +114,11 @@ export default {
 </script>
 
 <style scoped>
-
 .demo-tabs>.el-tabs__content {
   color: #6b778c;
   font-size: 32px;
   font-weight: 600;
 }
-
 
 .containet-style {
   width: 100%;
@@ -146,6 +166,38 @@ export default {
   padding-right: 20px !important;
 }
 
+/* Стили для состояния загрузки */
+.loading-container {
+  padding: 20px;
+}
+
+.loading-card {
+  margin-bottom: 20px;
+  background: #161b22;
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.loading-card :deep(.el-card__body) {
+  padding: 20px;
+}
+
+.loading-card :deep(.el-skeleton__item) {
+  background: linear-gradient(90deg, #1c2128 25%, #2d333b 50%, #1c2128 75%);
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.4s ease infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
 @media (max-width: 1200px) {
   .containet-style {
     width: 100% !important;
@@ -155,6 +207,18 @@ export default {
   .main-container-content {
     padding: 5px !important;
     padding-top: 0 !important;
+  }
+
+  .loading-container {
+    padding: 10px;
+  }
+
+  .loading-card {
+    margin-bottom: 10px;
+  }
+
+  .loading-card :deep(.el-skeleton__item) {
+    margin-bottom: 8px;
   }
 }
 </style>
