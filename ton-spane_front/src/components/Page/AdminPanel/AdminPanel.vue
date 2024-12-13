@@ -76,6 +76,7 @@ const handleSelect = (index) => {
     }
 
     .content {
+        padding-top:0;
         max-width: 100%;
     }
 }

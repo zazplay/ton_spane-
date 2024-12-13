@@ -12,10 +12,6 @@ export default defineComponent({
         const loading = ref(true);
         const lists = ref([]);
         const currentDate = new Date().toDateString();
-        // const router = useRouter(); // Отримуємо інстанс роутера
-        // const store = useStore(); // Получаем инстанс хранилища Vuex
-
-        // Устанавливаем изображение пользователя по умолчанию
         const defaultUserImage = "https://via.placeholder.com/150";
 
         // Получаем sub из Vuex
@@ -67,7 +63,6 @@ export default defineComponent({
             emit('select-user', item.id);
         };
 
-
         onMounted(() => {
             fetchData();
         });
@@ -89,6 +84,10 @@ export default defineComponent({
 </script>
 
 <template>
+    <div class="btn-add-profile">
+        <el-button type="success">Добавить профиль</el-button>
+    </div>
+
     <el-space style="width: 100%" fill>
         <el-skeleton style="display: flex; gap: 8px" :loading="loading" animated :count="3">
             <template #template>
@@ -177,6 +176,13 @@ export default defineComponent({
     font-size: 14px;
 }
 
+.btn-add-profile {
+    display: flex;
+    justify-content: end;
+    padding-right: 15px;
+}
+
+
 @media (max-width: 1200px) {
     .scroll-container {
         flex-wrap: nowrap;
@@ -187,18 +193,24 @@ export default defineComponent({
         scroll-snap-type: x mandatory;
         cursor: grab;
         /* Зміна курсору для натискання */
-        padding: 10px 0;
+        padding: 0;
+        margin-bottom: 10px;
     }
 
     .el-card {
         flex: 0 0 90px;
         /* Фіксована ширина картки */
-        height: 110px;
+        height: 140px;
     }
 
     .image {
         width: 90px;
         height: 85px;
+    }
+
+    .btn-add-profile {
+        padding-right: 5px;
+        margin: 10px 0 20px;
     }
 }
 </style>

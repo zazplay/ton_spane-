@@ -5,10 +5,10 @@
         <dialog id="deleteDialog" ref="deleteDialog">
             <form method="dialog">
                 <p>Вы действительно хотите удалить {{ selectedPosts.length }} пост(ов)?</p>
-                    <div style="display: flex; justify-content: space-between;" >
-                        <el-button type="danger"  @click="deletePosts">Видалити</el-button>
-                        <el-button type="info" @click="closeDeleteDialog">Отменить</el-button>
-                    </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <el-button type="danger" @click="deletePosts">Видалити</el-button>
+                    <el-button type="info" @click="closeDeleteDialog">Отменить</el-button>
+                </div>
             </form>
         </dialog>
 
@@ -68,8 +68,7 @@
             <PostComponent :id="post.id" :user="user ? user : post.user" :imageUrl="post.imageUrl"
                 :caption="post.caption" :isBlurred="post.isBlurred" :price="post.price" :createdAt="post.createdAt" />
             <!-- Кнопка редагування -->
-            <div
-                style="display: flex; flex-direction: row; justify-content: space-between; padding-left: 10px; padding-right: 10px;">
+            <div class="bottom-btn-group">
                 <el-button class="edit-btn" type="warning" @click="openEditDialog(post)">Редагувати</el-button>
                 <input type="checkbox" v-model="selectedPosts" :value="post.id" class="custom-checkbox" />
 
@@ -427,6 +426,14 @@ dialog::backdrop {
     /* Цвет фона при выборе */
 }
 
+.bottom-btn-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
 @media (max-width: 1200px) {
 
     /* .input-caption textarea{
@@ -467,5 +474,10 @@ dialog::backdrop {
         /* Уменьшаем размер кнопки закрытия */
     }
 
+    .bottom-btn-group {
+        
+        padding-left: 10px;
+        padding-right:10px;
+    }
 }
 </style>
