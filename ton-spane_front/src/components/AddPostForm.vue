@@ -91,13 +91,13 @@ const handleSubmit = async () => {
     formData.append("image", post.value.image);
 
     console.log("formData", post.value.caption, formData.userId, post.value.price, post.value.isBlurred, post.value.image);
-    
+
     const response = await axios.post(
       `${config.API_BASE_URL}/posts`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        }
+      headers: {
+        "Content-Type": "multipart/form-data",
       }
+    }
     );
     console.log("response", response);
     alert("Пост добавлен успешно!");
@@ -112,6 +112,13 @@ const closeForm = () => {
   emit("close");
 };
 
+const limitInput = (event) => {
+  const value = event.target.value;
+  if (value.length > 4) {
+    event.target.value = value.slice(0, 4); // Обрезаем строку до 4 символов
+  }
+};
+
 // Trigger file input click
 const triggerFileInput = () => {
   document.querySelector('input[type="file"]').click();
@@ -124,17 +131,19 @@ const triggerFileInput = () => {
     <div class="modal-content dark-theme">
       <button class="close-btn" @click="closeForm">✖</button>
       <form>
-        <div class="form-group" style="margin-top:30px;">
-          <label for="caption">Заголовок</label>
-          <textarea id="caption" v-model="post.caption" required class="form-control"
-            placeholder="Введите описание"></textarea>
+        <label for="caption">Текст:</label>
+        <div class="input-caption">
+          <textarea id="caption" v-model="post.caption" required placeholder="Введите описание"></textarea>
         </div>
 
-        <div style="display: flex; flex-direction: row; justify-content: space-between;">
-          <div class="input-price">
+
+        <div style="display: flex; flex-direction: row; justify-content: space-between; margin-top: 20px;">
+          <div>
             <label for="price">Цена:</label>
-            <input style="margin-top: 10px;" type="number" id="price" min="0" max="999" v-model.number="post.price"
-              required />
+            <div class="input-price">
+              <input type="number" id="price" min="0" max="999" v-model.number="post.price" required maxlength="4"
+                size="4" @input="limitInput" />
+            </div>
           </div>
           <div style="display: flex; flex-direction: row;">
             <!-- Показать имя выбранного файла -->
@@ -154,13 +163,13 @@ const triggerFileInput = () => {
         </div>
         <p v-if="error" class="text-danger">{{ error }}</p>
 
-        <div>
-          <input style="width: 15px; height: 15px;" type="checkbox" id="isBlurred" v-model="post.isBlurred" />
-          <label for="isBlurred">Размытое изображение:</label>
+        <div class="input-blurred">
+          <input v-model="post.isBlurred" type="checkbox" id="isBlurred" />
+          <label for="isBlurred" style="color: white;">Размытое изображение</label>
         </div>
 
-        <div class="mb-4">
-          <el-button type="success" class="custom-file-btn" style="margin-top: 15px;" plain
+        <div >
+          <el-button type="success" style="margin-top: 35px;" plain
             @click.prevent="handleSubmit">
             Опубликовать
           </el-button>
@@ -190,7 +199,7 @@ const triggerFileInput = () => {
 /* Содержимое модального окна */
 .modal-content {
   position: relative;
-  background: #2c2f33;
+  background: rgb(30, 27, 27);
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -306,6 +315,137 @@ const triggerFileInput = () => {
   margin-right: 10px;
 }
 
+/* Стилизация текстового input */
+.input-caption {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+}
+
+.input-caption label {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.input-caption textarea {
+  padding: 10px;
+  /* Отступы внутри текстового поля */
+  border: 2px solid #4f8cff;
+  /* Цвет рамки */
+  border-radius: 5px;
+  /* Закругление углов */
+  font-size: 16px;
+  /* Размер шрифта */
+  resize: vertical;
+  /* Позволяет изменять размер только по вертикали */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  /* Плавные переходы */
+  min-height: 100px;
+  /* Минимальная высота текстового поля */
+}
+
+.input-caption textarea:focus {
+  border-color: #2563eb;
+  /* Цвет рамки при фокусе */
+  box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
+  /* Тень при фокусе */
+  outline: none;
+  /* Убираем стандартное выделение */
+}
+
+.input-caption textarea::placeholder {
+  color: #aaa;
+  /* Цвет текста плейсхолдера */
+}
+
+/* Стили импута цены */
+.input-price {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  width: 70px;
+}
+
+.input-price label {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.input-price input[type="number"] {
+  padding: 10px;
+  /* Отступы внутри поля ввода */
+  border: 2px solid #4f8cff;
+  /* Цвет рамки */
+  border-radius: 5px;
+  /* Закругление углов */
+  font-size: 16px;
+  /* Размер шрифта */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  /* Плавные переходы */
+}
+
+.input-price input[type="number"]:focus {
+  border-color: #2563eb;
+  /* Цвет рамки при фокусе */
+  box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
+  /* Тень при фокусе */
+  outline: none;
+  /* Убираем стандартное выделение */
+}
+
+.input-price input[type="number"]::-webkit-inner-spin-button,
+.input-price input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  /* Убираем стрелки у spin button в Chrome */
+  margin: 0;
+  /* Убираем отступы */
+}
+
+/* Стили чекбокс */
+.input-blurred {
+  display: flex;
+  align-items: center;
+  /* Выравнивание по центру по вертикали */
+  margin-top: 20px;
+  /* Отступ сверху */
+}
+
+.input-blurred label {
+  font-size: 16px;
+  /* Размер шрифта метки */
+  color: #333;
+  /* Цвет текста метки */
+  margin-right: 10px;
+  /* Отступ справа от метки */
+}
+
+.input-blurred input[type="checkbox"] {
+  width: 20px;
+  /* Ширина чекбокса */
+  height: 20px;
+  /* Высота чекбокса */
+  cursor: pointer;
+  /* Указатель при наведении */
+  accent-color: #4f8cff;
+  /* Цвет чекбокса (для современных браузеров) */
+}
+
+/* Стили для чекбокса при фокусе */
+.input-blurred input[type="checkbox"]:focus {
+  outline: none;
+  /* Убираем стандартное выделение */
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+  /* Тень при фокусе */
+}
+
+/* Стили для состояния чекбокса (при нажатии) */
+.input-blurred input[type="checkbox"]:checked {
+  background-color: #4f8cff;
+  /* Цвет фона при выборе */
+}
+
 /* Адаптивность для экранов меньше 1200px */
 @media (max-width: 1200px) {
   .modal-content {
@@ -352,7 +492,8 @@ const triggerFileInput = () => {
 
   .selected-file {
     font-size: 14px;
-    max-width: 150px;    /* Ограничиваем ширину */
+    max-width: 150px;
+    /* Ограничиваем ширину */
 
   }
 }

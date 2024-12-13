@@ -4,28 +4,46 @@
         <!-- Модальне вікно для підтвердження видалення -->
         <dialog id="deleteDialog" ref="deleteDialog">
             <form method="dialog">
-                <p>Вы действительно хотите удалить {{ selectedPosts.length }} поста(ов)?</p>
-                <menu>
-                    <button @click="closeDeleteDialog">Отменить</button>
-                    <button type="button" @click="deletePosts">Видалити</button>
-                </menu>
+                <p>Вы действительно хотите удалить {{ selectedPosts.length }} пост(ов)?</p>
+                    <div style="display: flex; justify-content: space-between;" >
+                        <el-button type="danger"  @click="deletePosts">Видалити</el-button>
+                        <el-button type="info" @click="closeDeleteDialog">Отменить</el-button>
+                    </div>
             </form>
         </dialog>
 
         <!-- Модальне вікно редагування -->
         <dialog id="editDialog" ref="editDialog">
-            <form method="dialog" @submit.prevent="savePostChanges">
+            <form method="dialog" class="edit-modal-window">
                 <h3>Редактировать пост</h3>
+
                 <label for="caption">Текст:</label>
-                <input v-model="editForm.caption" type="text" id="caption" required />
-                <label for="price">Цена:</label>
-                <input v-model="editForm.price" type="number" id="price" required />
-                <label for="isBlurred">Розмытый:</label>
-                <input v-model="editForm.isBlurred" type="checkbox" id="isBlurred" />
-                <menu>
-                    <button type="button" @click="closeEditDialog">Закрыть</button>
-                    <button type="submit">Сохранить</button>
-                </menu>
+                <div class="input-caption">
+                    <textarea id="caption" v-model="editForm.caption" required
+                        placeholder="Введите описание"></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+
+                    <div class="input-blurred">
+                        <input v-model="editForm.isBlurred" type="checkbox" id="isBlurred" />
+                        <label for="isBlurred" style="color: white;">Размытое изображение</label>
+                    </div>
+
+                    <div style="margin-top: 10px;">
+                        <label for="price">Цена:</label>
+                        <div class="input-price">
+                            <input type="number" id="price" min="0" max="999" v-model.number="editForm.price" required
+                                maxlength="4" size="4" @input="limitInput" />
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="close-btn " @click="closeEditDialog">✖</button>
+                <el-button type="success" style="width: max-content; padding: 5px;" plain
+                    @click.prevent="savePostChanges">
+                    Редактировать
+                </el-button>
             </form>
         </dialog>
 
@@ -47,18 +65,14 @@
 
         <!-- Виведення карток постів -->
         <div v-for="post in listPosts" :key="post.id" class="post-item">
-            <PostComponent
-            :id="post.id" 
-            :user="user? user: post.user"
-            :imageUrl="post.imageUrl"
-            :caption="post.caption"
-            :isBlurred="post.isBlurred" 
-            :price="post.price"
-            :createdAt="post.createdAt" />
+            <PostComponent :id="post.id" :user="user ? user : post.user" :imageUrl="post.imageUrl"
+                :caption="post.caption" :isBlurred="post.isBlurred" :price="post.price" :createdAt="post.createdAt" />
             <!-- Кнопка редагування -->
-            <div style="display: flex; flex-direction: row; justify-content: space-between;">
-                <input type="checkbox" v-model="selectedPosts" :value="post.id" class="custom-checkbox" />
+            <div
+                style="display: flex; flex-direction: row; justify-content: space-between; padding-left: 10px; padding-right: 10px;">
                 <el-button class="edit-btn" type="warning" @click="openEditDialog(post)">Редагувати</el-button>
+                <input type="checkbox" v-model="selectedPosts" :value="post.id" class="custom-checkbox" />
+
             </div>
         </div>
 
@@ -85,9 +99,9 @@ const editForm = ref({ caption: '', price: 0, isBlurred: false, id: null }); // 
 
 const props = defineProps(
     {
-        user:{
-            type:Object,
-            required:false
+        user: {
+            type: Object,
+            required: false
         },
         userId: {
             type: String,
@@ -199,6 +213,12 @@ const savePostChanges = async () => {
     }
 };
 
+const limitInput = (event) => {
+    const value = event.target.value;
+    if (value.length > 4) {
+        event.target.value = value.slice(0, 4); // Обрезаем строку до 4 символов
+    }
+};
 
 // Отримуємо пости при монтуванні компонента
 onMounted(() => {
@@ -234,11 +254,20 @@ onMounted(() => {
     width: max-content;
 }
 
-.custom-checkbox {
-    width: 20px !important;
-    /* Установите нужный размер */
-    height: 20px !important;
-    /* Установите нужный размер */
+/* Кнопка закрытия */
+.close-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #ffffff;
+}
+
+.close-btn:hover {
+    color: #ff0000;
 }
 
 .edit-btn {
@@ -253,13 +282,165 @@ onMounted(() => {
 dialog {
     border: none;
     border-radius: 10px;
+    background-color: rgb(30, 27, 27);
 }
 
 dialog::backdrop {
     background-color: rgba(0, 0, 0, 0.5);
 }
 
+.edit-modal-window {
+    display: flex;
+    flex-direction: column;
+    width: 500px;
+    background-color: rgb(30, 27, 27);
+}
+
+/* Стилизация текстового input */
+.input-caption {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+}
+
+.input-caption label {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.input-caption textarea {
+    padding: 10px;
+    /* Отступы внутри текстового поля */
+    border: 2px solid #4f8cff;
+    /* Цвет рамки */
+    border-radius: 5px;
+    /* Закругление углов */
+    font-size: 16px;
+    /* Размер шрифта */
+    resize: vertical;
+    /* Позволяет изменять размер только по вертикали */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    /* Плавные переходы */
+    min-height: 100px;
+    /* Минимальная высота текстового поля */
+}
+
+.input-caption textarea:focus {
+    border-color: #2563eb;
+    /* Цвет рамки при фокусе */
+    box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
+    /* Тень при фокусе */
+    outline: none;
+    /* Убираем стандартное выделение */
+}
+
+.input-caption textarea::placeholder {
+    color: #aaa;
+    /* Цвет текста плейсхолдера */
+}
+
+/* Стили импута цены */
+.input-price {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    width: 70px;
+}
+
+.input-price label {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.input-price input[type="number"] {
+    padding: 10px;
+    /* Отступы внутри поля ввода */
+    border: 2px solid #4f8cff;
+    /* Цвет рамки */
+    border-radius: 5px;
+    /* Закругление углов */
+    font-size: 16px;
+    /* Размер шрифта */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    /* Плавные переходы */
+}
+
+.input-price input[type="number"]:focus {
+    border-color: #2563eb;
+    /* Цвет рамки при фокусе */
+    box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
+    /* Тень при фокусе */
+    outline: none;
+    /* Убираем стандартное выделение */
+}
+
+.input-price input[type="number"]::-webkit-inner-spin-button,
+.input-price input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    /* Убираем стрелки у spin button в Chrome */
+    margin: 0;
+    /* Убираем отступы */
+}
+
+/* Стили чекбокс */
+.input-blurred {
+    display: flex;
+    align-items: center;
+    /* Выравнивание по центру по вертикали */
+    margin-top: 10px;
+    /* Отступ сверху */
+}
+
+.input-blurred label {
+    font-size: 16px;
+    /* Размер шрифта метки */
+    color: #333;
+    /* Цвет текста метки */
+    margin-right: 10px;
+    /* Отступ справа от метки */
+}
+
+.input-blurred input[type="checkbox"] {
+    width: 20px;
+    /* Ширина чекбокса */
+    height: 20px;
+    /* Высота чекбокса */
+    cursor: pointer;
+    /* Указатель при наведении */
+    accent-color: #4f8cff;
+    /* Цвет чекбокса (для современных браузеров) */
+}
+
+/* Стили для чекбокса при фокусе */
+.input-blurred input[type="checkbox"]:focus {
+    outline: none;
+    /* Убираем стандартное выделение */
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+    /* Тень при фокусе */
+}
+
+/* Стили для состояния чекбокса (при нажатии) */
+.input-blurred input[type="checkbox"]:checked {
+    background-color: #4f8cff;
+    /* Цвет фона при выборе */
+}
+
 @media (max-width: 1200px) {
+
+    /* .input-caption textarea{
+        max-width:70%;
+    } */
+    dialog {
+        width: 80%;
+    }
+
+    .edit-modal-window {
+        width: 100%;
+    }
+
+
     .container-btn-add-delete {
         display: flex;
         position: sticky;
@@ -279,6 +460,11 @@ dialog::backdrop {
 
     .el-button {
         margin-right: 0;
+    }
+
+    .close-btn {
+        font-size: 1rem;
+        /* Уменьшаем размер кнопки закрытия */
     }
 
 }
