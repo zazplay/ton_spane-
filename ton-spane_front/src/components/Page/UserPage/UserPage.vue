@@ -54,7 +54,7 @@
             <el-text class="stat-text">{{ userLikes }} лайков</el-text>
           </el-text>
           <el-text class="stat-badgeSubs" type="primary">
-            <el-text class="stat-text">{{userSubscription}} подпищиков</el-text>
+            <el-text class="stat-text">{{userSubscription}} подпиcчиков</el-text>
           </el-text>
         </el-aside>
       </el-container>
