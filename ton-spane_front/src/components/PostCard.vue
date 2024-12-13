@@ -110,7 +110,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, computed } from 'vue'
+import { ref, defineProps, defineEmits, computed, onMounted } from 'vue'
 import ShareModal from './ShareModal.vue' 
 import TipsModal from './TipsModal.vue'
 import SubscriptionModal from '../components/Page/SubOnCardModal/SubCardModal.vue'
@@ -118,47 +118,92 @@ import { useStore } from 'vuex'
 import { Lock, Share, Money } from '@element-plus/icons-vue'
 
 const props = defineProps({
-  id: { type: String, required: true },
-  caption: { type: String, default: '' },
-  imageUrl: { type: String, default: '' },
-  isBlurred: { type: Boolean, default: false },
-  price: { type: String, default: '0' },
-  createdAt: { type: String, required: true },
-  updatedAt: { type: String, required: true },
+  id: {
+    type: String,
+    required: true,
+    validator: (value) => value.length > 0
+  },
+  caption: {
+    type: String,
+    default: '',
+    maxLength: 500
+  },
+  imageUrl: {
+    type: String,
+    default: '',
+    validator: (value) => value === '' || value.startsWith('https://')
+  },
+  isBlurred: {
+    type: Boolean,
+    default: false
+  },
+  price: {
+    type: [String, Number],
+    default: '0',
+    validator: (value) => !isNaN(parseFloat(value)) && parseFloat(value) >= 0
+  },
+  createdAt: {
+    type: String,
+    required: true,
+    validator: (value) => !isNaN(Date.parse(value))
+  },
+  updatedAt: {
+    type: String,
+    required: true,
+    validator: (value) => !isNaN(Date.parse(value))
+  },
   user: {
     type: Object,
+    required: true,
     default: () => ({
       id: '',
       username: '',
       email: '',
-      password: '',
       profilePicture: null,
       profileHeader: null,
       profileDescription: '',
       createdAt: '',
       updatedAt: ''
-    })
+    }),
+    validator: (value) => {
+      return typeof value.id === 'string' && 
+             typeof value.email === 'string' &&
+             (!value.username || typeof value.username === 'string')
+    }
   },
   comments: {
     type: Array,
-    default: () => []
+    default: () => [],
+    validator: (value) => Array.isArray(value)
   },
   likes: {
     type: Array,
-    default: () => []
+    default: () => [],
+    validator: (value) => Array.isArray(value)
+  },
+  isLikedByCurrentUser: {
+    type: Boolean,
   }
 })
 
 const emit = defineEmits(['like', 'share', 'donate', 'subscribe'])
 
+onMounted(() => {
+  console.log('Card props:', {
+    id: props.id,
+    isLikedByCurrentUser: props.isLikedByCurrentUser
+  })
+})
+
 const subscriptionModalRef = ref(null)
-const isLiked = ref(props.initialLiked)
+const isLiked = ref(props.isLikedByCurrentUser)
 const likes = ref(props.likes.length)
 const isSubscribed = ref(props.initialSubscribed)
 const isShared = ref(props.initialShared)
 const isDonated = ref(props.initialDonated)
 const isShareModalVisible = ref(false)
 const isTipsModalVisible = ref(false)
+
 
 const handleImageClick = () => {
   if (props.isBlurred && subscriptionModalRef.value) {

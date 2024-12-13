@@ -26,6 +26,7 @@ defineProps({
       :updatedAt="post.updatedAt"
       :comments="post.comments"
       :likes="post.likes"
+      :isLikedByCurrentUser="post.isLikedByCurrentUser"  
     />
   </div>
 </template>

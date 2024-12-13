@@ -6,8 +6,8 @@
         <div class="header-content">
           <el-text class="site-name">
             <div class="logo-container">
-    <img src="./../../assets/horizontal-logo.png" alt="Logo">
-</div>
+              <img src="./../../assets/horizontal-logo.png" alt="Logo">
+          </div>
           </el-text>
           <div class="icon-container">
             <router-link to="/app/notifications">
@@ -64,12 +64,13 @@
 </template>
 
 <script>
-import { BellFilled } from '@element-plus/icons-vue';
-import ListPostCards from '../ListPostCards.vue';
-import AddPostForm from '../AddPostForm.vue';
-import { ref } from 'vue'
-import FollowingPage from './FollowingPage/FollowingPage.vue';
-import config from '../../config';
+import { BellFilled } from '@element-plus/icons-vue'
+import ListPostCards from '../ListPostCards.vue'
+import AddPostForm from '../AddPostForm.vue'
+import {  computed } from 'vue'
+import FollowingPage from './FollowingPage/FollowingPage.vue'
+import config from '../../config'
+import { useStore } from 'vuex'
 
 export default {
   components: {
@@ -79,40 +80,91 @@ export default {
     FollowingPage
   },
   data() {
+    const store = useStore()
+    const userId = computed(() => store.getters.getSub)
+    
     return {
       isFormOpen: false,
       activeTab: 'first',
       isDataLoaded: false,
-      posts: ref([])
-    };
+      posts: {
+        id: '',
+        caption: '',
+        comments: [],
+        createdAt: '',
+        imageUrl: '',
+        isBlurred: false,
+        isLikedByCurrentUser: false,
+        likes: [],
+        price: '0',
+        updatedAt: '',
+        user: {
+          id: '',
+          username: null,
+          email: '',
+          password: '',
+          profilePicture: null,
+          profileHeader: null,
+          profileDescription: null,
+          createdAt: '',
+          updatedAt: ''
+        }
+      },
+      userId
+    }
   },
   methods: {
     openForm() {
-      this.isFormOpen = true;
+      this.isFormOpen = true
     },
     closeForm() {
-      this.isFormOpen = false;
+      this.isFormOpen = false
     },
     async fetchPosts() {
       try {
-        this.isDataLoaded = false; // Начало загрузки
-        const response = await fetch(`${config.API_BASE_URL}/posts`)
+        this.isDataLoaded = false
+        const response = await fetch(`${config.API_BASE_URL}/posts/requester/${this.userId}`)
         const data = await response.json()
         console.log('Posts data:', data)
-        this.posts = data
+        
+        // Трансформируем данные с нужной структурой
+        this.posts = data.map(post => ({
+          id: post.id || '',
+          caption: post.caption || '',
+          comments: post.comments || [],
+          createdAt: post.createdAt || '',
+          imageUrl: post.imageUrl || '',
+          isBlurred: post.isBlurred || false,
+          isLikedByCurrentUser: post.isLikedByCurrentUser || false,
+          likes: post.likes || [],
+          price: post.price || '0',
+          updatedAt: post.updatedAt || '',
+          user: {
+            id: post.user?.id || '',
+            username: post.user?.username || null,
+            email: post.user?.email || '',
+            password: post.user?.password || '',
+            profilePicture: post.user?.profilePicture || null,
+            profileHeader: post.user?.profileHeader || null,
+            profileDescription: post.user?.profileDescription || null,
+            createdAt: post.user?.createdAt || '',
+            updatedAt: post.user?.updatedAt || ''
+          }
+        }))
+
         setTimeout(() => {
-          this.isDataLoaded = true; // Завершение загрузки с небольшой задержкой
-        }, 1000);
+          this.isDataLoaded = true
+        }, 1000)
       } catch (error) {
         console.error('Error fetching posts:', error)
-        this.isDataLoaded = true; // Убираем загрузку даже при ошибке
+        this.isDataLoaded = true
       }
     }
   },
   mounted() {
     this.fetchPosts()
   }
-};
+}
 </script>
 
 <style scoped>

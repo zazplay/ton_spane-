@@ -99,7 +99,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted,computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import ListPostCards from '../../ListPostCards.vue'
 import Config from '@/config'
@@ -119,6 +119,13 @@ import {
   ElButton,
   ElEmpty
 } from 'element-plus'
+import { useStore } from 'vuex'
+
+
+
+const store = useStore()
+const CurrUserId = computed(() => store.getters.getSub)
+
 
 const router = useRouter()
 const route = useRoute()
@@ -199,12 +206,15 @@ const fetchUserData = async () => {
   }
 }
 
+
+
 const fetchUserPosts = async () => {
   try {
     const response = await fetch(
-      `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${userId}`,
+      `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${userId}/requester/${CurrUserId.value}`,
       { signal: abortController.signal }
     )
+    
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
     const data = await response.json()
     
@@ -227,7 +237,7 @@ const fetchUserPosts = async () => {
         email: userData.value.email || '',
         profilePicture: userData.value.profilePicture
       },
-      initialLiked: false,
+      initialLiked: post.isLikedByCurrentUser || false,
       initialShared: false,
       initialDonated: false,
       initialSubscribed: false

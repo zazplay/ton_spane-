@@ -26,8 +26,7 @@ export default {
 
 <style scoped>
 #app {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 
-  Roboto, 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing: antialiased;
+ -webkit-font-smoothing: antialiased;
  -moz-osx-font-smoothing: grayscale;
  /* text-align: center; */
  color: #2c3e50;
