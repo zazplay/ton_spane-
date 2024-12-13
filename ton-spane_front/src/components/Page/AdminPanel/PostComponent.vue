@@ -5,7 +5,7 @@
 
             <el-avatar :size="50" class="avatar" :src="user.profilePicture" />
             <div class="user-info">
-                <router-link :to="`/app/user/${user.id}`" class="username">
+                <router-link class="username">
                     {{ props.user.username }}
                 </router-link>
                 <el-text></el-text>
@@ -77,12 +77,7 @@ const props = defineProps({
     createdAt: { type: String, required: true },
     user: {
         type: Object,
-        default: () => ({
-            id: '',
-            username: '',
-            email: '',
-            profilePicture: null
-        })
+        required:false
     },
 })
 
