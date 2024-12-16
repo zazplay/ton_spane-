@@ -64,7 +64,10 @@
 
 
         <!-- Виведення карток постів -->
-        <div v-for="post in listPosts" :key="post.id" class="post-item">
+        <!-- <div v-for="post in listPosts" :key="post.id" class="post-item">
+            <PostComponent :id="post.id" :user="user ? user : post.user" :imageUrl="post.imageUrl"
+                :caption="post.caption" :isBlurred="post.isBlurred" :price="post.price" :createdAt="post.createdAt" /> -->
+        <div v-for="post in (postsParam?postsParam:listPosts)" :key="post.id" class="post-item">
             <PostComponent :id="post.id" :user="user ? user : post.user" :imageUrl="post.imageUrl"
                 :caption="post.caption" :isBlurred="post.isBlurred" :price="post.price" :createdAt="post.createdAt" />
             <!-- Кнопка редагування -->
@@ -81,7 +84,6 @@
 </template>
 
 <script lang="js" setup>
-
 import axios from 'axios';
 import config from '@/config';
 import { ref, onMounted, defineProps } from 'vue';
@@ -98,14 +100,15 @@ const editForm = ref({ caption: '', price: 0, isBlurred: false, id: null }); // 
 
 const props = defineProps(
     {
+        postsParam: {
+            type: Object,
+            required: false
+        },
         user: {
             type: Object,
             required: false
         },
-        userId: {
-            type: String,
-            default: null, // Кнопка буде відображатися за замовчуванням
-        },
+      
         showAddButton: {
             type: Boolean,
             default: false, // Кнопка буде відображатися за замовчуванням
@@ -113,18 +116,26 @@ const props = defineProps(
     })
 // Асинхронна функція для отримання постів
 const getPosts = async () => {
-    let getPostStr = '';
+    console.log('user',props.user)
+    console.log('postsParam',props.postsParam)
+    
+    // let getPostStr = '';
     try {
-        if (props.userId === null) {
-            getPostStr = `${config.API_BASE_URL}/posts`;
-        }
-        else {
-            console.log(props.userId);
-            getPostStr = `${config.API_BASE_URL}/posts/user/${props.userId}`
+        // if (props.userId === null) {
+        //     getPostStr = `${config.API_BASE_URL}/posts`;
+        // }
+        // else {
+        //     console.log(props.userId);
+        //     getPostStr = `${config.API_BASE_URL}/posts/requester/${props.userId}`
+        // }
+        //TODO: Изменить запрос для получения всех постов
+        if(!props.postsParam){
+            const response = await axios.get(`${config.API_BASE_URL}/posts/requester/a7248fe8-a4c1-4d49-bf22-5722f537916a`);
+            listPosts.value = response.data; // Оновлюємо список пості
         }
 
-        const response = await axios.get(getPostStr);
-        listPosts.value = response.data; // Оновлюємо список постів
+        // const response = await axios.get(getPostStr);
+        // listPosts.value = response.data; // Оновлюємо список пості
     } catch (error) {
         console.error('Помилка при отриманні постів:', error);
     }
@@ -435,10 +446,6 @@ dialog::backdrop {
 }
 
 @media (max-width: 1200px) {
-
-    /* .input-caption textarea{
-        max-width:70%;
-    } */
     dialog {
         width: 80%;
     }
@@ -475,9 +482,9 @@ dialog::backdrop {
     }
 
     .bottom-btn-group {
-        
+
         padding-left: 10px;
-        padding-right:10px;
+        padding-right: 10px;
     }
 }
 </style>

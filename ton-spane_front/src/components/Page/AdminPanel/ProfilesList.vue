@@ -1,9 +1,6 @@
 <!--ProfilesList-->
 <script>
-
 import { ref, onMounted, defineComponent } from "vue";
-// import { useRouter } from "vue-router"; // Імпортуємо useRouter
-// import { useStore } from 'vuex' // Импортируем useStore
 import axios from "axios";
 import config from "@/config";
 
@@ -14,12 +11,26 @@ export default defineComponent({
         const currentDate = new Date().toDateString();
         const defaultUserImage = "https://via.placeholder.com/150";
 
+        // Регулярные выражения для валидации
+        const htmlTagRegex = /<\/?[a-z][\w-]*(?:\s+[a-z_:][\w:.-]*(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^>\s]+))?)*(?:\s\s+|=)*\s*\/?>|<!--[\s\S]*?-->/gi;
+        const sqlInjectionRegex = /(\b(SELECT|INSERT|DELETE|UPDATE|DROP|TRUNCATE|EXEC|UNION|OR|FROM|TABLE|AND)\b)|['"--;]/gi;
+
         // Получаем sub из Vuex
         // const sub = store.getters.getSub;
         let isDragging = false;
         let startX = 0;
         let scrollLeft = 0;
 
+        const newProfile = ref({
+            username: '',
+            // profilePicture: '',
+            description: ''
+        });
+
+        const errors = ref({
+            username: '',
+            description: ''
+        });
         const startDrag = (event) => {
             isDragging = true;
             startX = event.pageX - event.target.offsetLeft;
@@ -63,10 +74,102 @@ export default defineComponent({
             emit('select-user', item.id);
         };
 
+        const openAddProfileDialog = () => {
+            const dialog = document.getElementById('addProfileDialog');
+            dialog.showModal(); // Открываем диалоговое окно
+        };
+
+        const closeAddProfileDialog = () => {
+            const dialog = document.getElementById('addProfileDialog');
+            dialog.close(); // Закрываем диалоговое окно
+        };
+
+        // Валидационные функции
+        const validateLogin = (value) => {
+            if (value.length > 20) {
+                return "Логин не должен превышать 20 символов.";
+            }
+            const loginRegex = /^[a-zA-Z0-9._]+$/;
+            if (!loginRegex.test(value)) {
+                return "Логин может содержать только английские буквы, цифры, точки и символы '_'.";
+            }
+            if (/^[._]/.test(value) || /[._]$/.test(value)) {
+                return "Логин не может начинаться или заканчиваться точкой или '_'.";
+            }
+            return ""; // Если ошибок нет
+        };
+
+        const validateInputs = () => {
+            let isValid = true;
+            errors.value.username = '';
+            errors.value.description = '';
+
+            // Проверка имени пользователя
+            if (!newProfile.value.username) {
+                errors.value.username = 'Имя обязательно для заполнения.';
+                return false;
+            } else if (newProfile.value.username.length > 20) {
+                errors.value.username = 'Имя не должно превышать 20 символов.';
+                return false;
+            }
+
+            // Проверка описания
+            if (!newProfile.value.description) {
+                errors.value.description = 'Описание обязательно для заполнения.';
+                return false;
+            }
+
+            // Проверка имени пользователя
+            const usernameError = validateLogin(newProfile.value.username);
+            if (usernameError) {
+                errors.value.username = usernameError;
+                return false;
+            }
+
+            // Проверка описания
+            if (!newProfile.value.description) {
+                errors.value.description = 'Описание обязательно для заполнения.';
+                return false;
+            }
+
+            // Проверка имени пользователя на наличие HTML-тегов и SQL-инъекций
+            if (htmlTagRegex.test(newProfile.value.username) || sqlInjectionRegex.test(newProfile.value.username)) {
+                errors.value.username = 'Имя не должно содержать недопустимые символы или конструкции.';
+                return false;
+            }
+
+            // Проверка описания на наличие HTML-тегов и SQL-инъекций
+            if (htmlTagRegex.test(newProfile.value.description) || sqlInjectionRegex.test(newProfile.value.description)) {
+                errors.value.description = 'Описание не должно содержать недопустимые символы или конструкции.';
+                return false;
+            }
+
+            return isValid;
+        };
+
+        const saveNewProfile = () => {
+            if (validateInputs()) {
+                console.log('Сохранение профиля:', newProfile.value);
+
+                // Здесь вы можете добавить код для отправки данных на сервер
+
+                closeAddProfileDialog(); // Закрываем диалог после сохранения
+                // Сброс значений формы после успешного сохранения
+                newProfile.value = { username: '', description: '' };
+            } else {
+                // Если есть ошибки, можно очищать значения некорректных полей
+                if (errors.value.username) {
+                    newProfile.value.username = ''; // Удаляем некорректное значение
+                }
+                if (errors.value.description) {
+                    newProfile.value.description = ''; // Удаляем некорректное значение
+                }
+            }
+        };
+
         onMounted(() => {
             fetchData();
         });
-
 
         return {
             loading,
@@ -78,6 +181,13 @@ export default defineComponent({
             startDrag,
             dragging,
             stopDrag,
+            newProfile,
+            openAddProfileDialog,
+            closeAddProfileDialog,
+            saveNewProfile,
+            errors,
+            validateInputs,
+
         };
     },
 });
@@ -85,8 +195,32 @@ export default defineComponent({
 
 <template>
     <div class="btn-add-profile">
-        <el-button type="success">Добавить профиль</el-button>
+        <el-button type="success" @click="openAddProfileDialog">Добавить профиль</el-button>
     </div>
+
+    <!--Добавить профиль-->
+    <dialog id="addProfileDialog" ref="addProfileDialog">
+        <form method="dialog" class="edit-modal-window">
+            <button type="button" class="close-btn" @click="closeAddProfileDialog">✖</button>
+            <h3>Добавить профиль</h3>
+
+            <label for="userName">Имя:</label>
+            <div class="input-userName">
+                <input id="userName" type="text" v-model="newProfile.username" placeholder="Введите имя профиля" />
+                <span v-if="errors.username" class="error-message">{{ errors.username }}</span>
+            </div>
+
+            <label for="description">Описание:</label>
+            <div class="input-caption">
+                <textarea id="description" v-model="newProfile.description" placeholder="Введите описание"></textarea>
+                <span v-if="errors.description" class="error-message">{{ errors.description }}</span>
+            </div>
+
+            <el-button type="success" style="width: max-content; padding: 5px; margin-top: 20px;" plain
+                @click.prevent="saveNewProfile">Сохранить
+            </el-button>
+        </form>
+    </dialog>
 
     <el-space style="width: 100%" fill>
         <el-skeleton style="display: flex; gap: 8px" :loading="loading" animated :count="3">
@@ -182,6 +316,137 @@ export default defineComponent({
     padding-right: 15px;
 }
 
+/* Стили для діалогового вікна */
+dialog {
+    border: none;
+    border-radius: 10px;
+    background-color: rgb(30, 27, 27);
+}
+
+dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.edit-modal-window {
+    display: flex;
+    flex-direction: column;
+    width: 500px;
+    background-color: rgb(30, 27, 27);
+}
+
+/* Стилизация текстового input */
+.input-caption {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+}
+
+.input-caption label {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.input-caption textarea {
+    padding: 10px;
+    /* Отступы внутри текстового поля */
+    border: 2px solid #4f8cff;
+    /* Цвет рамки */
+    border-radius: 5px;
+    /* Закругление углов */
+    font-size: 16px;
+    /* Размер шрифта */
+    resize: vertical;
+    /* Позволяет изменять размер только по вертикали */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    /* Плавные переходы */
+    min-height: 100px;
+    /* Минимальная высота текстового поля */
+}
+
+.input-caption textarea:focus {
+    border-color: #2563eb;
+    /* Цвет рамки при фокусе */
+    box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
+    /* Тень при фокусе */
+    outline: none;
+    /* Убираем стандартное выделение */
+}
+
+.input-caption textarea::placeholder {
+    color: #aaa;
+    /* Цвет текста плейсхолдера */
+}
+
+.input-userName {
+    display: flex;
+    flex-direction: column;
+    /* Расположение метки и поля ввода в столбик */
+    margin-top: 10px;
+    margin-bottom: 10px;
+    /* Отступ сверху */
+}
+
+.input-userName label {
+    font-size: 16px;
+    /* Размер шрифта метки */
+    color: #333;
+    /* Цвет текста метки */
+    margin-bottom: 5px;
+    /* Отступ снизу от метки */
+}
+
+.input-userName input[type="text"] {
+    padding: 10px;
+    /* Отступы внутри поля ввода */
+    border: 2px solid #4f8cff;
+    /* Цвет рамки */
+    border-radius: 5px;
+    /* Закругление углов */
+    font-size: 16px;
+    /* Размер шрифта */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    /* Плавные переходы */
+}
+
+.input-userName input[type="text"]:focus {
+    border-color: #2563eb;
+    /* Цвет рамки при фокусе */
+    box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
+    /* Тень при фокусе */
+    outline: none;
+    /* Убираем стандартное выделение */
+}
+
+.input-userName input[type="text"]::placeholder {
+    color: #aaa;
+    /* Цвет текста плейсхолдера */
+}
+
+/* Кнопка закрытия */
+.close-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #ffffff;
+}
+
+.close-btn:hover {
+    color: #ff0000;
+}
+
+.error-message {
+    color: red;
+    /* Цвет текста ошибки */
+    font-size: 14px;
+    /* Размер шрифта */
+    margin-top: 5px;
+    /* Отступ сверху */
+}
 
 @media (max-width: 1200px) {
     .scroll-container {
@@ -211,6 +476,19 @@ export default defineComponent({
     .btn-add-profile {
         padding-right: 5px;
         margin: 10px 0 20px;
+    }
+
+    dialog {
+        width: 80%;
+    }
+
+    .edit-modal-window {
+        width: 100%;
+    }
+
+    .close-btn {
+        font-size: 1, 2rem;
+        /* Уменьшаем размер кнопки закрытия */
     }
 }
 </style>
