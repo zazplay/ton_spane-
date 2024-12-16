@@ -34,7 +34,7 @@ const userData = ref({
     profileHeader: '',
     profileDescription: '',
     createdAt: '',
-    post: [],
+    posts: [],
     likes: [],
 });
 
@@ -237,7 +237,7 @@ const fetchUserData = async () => {
 
 const fetchUserPosts = async () => {
     try {
-        const response = await fetch(`${config.API_BASE_URL}/posts/user/${props.userIdProp}`);
+        const response = await fetch(`${config.API_BASE_URL}/posts/requester/${props.userIdProp}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
 
@@ -263,6 +263,7 @@ const fetchUserPosts = async () => {
         }));
 
         userData.value.posts = formattedPosts;
+        console.log("userData.value.posts",userData.value.posts);
     } catch (err) {
         console.error('Error fetching user posts:', err);
         userData.value.posts = [];
@@ -394,7 +395,7 @@ onMounted(initializeUserData)
         </el-container>
         <div style="position: relative;">
             <PostsAP v-if="userData.posts.length" 
-            :posts="userData.posts" 
+            :postsParam="userData.posts" 
             :user="userData" 
             :userId="userData.id"
             :showAddButton="true" 

@@ -8,8 +8,8 @@
                 <!-- Передаем selectedUser как userIdProp -->
                 <ProfileContent :userIdProp="selectedUser" />
             </div>
-            <div v-else>
-                <p>Виберіть користувача, щоб переглянути його профіль</p>
+            <div v-else style="display: flex; justify-content: center;">
+                <p style="color: white; font-size: x-large;">Виберите пользователя чтоб просмотреть его профиль.</p>
             </div>
         </div>
     </div>

@@ -110,6 +110,7 @@
 </template>
 
 <script setup>
+
 import { ref, defineProps, defineEmits, computed, onMounted } from 'vue'
 import ShareModal from './ShareModal.vue' 
 import TipsModal from './TipsModal.vue'
@@ -203,7 +204,6 @@ const isShared = ref(props.initialShared)
 const isDonated = ref(props.initialDonated)
 const isShareModalVisible = ref(false)
 const isTipsModalVisible = ref(false)
-
 
 const handleImageClick = () => {
   if (props.isBlurred && subscriptionModalRef.value) {
