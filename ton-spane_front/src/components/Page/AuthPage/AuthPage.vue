@@ -1,5 +1,15 @@
 <template>
   <div class="auth-container">
+    <div class="logo-container">
+  <div class="logo-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M17.516 3c2.382 0 4.487 1.564 4.487 4.712 0 4.963-6.528 8.297-10.003 11.935-3.475-3.638-10.002-6.971-10.002-11.934 0-3.055 2.008-4.713 4.487-4.713 3.18 0 4.846 3.644 5.515 5.312.667-1.666 2.333-5.312 5.516-5.312zm0-2c-2.174 0-4.346 1.062-5.516 3.419-1.17-2.357-3.342-3.419-5.515-3.419-3.403 0-6.484 2.39-6.484 6.689 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-4.586-3.414-6.689-6.484-6.689z" />
+    </svg>
+  </div>
+  <div class="logo-text">
+    <span class="text-gradient">Dream</span>scape
+  </div> 
+</div>
     <div class="form-card">
       <div class="header">
         <div class="button-group">
@@ -71,7 +81,7 @@ export default {
       },
       showPassword: false,
       showLogin: true,
-      isLoading: false, // Добавляем состояние загрузки
+      isLoading: false,
     };
   },
   methods: {
@@ -103,7 +113,7 @@ export default {
     },
     async submitForm() {
       if (this.validateForm()) {
-        this.isLoading = true; // Включаем анимацию загрузки
+        this.isLoading = true;
         try {
           const apiUrl = `${config.API_BASE_URL}/auth/login/`;
           const payload = {
@@ -118,7 +128,6 @@ export default {
             sessionStorage.setItem("refreshToken", response.data.refreshToken);
             this.$store.dispatch('initializeSub', response.data.accessToken);
             
-            // Добавляем задержку для плавной анимации
             setTimeout(() => {
               this.isLoading = false;
               window.location.href = "/app/tape";
@@ -143,7 +152,48 @@ export default {
 </script>
 
 <style scoped>
-/* Контейнер для кнопок */
+/* DreamScape Logo Styles */
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap');
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  font-family: 'Comfortaa', cursive;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.logo-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(45deg, #007bff, #00bfff);
+  border-radius: 50%;
+  margin-right: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-icon svg {
+  width: 36px;
+  height: 36px;
+  fill: white;
+}
+
+.logo-text {
+  font-size: 36px;
+  background: linear-gradient(45deg, #007bff, #00bfff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient {
+  background: linear-gradient(45deg, #ffffff, #f0f8ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;  
+}
+
+/* Header Styles */
 .header {
   display: flex;
   justify-content: flex-end;
@@ -155,7 +205,6 @@ export default {
   gap: 10px;
 }
 
-/* Стили кнопок переключения */
 .header-btn {
   padding: 10px 20px;
   font-size: 16px;
@@ -181,15 +230,15 @@ export default {
   box-shadow: 0 4px 12px rgba(79, 140, 255, 0.3);
 }
 
-/* Основной контейнер */
+/* Container Styles */
 .auth-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   min-height: 80vh;
 }
 
-/* Карточка формы */
 .form-card {
   padding: 30px;
   border-radius: 15px;
@@ -202,7 +251,7 @@ export default {
   animation: fadeIn 0.5s ease-out;
 }
 
-/* Заголовок */
+/* Form Styles */
 .title {
   text-align: center;
   font-size: 28px;
@@ -211,13 +260,11 @@ export default {
   text-shadow: 0 0 10px rgba(79, 140, 255, 0.5);
 }
 
-/* Форма */
 .auth-form {
   display: flex;
   flex-direction: column;
 }
 
-/* Элементы формы */
 .form-item {
   margin-bottom: 20px;
   position: relative;
@@ -255,7 +302,7 @@ export default {
   outline: none;
 }
 
-/* Контейнер кнопок */
+/* Button Styles */
 .form-actions {
   display: flex;
   justify-content: space-between;
@@ -263,7 +310,6 @@ export default {
   margin-top: 20px;
 }
 
-/* Стили кнопок */
 .submit-btn,
 form button[type="button"] {
   border: none;
@@ -302,7 +348,7 @@ form button[type="button"] {
   box-shadow: 0 4px 12px rgba(79, 140, 255, 0.3);
 }
 
-/* Поле пароля */
+/* Password Field Styles */
 .password-wrapper {
   position: relative;
   display: flex;
@@ -339,7 +385,7 @@ form button[type="button"] {
   pointer-events: none;
 }
 
-/* Текст ошибок */
+/* Error Styles */
 .error-text {
   color: #ff4b6e;
   font-size: 14px;
@@ -347,7 +393,7 @@ form button[type="button"] {
   animation: fadeIn 0.3s ease;
 }
 
-/* Анимация загрузки */
+/* Loading Animation */
 .loading-spinner {
   display: flex;
   justify-content: center;
@@ -365,7 +411,7 @@ form button[type="button"] {
   animation: spin 0.8s linear infinite;
 }
 
-/* Состояния кнопок */
+/* Button States */
 .submit-btn:disabled,
 .red-btn:disabled {
   opacity: 0.7;
@@ -383,7 +429,7 @@ form button[type="button"] {
   opacity: 0.7;
 }
 
-/* Hover эффекты */
+/* Hover Effects */
 .form-item:hover label {
   color: #4f8cff;
 }
@@ -392,7 +438,7 @@ form button[type="button"] {
   color: #4f8cff;
 }
 
-/* Анимации */
+/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -420,18 +466,18 @@ form button[type="button"] {
   }
 }
 
-/* Темная тема */
+/* Dark Theme */
 @media (prefers-color-scheme: dark) {
   .form-card {
     background: rgba(17, 24, 39, 0.95);
   }
-
+  /* Dark Theme Continued */
   .form-item input {
     background-color: rgba(17, 24, 39, 0.8);
   }
 }
 
-/* Адаптивность */
+/* Responsive Design */
 @media screen and (max-width: 768px) {
   .form-card {
     padding: 20px;
@@ -451,5 +497,67 @@ form button[type="button"] {
     padding: 10px 20px;
     font-size: 14px;
   }
+
+  .dreamscape-logo .logo-text {
+    font-size: 36px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .dreamscape-logo .logo-text {
+    font-size: 32px;
+  }
+
+  .header-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  .form-card {
+    padding: 15px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .submit-btn,
+  .red-btn {
+    width: 100%;
+  }
+}
+
+/* Additional hover effects for form elements */
+.form-item input:hover {
+  border-color: rgba(81, 119, 255, 0.4);
+}
+
+.toggle-password:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.form-card:hover {
+  border-color: rgba(81, 119, 255, 0.2);
+  box-shadow: 0 10px 40px rgba(0, 8, 78, 0.35);
+}
+
+/* Enhanced focus states for accessibility */
+.header-btn:focus,
+.submit-btn:focus,
+.red-btn:focus,
+.toggle-password:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.4);
+}
+
+/* Smooth transitions for interactive elements */
+.form-card,
+.header-btn,
+.submit-btn,
+.red-btn,
+.form-item input,
+.toggle-password {
+  will-change: transform, box-shadow, border-color;
 }
 </style>

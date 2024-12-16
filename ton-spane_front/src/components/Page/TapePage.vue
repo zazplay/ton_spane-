@@ -6,8 +6,15 @@
         <div class="header-content">
           <el-text class="site-name">
             <div class="logo-container">
-              <img src="./../../assets/horizontal-logo.png" alt="Logo">
-          </div>
+  <div class="logo-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M17.516 3c2.382 0 4.487 1.564 4.487 4.712 0 4.963-6.528 8.297-10.003 11.935-3.475-3.638-10.002-6.971-10.002-11.934 0-3.055 2.008-4.713 4.487-4.713 3.18 0 4.846 3.644 5.515 5.312.667-1.666 2.333-5.312 5.516-5.312zm0-2c-2.174 0-4.346 1.062-5.516 3.419-1.17-2.357-3.342-3.419-5.515-3.419-3.403 0-6.484 2.39-6.484 6.689 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-4.586-3.414-6.689-6.484-6.689z" />
+    </svg>
+  </div>
+  <div class="logo-text">
+    <span class="text-gradient">Dream</span>scape
+  </div>  
+</div>
           </el-text>
           <div class="icon-container">
             <router-link to="/app/notifications">
@@ -64,15 +71,19 @@
 </template>
 
 <script>
-import { BellFilled } from '@element-plus/icons-vue'
-import ListPostCards from '../ListPostCards.vue'
-import AddPostForm from '../AddPostForm.vue'
-import {  computed } from 'vue'
-import FollowingPage from './FollowingPage/FollowingPage.vue'
-import config from '../../config'
+import { BellFilled } from '@element-plus/icons-vue';
+import ListPostCards from '../ListPostCards.vue';
+import AddPostForm from '../AddPostForm.vue';
+import { ref, computed } from 'vue'
+import FollowingPage from './FollowingPage/FollowingPage.vue';
+import config from '../../config';
 import { useStore } from 'vuex'
 
+
 export default {
+
+
+
   components: {
     AddPostForm,
     ListPostCards,
@@ -87,84 +98,38 @@ export default {
       isFormOpen: false,
       activeTab: 'first',
       isDataLoaded: false,
-      posts: {
-        id: '',
-        caption: '',
-        comments: [],
-        createdAt: '',
-        imageUrl: '',
-        isBlurred: false,
-        isLikedByCurrentUser: false,
-        likes: [],
-        price: '0',
-        updatedAt: '',
-        user: {
-          id: '',
-          username: null,
-          email: '',
-          password: '',
-          profilePicture: null,
-          profileHeader: null,
-          profileDescription: null,
-          createdAt: '',
-          updatedAt: ''
-        }
-      },
+      posts: ref([]),
       userId
-    }
+
+    };
   },
   methods: {
     openForm() {
-      this.isFormOpen = true
+      this.isFormOpen = true;
     },
     closeForm() {
-      this.isFormOpen = false
+      this.isFormOpen = false;
     },
     async fetchPosts() {
       try {
-        this.isDataLoaded = false
+        this.isDataLoaded = false; // Начало загрузки
         const response = await fetch(`${config.API_BASE_URL}/posts/requester/${this.userId}`)
         const data = await response.json()
         console.log('Posts data:', data)
-        
-        // Трансформируем данные с нужной структурой
-        this.posts = data.map(post => ({
-          id: post.id || '',
-          caption: post.caption || '',
-          comments: post.comments || [],
-          createdAt: post.createdAt || '',
-          imageUrl: post.imageUrl || '',
-          isBlurred: post.isBlurred || false,
-          isLikedByCurrentUser: post.isLikedByCurrentUser || false,
-          likes: post.likes || [],
-          price: post.price || '0',
-          updatedAt: post.updatedAt || '',
-          user: {
-            id: post.user?.id || '',
-            username: post.user?.username || null,
-            email: post.user?.email || '',
-            password: post.user?.password || '',
-            profilePicture: post.user?.profilePicture || null,
-            profileHeader: post.user?.profileHeader || null,
-            profileDescription: post.user?.profileDescription || null,
-            createdAt: post.user?.createdAt || '',
-            updatedAt: post.user?.updatedAt || ''
-          }
-        }))
-
+        this.posts = data
         setTimeout(() => {
-          this.isDataLoaded = true
-        }, 1000)
+          this.isDataLoaded = true; // Завершение загрузки с небольшой задержкой
+        }, 1000);
       } catch (error) {
         console.error('Error fetching posts:', error)
-        this.isDataLoaded = true
+        this.isDataLoaded = true; // Убираем загрузку даже при ошибке
       }
     }
   },
   mounted() {
     this.fetchPosts()
   }
-}
+};
 </script>
 
 <style scoped>
@@ -295,5 +260,46 @@ export default {
   .loading-card :deep(.el-skeleton__item) {
     margin-bottom: 8px;
   }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap');
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Comfortaa', cursive;
+  border-radius: 8px;
+  padding-top: 10px;
+}
+
+.logo-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(45deg, #007bff, #00bfff);
+  border-radius: 50%;
+  margin-right: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-icon svg {
+  width: 28px; 
+  height: 28px;
+  fill: white;
+}
+
+.logo-text {
+  font-size: 28px;
+  background: linear-gradient(45deg, #007bff, #00bfff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient {
+  background: linear-gradient(45deg, #ffffff, #f0f8ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 </style>

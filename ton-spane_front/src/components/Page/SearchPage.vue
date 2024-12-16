@@ -68,6 +68,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { useStore } from 'vuex'
+
+const store = useStore()
+const userId = computed(() => store.getters.getSub)
 
 const searchQuery = ref('')
 const isLoading = ref(false)
@@ -127,18 +131,63 @@ const fetchUsers = async () => {
 }
 
 // Загрузка постов для всех пользователей
+// const fetchAllUsersPosts = async () => {
+//   for (const user of users.value) {
+//     try {
+//       const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/posts/requester/${user.id}`)
+//       if (!response.ok) continue
+//       const posts = await response.json()
+//       userPosts.value[user.id] = posts;
+//       console.log(userPosts.value);
+//     } catch (error) {
+//       console.error(`Error fetching posts for user ${user.id}:`, error)
+//     }
+//   }
+// }
+
+
+
 const fetchAllUsersPosts = async () => {
-  for (const user of users.value) {
-    try {
-      const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/posts/requester/${user.id}`)
-      if (!response.ok) continue
-      const posts = await response.json()
-      userPosts.value[user.id] = posts
-    } catch (error) {
-      console.error(`Error fetching posts for user ${user.id}:`, error)
-    }
+  // Reset or initialize userPosts if needed
+  userPosts.value = {};
+  
+  try {
+    // Use Promise.all to fetch all posts in parallel
+    const fetchPromises = users.value.map(async (user) => {
+      try {
+        const response = await fetch(
+          `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${user.id}/requester/${userId.value}`,
+          {
+            headers: {
+              'Accept': '*/*'
+            }
+          }
+        );
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const posts = await response.json();
+        return { userId: user.id, posts };
+      } catch (error) {
+        console.error(`Error fetching posts for user ${user.id}:`, error);
+        return { userId: user.id, posts: [] }; // Return empty array for failed requests
+      }
+    });
+
+    const results = await Promise.all(fetchPromises);
+    
+    // Update userPosts with all results
+    results.forEach(({ userId, posts }) => {
+      userPosts.value[userId] = posts;
+    });
+    
+    console.log('All posts fetched successfully:', userPosts.value);
+  } catch (error) {
+    console.error('Error in fetchAllUsersPosts:', error);
   }
-}
+};
 
 const handleSubscribe = async (user) => {
   try {

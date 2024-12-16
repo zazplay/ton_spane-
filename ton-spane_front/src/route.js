@@ -4,13 +4,12 @@ import MainPage from './components/Page/MainPage.vue';
 import AdminPanel from './components/Page/AdminPanel/AdminPanel.vue';
 
 const routes = [
-
   { path: '/', redirect: '/auth' },
   { path: '/admin', component: AdminPanel },
   { path: '/auth', component: AuthPage },
   {
     path: '/app',
-    component: MainPage, // Основное приложение
+    component: MainPage,
     children: [
       { path: 'tape', component: () => import('./components/Page/TapePage.vue') },
       { path: 'notifications', component: () => import('./components/Page/NotificationsPage.vue') },
@@ -51,14 +50,17 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior() {
+    return { top: 0 };
+  },
 });
 
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = sessionStorage.getItem('authToken'); // Пример проверки авторизации
+  const isAuthenticated = sessionStorage.getItem('authToken');
   if (to.path.startsWith('/app') && !isAuthenticated) {
-    next('/auth'); // Перенаправить на страницу авторизации
+    next('/auth');
   } else {
-    next(); // Разрешить переход
+    next();
   }
 });
 
