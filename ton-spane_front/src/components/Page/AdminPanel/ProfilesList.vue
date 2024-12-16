@@ -3,17 +3,15 @@
 import { ref, onMounted, defineComponent } from "vue";
 import axios from "axios";
 import config from "@/config";
+import { validateInputToScript, removeTagsOperators, validateLogin } from "../../Validation";
 
 export default defineComponent({
+    emits: ['select-user'], 
     setup(_, { emit }) {
         const loading = ref(true);
         const lists = ref([]);
         const currentDate = new Date().toDateString();
         const defaultUserImage = "https://via.placeholder.com/150";
-
-        // Регулярные выражения для валидации
-        const htmlTagRegex = /<\/?[a-z][\w-]*(?:\s+[a-z_:][\w:.-]*(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^>\s]+))?)*(?:\s\s+|=)*\s*\/?>|<!--[\s\S]*?-->/gi;
-        const sqlInjectionRegex = /(\b(SELECT|INSERT|DELETE|UPDATE|DROP|TRUNCATE|EXEC|UNION|OR|FROM|TABLE|AND)\b)|['"--;]/gi;
 
         // Получаем sub из Vuex
         // const sub = store.getters.getSub;
@@ -84,87 +82,53 @@ export default defineComponent({
             dialog.close(); // Закрываем диалоговое окно
         };
 
-        // Валидационные функции
-        const validateLogin = (value) => {
-            if (value.length > 20) {
-                return "Логин не должен превышать 20 символов.";
-            }
-            const loginRegex = /^[a-zA-Z0-9._]+$/;
-            if (!loginRegex.test(value)) {
-                return "Логин может содержать только английские буквы, цифры, точки и символы '_'.";
-            }
-            if (/^[._]/.test(value) || /[._]$/.test(value)) {
-                return "Логин не может начинаться или заканчиваться точкой или '_'.";
-            }
-            return ""; // Если ошибок нет
-        };
+        const handleInputName = () => {
+            errors.value.username = ''
 
-        const validateInputs = () => {
-            let isValid = true;
-            errors.value.username = '';
+            const lengthLogin = validateLogin(newProfile.value.username);
+            if (!lengthLogin.executionResult) {
+                errors.value.username = lengthLogin.messange;
+            }
+
+            const result = validateInputToScript(newProfile.value.username);
+            if (!result.executionResult) {
+                errors.value.username = result.messange;
+                newProfile.value.username = removeTagsOperators(newProfile.value.username);
+            }
+        }
+
+        const handleInputDescription = () => {
             errors.value.description = '';
-
-            // Проверка имени пользователя
-            if (!newProfile.value.username) {
-                errors.value.username = 'Имя обязательно для заполнения.';
-                return false;
-            } else if (newProfile.value.username.length > 20) {
-                errors.value.username = 'Имя не должно превышать 20 символов.';
-                return false;
+            const result = validateInputToScript(newProfile.value.description);
+            if (!result.executionResult) {
+                errors.value.description = result.messange;
+                newProfile.value.description = removeTagsOperators(newProfile.value.description);
             }
-
-            // Проверка описания
-            if (!newProfile.value.description) {
-                errors.value.description = 'Описание обязательно для заполнения.';
-                return false;
-            }
-
-            // Проверка имени пользователя
-            const usernameError = validateLogin(newProfile.value.username);
-            if (usernameError) {
-                errors.value.username = usernameError;
-                return false;
-            }
-
-            // Проверка описания
-            if (!newProfile.value.description) {
-                errors.value.description = 'Описание обязательно для заполнения.';
-                return false;
-            }
-
-            // Проверка имени пользователя на наличие HTML-тегов и SQL-инъекций
-            if (htmlTagRegex.test(newProfile.value.username) || sqlInjectionRegex.test(newProfile.value.username)) {
-                errors.value.username = 'Имя не должно содержать недопустимые символы или конструкции.';
-                return false;
-            }
-
-            // Проверка описания на наличие HTML-тегов и SQL-инъекций
-            if (htmlTagRegex.test(newProfile.value.description) || sqlInjectionRegex.test(newProfile.value.description)) {
-                errors.value.description = 'Описание не должно содержать недопустимые символы или конструкции.';
-                return false;
-            }
-
-            return isValid;
-        };
+        }
 
         const saveNewProfile = () => {
-            if (validateInputs()) {
-                console.log('Сохранение профиля:', newProfile.value);
-
-                // Здесь вы можете добавить код для отправки данных на сервер
-
-                closeAddProfileDialog(); // Закрываем диалог после сохранения
-                // Сброс значений формы после успешного сохранения
-                newProfile.value = { username: '', description: '' };
-            } else {
-                // Если есть ошибки, можно очищать значения некорректных полей
-                if (errors.value.username) {
-                    newProfile.value.username = ''; // Удаляем некорректное значение
-                }
-                if (errors.value.description) {
-                    newProfile.value.description = ''; // Удаляем некорректное значение
-                }
+            if (newProfile.value.username.length < 3) {
+                errors.value.username = 'Логин не может быть меньше 3 символов.'
+                return;
             }
+
+            console.log('Сохранение профиля:', newProfile.value);
+
+            // Здесь добавить код для отправки данных на сервер
+
+            closeAddProfileDialog(); // Закрываем диалог после сохранения
+
+            // Сброс значений формы после успешного сохранения
+            // newProfile.value = { username: '', description: '' };
+            // // } else {
+            // // Если есть ошибки, очищать значения некорректных полей
+            // if (errors.value.username) {
+            //     newProfile.value.username = ''; // Удаляем некорректное значение
+            // }
+            // if (errors.value.description) {
+            //     newProfile.value.description = ''; // Удаляем некорректное значение
+            // }
+            // // }
         };
 
         onMounted(() => {
@@ -186,8 +150,8 @@ export default defineComponent({
             closeAddProfileDialog,
             saveNewProfile,
             errors,
-            validateInputs,
-
+            handleInputName,
+            handleInputDescription,
         };
     },
 });
@@ -206,13 +170,15 @@ export default defineComponent({
 
             <label for="userName">Имя:</label>
             <div class="input-userName">
-                <input id="userName" type="text" v-model="newProfile.username" placeholder="Введите имя профиля" />
+                <input id="userName" type="text" v-model="newProfile.username" v-on:input="handleInputName"
+                    placeholder="Введите имя профиля" />
                 <span v-if="errors.username" class="error-message">{{ errors.username }}</span>
             </div>
 
             <label for="description">Описание:</label>
             <div class="input-caption">
-                <textarea id="description" v-model="newProfile.description" placeholder="Введите описание"></textarea>
+                <textarea id="description" v-model="newProfile.description" v-on:input="handleInputDescription"
+                    placeholder="Введите описание"></textarea>
                 <span v-if="errors.description" class="error-message">{{ errors.description }}</span>
             </div>
 

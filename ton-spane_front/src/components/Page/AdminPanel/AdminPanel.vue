@@ -61,7 +61,6 @@ const handleSelect = (index) => {
 .content {
     padding: 20px;
     width: 100%;
-    /* max-width: 40vw; */
     display: flex;
     justify-content: center;
 }
