@@ -19,8 +19,9 @@
 
                 <label for="caption">Текст:</label>
                 <div class="input-caption">
-                    <textarea id="caption" v-model="editForm.caption" required
+                    <textarea id="caption" v-model="editForm.caption" v-on:input="handleInputDescription" required
                         placeholder="Введите описание"></textarea>
+                    <span v-if="errors.description" class="error-message">{{ errors.description }}</span>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: start;">
@@ -64,12 +65,14 @@
 
 
         <!-- Виведення карток постів -->
-        <div v-for="post in listPosts" :key="post.id" class="post-item">
+        <!-- <div v-for="post in listPosts" :key="post.id" class="post-item">
+            <PostComponent :id="post.id" :user="user ? user : post.user" :imageUrl="post.imageUrl"
+                :caption="post.caption" :isBlurred="post.isBlurred" :price="post.price" :createdAt="post.createdAt" /> -->
+        <div v-for="post in (postsParam ? postsParam : listPosts)" :key="post.id" class="post-item">
             <PostComponent :id="post.id" :user="user ? user : post.user" :imageUrl="post.imageUrl"
                 :caption="post.caption" :isBlurred="post.isBlurred" :price="post.price" :createdAt="post.createdAt" />
             <!-- Кнопка редагування -->
-            <div
-                style="display: flex; flex-direction: row; justify-content: space-between; padding-left: 10px; padding-right: 10px;">
+            <div class="bottom-btn-group">
                 <el-button class="edit-btn" type="warning" @click="openEditDialog(post)">Редагувати</el-button>
                 <input type="checkbox" v-model="selectedPosts" :value="post.id" class="custom-checkbox" />
 
@@ -82,12 +85,12 @@
 </template>
 
 <script lang="js" setup>
-
 import axios from 'axios';
 import config from '@/config';
 import { ref, onMounted, defineProps } from 'vue';
 import PostComponent from './PostComponent.vue';
 import AddPostForm from '../../AddPostForm.vue';
+import { validateInputToScript, removeTagsOperators } from "../../Validation";
 
 // Реактивний список постів
 const listPosts = ref([]);
@@ -97,16 +100,21 @@ const isFormOpen = ref(false); // Стан для відкриття форми
 const editDialog = ref(null); // Ссилка на діалог редагування
 const editForm = ref({ caption: '', price: 0, isBlurred: false, id: null }); // Дані для редагування
 
+const errors = ref({
+    description: ''
+});
+
 const props = defineProps(
     {
+        postsParam: {
+            type: Object,
+            required: false
+        },
         user: {
             type: Object,
             required: false
         },
-        userId: {
-            type: String,
-            default: null, // Кнопка буде відображатися за замовчуванням
-        },
+
         showAddButton: {
             type: Boolean,
             default: false, // Кнопка буде відображатися за замовчуванням
@@ -114,18 +122,26 @@ const props = defineProps(
     })
 // Асинхронна функція для отримання постів
 const getPosts = async () => {
-    let getPostStr = '';
+    console.log('user', props.user)
+    console.log('postsParam', props.postsParam)
+
+    // let getPostStr = '';
     try {
-        if (props.userId === null) {
-            getPostStr = `${config.API_BASE_URL}/posts`;
-        }
-        else {
-            console.log(props.userId);
-            getPostStr = `${config.API_BASE_URL}/posts/user/${props.userId}`
+        // if (props.userId === null) {
+        //     getPostStr = `${config.API_BASE_URL}/posts`;
+        // }
+        // else {
+        //     console.log(props.userId);
+        //     getPostStr = `${config.API_BASE_URL}/posts/requester/${props.userId}`
+        // }
+        //TODO: Изменить запрос для получения всех постов
+        if (!props.postsParam) {
+            const response = await axios.get(`${config.API_BASE_URL}/posts/requester/a7248fe8-a4c1-4d49-bf22-5722f537916a`);
+            listPosts.value = response.data; // Оновлюємо список пості
         }
 
-        const response = await axios.get(getPostStr);
-        listPosts.value = response.data; // Оновлюємо список постів
+        // const response = await axios.get(getPostStr);
+        // listPosts.value = response.data; // Оновлюємо список пості
     } catch (error) {
         console.error('Помилка при отриманні постів:', error);
     }
@@ -183,6 +199,15 @@ const openEditDialog = (post) => {
 const closeEditDialog = () => {
     editDialog.value.close(); // Закриваємо модальне вікно редагування
 };
+
+const handleInputDescription = () => {
+    errors.value.description = '';
+    const result = validateInputToScript(editForm.value.caption);
+    if (!result.executionResult) {
+        errors.value.description = result.messange;
+        editForm.value.caption = removeTagsOperators(editForm.value.caption);
+    }
+}
 
 // Функція для збереження змін поста з використанням fetch
 const savePostChanges = async () => {
@@ -427,11 +452,24 @@ dialog::backdrop {
     /* Цвет фона при выборе */
 }
 
-@media (max-width: 1200px) {
+.bottom-btn-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-left: 0px;
+    padding-right: 0px;
+}
 
-    /* .input-caption textarea{
-        max-width:70%;
-    } */
+.error-message {
+    color: red;
+    /* Цвет текста ошибки */
+    font-size: 14px;
+    /* Размер шрифта */
+    margin-top: 5px;
+    /* Отступ сверху */
+}
+
+@media (max-width: 1200px) {
     dialog {
         width: 80%;
     }
@@ -467,5 +505,10 @@ dialog::backdrop {
         /* Уменьшаем размер кнопки закрытия */
     }
 
+    .bottom-btn-group {
+
+        padding-left: 10px;
+        padding-right: 10px;
+    }
 }
 </style>
