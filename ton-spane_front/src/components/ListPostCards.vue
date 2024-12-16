@@ -17,7 +17,7 @@ defineProps({
       v-for="post in posts"
       :key="post.id"          
       :id="post.id"
-      :user="post.user"
+      :user="post.model"
       :imageUrl="post.imageUrl"
       :caption="post.caption"
       :isBlurred="post.isBlurred"

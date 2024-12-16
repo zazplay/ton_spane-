@@ -1,12 +1,7 @@
 <template>
   <ShareModal v-model:dialogVisible="isShareModalVisible" />
   <TipsModal v-model:dialogDonateVisible="isTipsModalVisible" />
-  <SubscriptionModal 
-    v-if="isBlurred" 
-    ref="subscriptionModalRef" 
-    :userId="user.id" 
-  />
-
+  <SubscriptionModal />
   <el-card class="post-card">
     <div class="header">
       <el-avatar :size="50" class="avatar" :src="user.profilePicture" />
@@ -122,36 +117,6 @@ const props = defineProps({
   id: {
     type: String,
     required: true,
-    validator: (value) => value.length > 0
-  },
-  caption: {
-    type: String,
-    default: '',
-    maxLength: 500
-  },
-  imageUrl: {
-    type: String,
-    default: '',
-    validator: (value) => value === '' || value.startsWith('https://')
-  },
-  isBlurred: {
-    type: Boolean,
-    default: false
-  },
-  price: {
-    type: [String, Number],
-    default: '0',
-    validator: (value) => !isNaN(parseFloat(value)) && parseFloat(value) >= 0
-  },
-  createdAt: {
-    type: String,
-    required: true,
-    validator: (value) => !isNaN(Date.parse(value))
-  },
-  updatedAt: {
-    type: String,
-    required: true,
-    validator: (value) => !isNaN(Date.parse(value))
   },
   user: {
     type: Object,
@@ -159,31 +124,46 @@ const props = defineProps({
     default: () => ({
       id: '',
       username: '',
-      email: '',
-      profilePicture: null,
-      profileHeader: null,
-      profileDescription: '',
-      createdAt: '',
-      updatedAt: ''
-    }),
-    validator: (value) => {
-      return typeof value.id === 'string' && 
-             typeof value.email === 'string' &&
-             (!value.username || typeof value.username === 'string')
-    }
+      profilePicture: '',
+      profileHeader: '',
+      profileDescription: ''
+    })
+  },
+  caption: {
+    type: String,
+    default: ''
+  },
+  imageUrl: {
+    type: String,
+    default: ''
+  },
+  isBlurred: {
+    type: Boolean,
+    default: false
+  },
+  price: {
+    type: [String, Number],
+    default: '0'
+  },
+  createdAt: {
+    type: String,
+    required: true
+  },
+  updatedAt: {
+    type: String,
+    required: true
   },
   comments: {
     type: Array,
-    default: () => [],
-    validator: (value) => Array.isArray(value)
+    default: () => []
   },
   likes: {
     type: Array,
-    default: () => [],
-    validator: (value) => Array.isArray(value)
+    default: () => []
   },
   isLikedByCurrentUser: {
     type: Boolean,
+    default: false
   }
 })
 

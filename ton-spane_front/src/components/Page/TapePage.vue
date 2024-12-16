@@ -6,15 +6,15 @@
         <div class="header-content">
           <el-text class="site-name">
             <div class="logo-container">
-  <div class="logo-icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path d="M17.516 3c2.382 0 4.487 1.564 4.487 4.712 0 4.963-6.528 8.297-10.003 11.935-3.475-3.638-10.002-6.971-10.002-11.934 0-3.055 2.008-4.713 4.487-4.713 3.18 0 4.846 3.644 5.515 5.312.667-1.666 2.333-5.312 5.516-5.312zm0-2c-2.174 0-4.346 1.062-5.516 3.419-1.17-2.357-3.342-3.419-5.515-3.419-3.403 0-6.484 2.39-6.484 6.689 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-4.586-3.414-6.689-6.484-6.689z" />
-    </svg>
-  </div>
-  <div class="logo-text">
-    <span class="text-gradient">Dream</span>scape
-  </div>  
-</div>
+              <div class="logo-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M17.516 3c2.382 0 4.487 1.564 4.487 4.712 0 4.963-6.528 8.297-10.003 11.935-3.475-3.638-10.002-6.971-10.002-11.934 0-3.055 2.008-4.713 4.487-4.713 3.18 0 4.846 3.644 5.515 5.312.667-1.666 2.333-5.312 5.516-5.312zm0-2c-2.174 0-4.346 1.062-5.516 3.419-1.17-2.357-3.342-3.419-5.515-3.419-3.403 0-6.484 2.39-6.484 6.689 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-4.586-3.414-6.689-6.484-6.689z" />
+                </svg>
+              </div>
+              <div class="logo-text">
+                <span class="text-gradient">Dream</span>scape
+              </div>  
+            </div>
           </el-text>
           <div class="icon-container">
             <router-link to="/app/notifications">
@@ -57,6 +57,17 @@
                   </el-col>
                 </el-row>
               </div>
+              <!-- Пустое состояние -->
+              <div v-else-if="posts.length === 0" class="empty-state">
+                <el-card class="empty-card">
+                  <div class="empty-content">
+                    <el-icon class="empty-icon"><Box /></el-icon>
+                    <h3 class="empty-title">Здесь пока пусто</h3>
+                    <p class="empty-description">Публикации появятся позже</p>
+                  </div>
+                </el-card>
+              </div>
+              <!-- Список постов -->
               <ListPostCards v-else :posts="posts" />
             </el-tab-pane>
             <el-tab-pane label="Подписки" name="second">
@@ -71,7 +82,7 @@
 </template>
 
 <script>
-import { BellFilled } from '@element-plus/icons-vue';
+import { BellFilled, Box } from '@element-plus/icons-vue';
 import ListPostCards from '../ListPostCards.vue';
 import AddPostForm from '../AddPostForm.vue';
 import { ref, computed } from 'vue'
@@ -79,15 +90,12 @@ import FollowingPage from './FollowingPage/FollowingPage.vue';
 import config from '../../config';
 import { useStore } from 'vuex'
 
-
 export default {
-
-
-
   components: {
     AddPostForm,
     ListPostCards,
     BellFilled,
+    Box,
     FollowingPage
   },
   data() {
@@ -100,7 +108,6 @@ export default {
       isDataLoaded: false,
       posts: ref([]),
       userId
-
     };
   },
   methods: {
@@ -112,17 +119,18 @@ export default {
     },
     async fetchPosts() {
       try {
-        this.isDataLoaded = false; // Начало загрузки
+        this.isDataLoaded = false;
         const response = await fetch(`${config.API_BASE_URL}/posts/requester/${this.userId}`)
         const data = await response.json()
         console.log('Posts data:', data)
         this.posts = data
         setTimeout(() => {
-          this.isDataLoaded = true; // Завершение загрузки с небольшой задержкой
+          this.isDataLoaded = true;
         }, 1000);
       } catch (error) {
         console.error('Error fetching posts:', error)
-        this.isDataLoaded = true; // Убираем загрузку даже при ошибке
+        this.isDataLoaded = true;
+        this.posts = [];
       }
     }
   },
@@ -133,27 +141,12 @@ export default {
 </script>
 
 <style scoped>
-
-
+/* Существующие стили */
 .logo-container img {
     height: 50px;
     margin-left: 70px;
 }
 
-/* Стили для мобильных устройств */
-@media screen and (max-width: 768px) {
-    .logo-container img {
-        height: 40px; /* Немного уменьшаем высоту на телефоне */
-        margin-left: 40px; /* Уменьшаем отступ слева для мобильных устройств */
-    }
-}
-
-/* Стили для очень маленьких экранов */
-@media screen and (max-width: 480px) {
-    .logo-container img {
-        margin-left: 25px; /* Еще меньший отступ для самых маленьких экранов */
-    }
-}
 .demo-tabs>.el-tabs__content {
   color: #6b778c;
   font-size: 32px;
@@ -219,6 +212,69 @@ export default {
   overflow: hidden;
 }
 
+/* Новые стили для пустого состояния */
+.empty-state {
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.empty-card {
+  width: 100%;
+  max-width: 500px;
+  background: #161b22;
+  border: 1px solid rgba(0, 149, 255, 0.1);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.empty-card:hover {
+  border-color: rgba(0, 149, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(0, 149, 255, 0.1);
+}
+
+.empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  text-align: center;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 149, 255, 0.1) 0%,
+    rgba(0, 89, 255, 0.2) 50%,
+    rgba(0, 149, 255, 0.1) 100%
+  );
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  color: #58a6ff;
+  opacity: 0.8;
+}
+
+.empty-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #e6edf3;
+  margin-bottom: 10px;
+  margin: 0;
+}
+
+.empty-description {
+  color: #8b949e;
+  margin: 10px 0 0 0;
+}
+
+/* Остальные существующие стили */
 .loading-card :deep(.el-card__body) {
   padding: 20px;
 }
@@ -238,6 +294,7 @@ export default {
   }
 }
 
+/* Медиа-запросы */
 @media (max-width: 1200px) {
   .containet-style {
     width: 100% !important;
@@ -257,9 +314,38 @@ export default {
     margin-bottom: 10px;
   }
 
-  .loading-card :deep(.el-skeleton__item) {
-    margin-bottom: 8px;
+  .empty-state {
+    padding: 20px 10px;
   }
+
+  .empty-card {
+    max-width: 100%;
+  }
+
+  .empty-content {
+    padding: 30px 15px;
+  }
+
+  .empty-icon {
+    font-size: 48px;
+  }
+
+  .empty-title {
+    font-size: 1rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+    .logo-container img {
+        height: 40px;
+        margin-left: 40px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .logo-container img {
+        margin-left: 25px;
+    }
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap');

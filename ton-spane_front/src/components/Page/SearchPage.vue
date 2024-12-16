@@ -77,134 +77,155 @@ const searchQuery = ref('')
 const isLoading = ref(false)
 const users = ref([])
 const subscribedUsers = ref(new Set())
-const userPosts = ref({}) // Хранение постов пользователей
+const userPosts = ref({})
 
 const filteredUsers = computed(() => {
-  if (!searchQuery.value) return users.value
-  const query = searchQuery.value.toLowerCase()
-  return users.value.filter(user => {
-    const username = (user.username || '').toLowerCase()
-    const email = (user.email || '').toLowerCase()
-    return username.includes(query) || email.includes(query)
-  })
+ if (!searchQuery.value) return users.value
+ const query = searchQuery.value.toLowerCase()
+ return users.value.filter(user => {
+   const username = (user.username || '').toLowerCase()
+   const email = (user.email || '').toLowerCase()
+   return username.includes(query) || email.includes(query)
+ })
 })
 
 const getInitials = (text) => {
-  if (!text) return '?'
-  return text.split(' ')[0][0].toUpperCase()
+ if (!text) return '?'
+ return text.split(' ')[0][0].toUpperCase()
 }
 
 const formatEmail = (email) => {
-  return email?.split('@')[0] || 'Пользователь'
+ return email?.split('@')[0] || 'Пользователь'
 }
 
 const isUserSubscribed = (userId) => {
-  return subscribedUsers.value.has(userId)
+ return subscribedUsers.value.has(userId)
 }
 
-// Получение количества постов пользователя
 const getUserPostsCount = (userId) => {
-  return userPosts.value[userId]?.length || 0
+ return userPosts.value[userId]?.length || 0
 }
 
-// Получение общего количества лайков пользователя
 const getUserTotalLikes = (userId) => {
-  const posts = userPosts.value[userId] || []
-  return posts.reduce((total, post) => total + (post.likes?.length || 0), 0)
+ const posts = userPosts.value[userId] || []
+ return posts.reduce((total, post) => total + (post.likes?.length || 0), 0)
 }
 
-// Загрузка пользователей
 const fetchUsers = async () => {
-  isLoading.value = true
-  try {
-    const response = await fetch('https://ton-back-e015fa79eb60.herokuapp.com/api/users')
-    if (!response.ok) throw new Error('Network response was not ok')
-    const data = await response.json()
-    users.value = data
-    await fetchAllUsersPosts()
-  } catch (error) {
-    console.error('Error fetching users:', error)
-    ElMessage.error('Ошибка при загрузке пользователей')
-  } finally {
-    isLoading.value = false
-  }
+ isLoading.value = true
+ try {
+   const response = await fetch('https://ton-back-e015fa79eb60.herokuapp.com/api/models', {
+     headers: {
+       'accept': '*/*'
+     }
+   })
+   if (!response.ok) throw new Error('Network response was not ok')
+   const data = await response.json()
+   users.value = data
+   await fetchAllUsersPosts()
+ } catch (error) {
+   console.error('Error fetching users:', error)
+   ElMessage.error('Ошибка при загрузке пользователей')
+ } finally {
+   isLoading.value = false
+ }
 }
-
-// Загрузка постов для всех пользователей
-// const fetchAllUsersPosts = async () => {
-//   for (const user of users.value) {
-//     try {
-//       const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/posts/requester/${user.id}`)
-//       if (!response.ok) continue
-//       const posts = await response.json()
-//       userPosts.value[user.id] = posts;
-//       console.log(userPosts.value);
-//     } catch (error) {
-//       console.error(`Error fetching posts for user ${user.id}:`, error)
-//     }
-//   }
-// }
-
-
 
 const fetchAllUsersPosts = async () => {
-  // Reset or initialize userPosts if needed
-  userPosts.value = {};
-  
-  try {
-    // Use Promise.all to fetch all posts in parallel
-    const fetchPromises = users.value.map(async (user) => {
-      try {
-        const response = await fetch(
-          `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${user.id}/requester/${userId.value}`,
-          {
-            headers: {
-              'Accept': '*/*'
-            }
-          }
-        );
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const posts = await response.json();
-        return { userId: user.id, posts };
-      } catch (error) {
-        console.error(`Error fetching posts for user ${user.id}:`, error);
-        return { userId: user.id, posts: [] }; // Return empty array for failed requests
-      }
-    });
+ userPosts.value = {};
+ 
+ try {
+   const fetchPromises = users.value.map(async (user) => {
+     try {
+       const response = await fetch(
+         `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${user.id}/requester/${userId.value}`,
+         {
+           headers: {
+             'Accept': '*/*'
+           }
+         }
+       );
+       
+       if (!response.ok) {
+         throw new Error(`HTTP error! status: ${response.status}`);
+       }
+       
+       const posts = await response.json();
+       return { userId: user.id, posts };
+     } catch (error) {
+       console.error(`Error fetching posts for user ${user.id}:`, error);
+       return { userId: user.id, posts: [] };
+     }
+   });
 
-    const results = await Promise.all(fetchPromises);
-    
-    // Update userPosts with all results
-    results.forEach(({ userId, posts }) => {
-      userPosts.value[userId] = posts;
-    });
-    
-    console.log('All posts fetched successfully:', userPosts.value);
-  } catch (error) {
-    console.error('Error in fetchAllUsersPosts:', error);
-  }
+   const results = await Promise.all(fetchPromises);
+   
+   results.forEach(({ userId, posts }) => {
+     userPosts.value[userId] = posts;
+   });
+   
+   console.log('All posts fetched successfully:', userPosts.value);
+ } catch (error) {
+   console.error('Error in fetchAllUsersPosts:', error);
+ }
 };
 
 const handleSubscribe = async (user) => {
-  try {
-    if (subscribedUsers.value.has(user.id)) {
-      subscribedUsers.value.delete(user.id)
-      ElMessage.success('Вы отписались от пользователя')
-    } else {
-      subscribedUsers.value.add(user.id)
-      ElMessage.success('Вы подписались на пользователя')
-    }
-  } catch (error) {
-    console.error('Error toggling subscription:', error)
-    ElMessage.error('Ошибка при изменении подписки')
-  }
-}
+ try {
+   const method = subscribedUsers.value.has(user.id) ? 'DELETE' : 'POST';
+   const response = await fetch(
+     `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions`,
+     {
+       method,
+       headers: {
+         'Content-Type': 'application/json',
+         'Accept': '*/*'
+       },
+       body: JSON.stringify({
+         modelId: user.id,
+         subscriberId: userId.value
+       })
+     }
+   );
 
-onMounted(fetchUsers)
+   if (!response.ok) throw new Error('Subscription update failed');
+
+   if (subscribedUsers.value.has(user.id)) {
+     subscribedUsers.value.delete(user.id);
+     ElMessage.success('Вы отписались от пользователя');
+   } else {
+     subscribedUsers.value.add(user.id);
+     ElMessage.success('Вы подписались на пользователя');
+   }
+ } catch (error) {
+   console.error('Error toggling subscription:', error);
+   ElMessage.error('Ошибка при изменении подписки');
+ }
+};
+
+const fetchUserSubscriptions = async () => {
+ try {
+   const response = await fetch(
+     `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId.value}/subscriptions`,
+     {
+       headers: {
+         'Accept': '*/*'
+       }
+     }
+   );
+
+   if (!response.ok) throw new Error('Failed to fetch subscriptions');
+   
+   const subscriptions = await response.json();
+   subscribedUsers.value = new Set(subscriptions.map(sub => sub.modelId));
+ } catch (error) {
+   console.error('Error fetching subscriptions:', error);
+ }
+};
+
+onMounted(async () => {
+ await Promise.all([fetchUsers(), fetchUserSubscriptions()]);
+})
 </script>
 
 <style scoped>

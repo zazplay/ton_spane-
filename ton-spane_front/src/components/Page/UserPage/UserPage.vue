@@ -61,18 +61,16 @@
 
       <el-container>
         <el-main class="main">
-          <el-collapse v-model="activeNames" class="about-section">
-            <el-collapse-item name="1">
-              <template #title>
-                <div class="collapse-header">
+          <el-card class="about-section" shadow="never">
+              <template #header>
+                <div class="about-header">
                   <span class="title">О себе</span>
                 </div>
               </template>
-              <div class="collapse-content">
+              <div class="about-content">
                 {{ userData.profileDescription || 'Описание не добавлено' }}
               </div>
-            </el-collapse-item>
-          </el-collapse>
+          </el-card>
         </el-main>
       </el-container>
 
@@ -99,33 +97,27 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted,computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import ListPostCards from '../../ListPostCards.vue'
-import Config from '@/config'
 import {
-  ElMessage,
-  ElSkeleton,
-  ElSkeletonItem,
-  ElCard,
-  ElContainer,
-  ElHeader,
-  ElAside,
-  ElMain,
-  ElImage,
-  ElText,
-  ElCollapse,
-  ElCollapseItem,
-  ElButton,
-  ElEmpty
+ ElMessage,
+ ElSkeleton,
+ ElSkeletonItem,
+ ElCard,
+ ElContainer,
+ ElHeader,
+ ElAside,
+ ElMain,
+ ElImage,
+ ElText,
+ ElButton,
+ ElEmpty
 } from 'element-plus'
 import { useStore } from 'vuex'
 
-
-
 const store = useStore()
 const CurrUserId = computed(() => store.getters.getSub)
-
 
 const router = useRouter()
 const route = useRoute()
@@ -138,184 +130,183 @@ const DEFAULT_AVATAR = 'https://img.icons8.com/?size=100&id=83151&format=png&col
 const userLikes = ref(0)
 const userSubscription = ref(0)
 const isLoaded = ref(false)
-const activeNames = ref(['1'])
 const abortController = new AbortController()
 
 const userData = ref({
-  id: userId,
-  username: '',
-  profilePicture: '',
-  profileHeader: '',
-  posts: [],
-  likes: [],
-  profileDescription: ''
+ id: userId,
+ username: '',
+ profilePicture: '',
+ profileHeader: '',
+ posts: [],
+ likes: [],
+ profileDescription: ''
 })
 
 const formatImageUrl = (imageUrl) => {
-  if (!imageUrl) return null
-  return imageUrl.startsWith('http') ? imageUrl : `${S3_BASE_URL}${imageUrl}`
+ if (!imageUrl) return null
+ return imageUrl.startsWith('http') ? imageUrl : `${S3_BASE_URL}${imageUrl}`
 }
 
 const preparePostsData = (posts = []) => {
-  if (!Array.isArray(posts)) return []
-  return posts.map(post => ({
-    ...post,
-    id: post.id,
-    userId: userId,
-    imageUrl: formatImageUrl(post.imageUrl),
-    price: String(post.price || 0),
-    isBlurred: post.isBlurred || false,
-    caption: post.caption || ''
-  }))
+ if (!Array.isArray(posts)) return []
+ return posts.map(post => ({
+   ...post,
+   id: post.id,
+   userId: userId,
+   imageUrl: formatImageUrl(post.imageUrl),
+   price: String(post.price || 0),
+   isBlurred: post.isBlurred || false,
+   caption: post.caption || ''
+ }))
 }
 
 const fetchUserData = async () => {
-  try {
-    const response = await fetch(`${Config.API_BASE_URL}/users/${userId}`, {
-      signal: abortController.signal
-    })
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-    const data = await response.json()
-    
-    if (!data) {
-      throw new Error('No user data received')
-    }
-    
-    userData.value = {
-      ...data,
-      id: userId,
-      profilePicture: formatImageUrl(data.profilePicture) || DEFAULT_AVATAR,
-      profileHeader: formatImageUrl(data.profileHeader) || DEFAULT_HEADER,
-      posts: preparePostsData(data.posts),
-      likes: data.likes || [],
-      profileDescription: data.profileDescription || ''
-    }
-  } catch (err) {
-    if (err.name === 'AbortError') return
-    console.error('Error fetching user data:', err)
-    ElMessage.error('Ошибка при загрузке данных пользователя')
-    userData.value = {
-      id: userId,
-      username: 'Пользователь',
-      profilePicture: DEFAULT_AVATAR,
-      profileHeader: DEFAULT_HEADER,
-      posts: [],
-      likes: [],
-      profileDescription: ''
-    }
-  }
+ try {
+   const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/models/${route.params.id}`, {
+     signal: abortController.signal,
+     headers: {
+       'accept': '*/*'
+     }
+   })
+   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+   const data = await response.json()
+
+   if (!data) {
+     throw new Error('No user data received')
+   }
+
+   userData.value = {
+     ...data,
+     id: userId,
+     profilePicture: formatImageUrl(data.profilePicture) || DEFAULT_AVATAR,
+     profileHeader: formatImageUrl(data.profileHeader) || DEFAULT_HEADER,
+     posts: preparePostsData(data.posts),
+     likes: data.likes || [],
+     profileDescription: data.profileDescription || ''
+   }
+ } catch (err) {
+   if (err.name === 'AbortError') return
+   console.error('Error fetching user data:', err)
+   ElMessage.error('Ошибка при загрузке данных пользователя')
+   userData.value = {
+     id: userId,
+     username: 'Пользователь',
+     profilePicture: DEFAULT_AVATAR,
+     profileHeader: DEFAULT_HEADER,
+     posts: [],
+     likes: [],
+     profileDescription: ''
+   }
+ }
 }
 
-
-
 const fetchUserPosts = async () => {
-  try {
-    const response = await fetch(
-      `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${userId}/requester/${CurrUserId.value}`,
-      { signal: abortController.signal }
-    )
-    
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-    const data = await response.json()
-    
-    if (!Array.isArray(data)) {
-      console.error('Posts data is not an array:', data)
-      return []
-    }
-    
-    const formattedPosts = data.map(post => ({
-      ...post,
-      id: post.id,
-      imageUrl: formatImageUrl(post.imageUrl),
-      caption: post.caption || '',
-      price: String(post.price || 0),
-      isBlurred: post.isBlurred || false,
-      createdAt: post.createdAt,
-      user: {
-        id: userId,
-        username: userData.value.username,
-        email: userData.value.email || '',
-        profilePicture: userData.value.profilePicture
-      },
-      initialLiked: post.isLikedByCurrentUser || false,
-      initialShared: false,
-      initialDonated: false,
-      initialSubscribed: false
-    }))
+ try {
+   const response = await fetch(
+     `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${route.params.id}/requester/${CurrUserId.value}`,
+     { signal: abortController.signal }
+   )
+   
+   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+   const data = await response.json()
+   
+   if (!Array.isArray(data)) {
+     console.error('Posts data is not an array:', data)
+     return []
+   }
+   
+   const formattedPosts = data.map(post => ({
+     ...post,
+     id: post.id,
+     imageUrl: formatImageUrl(post.imageUrl),
+     caption: post.caption || '',
+     price: String(post.price || 0),
+     isBlurred: post.isBlurred || false,
+     createdAt: post.createdAt,
+     model: {
+       id: userId,
+       username: userData.value.username,
+       email: userData.value.email || '',
+       profilePicture: userData.value.profilePicture
+     },
+     initialLiked: post.isLikedByCurrentUser || false,
+     initialShared: false,
+     initialDonated: false,
+     initialSubscribed: false
+   }))
 
-    if (formattedPosts.length > 0) {
-      userData.value.posts = formattedPosts
-      userLikes.value = formattedPosts.reduce((total, post) => total + (post.likes?.length || 0), 0)
-    }
+   if (formattedPosts.length > 0) {
+     userData.value.posts = formattedPosts
+     userLikes.value = formattedPosts.reduce((total, post) => total + (post.likes?.length || 0), 0)
+   }
 
-    return formattedPosts
-  } catch (err) {
-    if (err.name === 'AbortError') return
-    console.error('Error fetching user posts:', err)
-    ElMessage.error('Ошибка при загрузке постов пользователя')
-    return []
-  }
+   return formattedPosts
+ } catch (err) {
+   if (err.name === 'AbortError') return
+   console.error('Error fetching user posts:', err)
+   ElMessage.error('Ошибка при загрузке постов пользователя')
+   return []
+ }
 }
 
 const fetchUserSubs = async () => {
-  try {
-    const response = await fetch(
-      `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId}/followers`,
-      { signal: abortController.signal }
-    )
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-    const data = await response.json()
-    userSubscription.value = Array.isArray(data) ? data.length : 0
-  } catch (err) {
-    if (err.name === 'AbortError') return
-    console.error('Error fetching user subscriptions:', err)
-    ElMessage.error('Ошибка при загрузке подписчиков')
-    userSubscription.value = 0
-  }
+ try {
+   const response = await fetch(
+     `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${route.params.id}/followers`,
+     { signal: abortController.signal }
+   )
+   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+   const data = await response.json()
+   userSubscription.value = Array.isArray(data) ? data.length : 0
+ } catch (err) {
+   if (err.name === 'AbortError') return
+   console.error('Error fetching user subscriptions:', err)
+   ElMessage.error('Ошибка при загрузке подписчиков')
+   userSubscription.value = 0
+ }
 }
 
 const handleImageError = (type) => {
-  if (type === 'header') {
-    userData.value.profileHeader = DEFAULT_HEADER
-  } else if (type === 'avatar') {
-    userData.value.profilePicture = DEFAULT_AVATAR
-  }
+ if (type === 'header') {
+   userData.value.profileHeader = DEFAULT_HEADER
+ } else if (type === 'avatar') {
+   userData.value.profilePicture = DEFAULT_AVATAR
+ }
 }
 
 const openDonatePage = () => {
-  router.push(`/app/userSubscribeDonate/${userId}`)
+ router.push(`/app/userSubscribeDonate/${userId}`)
 }
 
 const openDonateYearPage = () => {
-  router.push(`/app/userSubscribeDonateYear/${userId}`)
+ router.push(`/app/userSubscribeDonateYear/${userId}`)
 }
 
 const initializeUserData = async () => {
-  try {
-    isLoaded.value = false
-    await fetchUserData()
-    // Просто вызываем Promise.all без присваивания результатов
-    await Promise.all([
-      fetchUserPosts(),
-      fetchUserSubs()
-    ])
-    setTimeout(() => {
-      isLoaded.value = true
-    }, 300)
-  } catch (error) {
-    if (error.name === 'AbortError') return
-    console.error('Error initializing data:', error)
-    ElMessage.error('Ошибка при загрузке данных')
-    isLoaded.value = true
-  }
+ try {
+   isLoaded.value = false
+   await fetchUserData()
+   await Promise.all([
+     fetchUserPosts(),
+     fetchUserSubs()
+   ])
+   setTimeout(() => {
+     isLoaded.value = true
+   }, 300)
+ } catch (error) {
+   if (error.name === 'AbortError') return
+   console.error('Error initializing data:', error)
+   ElMessage.error('Ошибка при загрузке данных')
+   isLoaded.value = true
+ }
 }
 
 onMounted(() => {
-  initializeUserData()
+ initializeUserData()
 })
 
 onUnmounted(() => {
-  abortController.abort()
+ abortController.abort()
 })
 </script>
 
@@ -346,7 +337,7 @@ onUnmounted(() => {
 
 .content-container {
   flex-direction: column !important;
-  width: 98%;
+  width: 100%;
 }
 
 .aside {
@@ -512,49 +503,57 @@ onUnmounted(() => {
   width: 99%;
   min-height: 150px;
   margin: 1.5% 0 0 5px;
-  background: rgba(22, 27, 34, 0.8);
-  border: 1px solid rgba(0, 149, 255, 0.1);
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
-  margin-bottom: 0px;
-  backdrop-filter: blur(10px);
-  color: white !important;
-}
-
-.about-section:hover {
-  border-color: rgba(0, 149, 255, 0.3);
+  background: linear-gradient(145deg, rgba(22, 27, 34, 0.95), rgba(22, 27, 34, 0.85));
+  border: 1px solid rgba(88, 166, 255, 0.15);
+  border-radius: 12px;
   box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(0, 149, 255, 0.1);
-  transform: translateY(-2px);
+    0 4px 20px rgba(0, 0, 0, 0.2),
+    inset 0 0 60px rgba(88, 166, 255, 0.03);
+  backdrop-filter: blur(10px);
 }
 
-.about-section :deep(.el-collapse-item__header) {
-  padding: 0.4rem 0.6rem;
+
+/* Переопределяем стили Element Plus */
+.about-section :deep(.el-card__header) {
+  padding: 18px 24px;
   background: transparent;
-  border-bottom: 1px solid rgba(0, 149, 255, 0.1);
-  color: #e6edf3;
+  border-bottom: 1px solid rgba(88, 166, 255, 0.15);
 }
 
-.about-section :deep(.el-collapse-item__content) {
-  padding: 0.4rem 0.6rem;
-  width: 95%;
-  color: #ffffff !important;
+.about-section :deep(.el-card__body) {
+  padding: 20px 24px;
+  color: rgba(255, 255, 255, 0.95);
 }
 
-.collapse-header .title {
-  font-size: 0.95rem;
-  font-weight: 500;
+.about-header .title {
+  font-size: 1.1rem;
+  font-weight: 600;
   color: #58a6ff;
+  letter-spacing: 0.3px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.collapse-content {
-  font-size: 0.875rem;
-  line-height: 1.4;
-  color: #ffffff;
+.about-content {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: 0.2px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
+/* Убираем стандартные стили карточки */
+.about-section :deep(.el-card) {
+  background: transparent;
+  border: none;
+  color: white;
+}
+
+/* Стили для пустого состояния */
+.about-content:empty::before,
+.about-content:contains('Описание не добавлено') {
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
 /* Стили кнопок */
 .action-buttonYearSub,
 .action-buttonMonthSub {

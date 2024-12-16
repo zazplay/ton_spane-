@@ -51,19 +51,23 @@
 </template>
 
 <script setup>
-import { ref, computed, defineEmits, defineProps } from 'vue'; // `defineProps` и `defineEmits` импортируются из Vue
+import { ref, computed, defineEmits, defineProps } from 'vue';
 import { ElMessage } from 'element-plus';
-import { Message, CopyDocument, Promotion, Close } from '@element-plus/icons-vue'; // Импорт только иконок
+import { Message, CopyDocument, Promotion, Close } from '@element-plus/icons-vue';
 
-// Используем встроенную функцию defineProps
 const props = defineProps({
   dialogVisible: { type: Boolean, required: true }
 });
 
-// Используем встроенную функцию defineEmits
 const emit = defineEmits(['update:dialogVisible']);
 
-const shareLink = window.location.href; // Получаем текущий URL страницы
+// Get the current page URL including any query parameters and hash
+const getCurrentPageUrl = () => {
+  return window.location.href;
+};
+
+// Reactive reference for the share link
+const shareLink = ref(getCurrentPageUrl());
 
 const linkInput = ref(null);
 
@@ -76,26 +80,76 @@ const closeModal = () => {
   isOpen.value = false;
 };
 
-const shareToSocial = (platform) => {
-  const urls = {
-    instagram: `https://instagram.com/share?url=${encodeURIComponent(shareLink)}`,
-    telegram: `https://t.me/share/url?url=${encodeURIComponent(shareLink)}`,
-    email: `mailto:?subject=Check this out&body=${encodeURIComponent(shareLink)}`
-  };
-  window.open(urls[platform], '_blank');
+const shareToSocial = async (platform) => {
+  try {
+    const currentUrl = getCurrentPageUrl();
+    
+    if (platform === 'telegram') {
+      // Telegram API parameters
+      // https://core.telegram.org/widgets/share
+      const params = new URLSearchParams({
+        url: currentUrl,
+        text: document.title || 'Поделиться страницей', // Use page title or default text
+      });
+      
+      window.open(
+        `https://t.me/share/url?${params.toString()}`,
+        'telegram-share',
+        'width=640,height=480,toolbar=0,menubar=0,location=0'
+      );
+    } 
+    else if (platform === 'instagram') {
+      // For Instagram, we can:
+      // 1. Open in Instagram app if on mobile
+      // 2. Copy link and show instructions for sharing on desktop
+      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        // Mobile: Try to open Instagram app with sharing intent
+        const instagramUrl = `instagram://library?AssetPath=${encodeURIComponent(currentUrl)}`;
+        window.location.href = instagramUrl;
+        
+        // Fallback to Instagram website if app doesn't open after 2 seconds
+        setTimeout(() => {
+          window.location.href = `https://instagram.com`;
+        }, 2000);
+      } else {
+        // Desktop: Copy link and show instructions
+        await navigator.clipboard.writeText(currentUrl);
+        ElMessage({
+          message: 'Ссылка скопирована. Откройте Instagram и вставьте ссылку в Stories или Direct',
+          type: 'success',
+          duration: 5000,
+          offset: 60
+        });
+      }
+    }
+    else if (platform === 'email') {
+      const params = new URLSearchParams({
+        subject: document.title || 'Поделиться страницей',
+        body: currentUrl
+      });
+      window.location.href = `mailto:?${params.toString()}`;
+    }
+  } catch (error) {
+    ElMessage({
+      message: `Ошибка при попытке поделиться: ${error.message}`,
+      type: 'error',
+      offset: 60
+    });
+  }
 };
 
 const copyLink = async () => {
   try {
-    await navigator.clipboard.writeText(shareLink);
+    const currentUrl = getCurrentPageUrl();
+    await navigator.clipboard.writeText(currentUrl);
     ElMessage({
       message: 'Ссылка скопирована',
       type: 'success',
       offset: 60
     });
-  } catch {
+  } catch (error) {
     ElMessage({
-      message: 'Ошибка копирования',
+      message: 'Ошибка копирования ссылки',
       type: 'error',
       offset: 60
     });
