@@ -2,13 +2,15 @@
 import { ref } from 'vue';
 import PostsAP from './PostsAP.vue';
 import ProfilesForAp from './ProfilesForAP.vue';
+import BotsPage from './BotsPage.vue';
 
 const activeIndex = ref('1'); // Визначаємо активний індекс
 
 // Функція для отримання контенту в залежності від активної вкладки
 const contentMap = {
     '1': ProfilesForAp,
-    '2': PostsAP,
+    '2': BotsPage,
+    '3': PostsAP,
 };
 
 // Функція для обробки вибору вкладки
@@ -23,7 +25,8 @@ const handleSelect = (index) => {
         <div class="fixed-tabs">
             <el-menu :default-active="activeIndex" mode="horizontal" @select="handleSelect">
                 <el-menu-item index="1" >Профили</el-menu-item>
-                <el-menu-item index="2">Посты</el-menu-item>
+                <el-menu-item index="2" >Боты</el-menu-item>
+                <el-menu-item index="3">Посты</el-menu-item>
             </el-menu>
         </div>
 
