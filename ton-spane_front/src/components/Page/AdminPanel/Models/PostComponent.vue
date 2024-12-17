@@ -4,6 +4,11 @@
         <div class="header">
             <el-avatar :size="50" class="avatar" :src="user.profilePicture" />
             <div class="user-info">
+                <!-- <router-link class="username"> -->
+                    <div  class="username">
+                        {{ props.user.username }}
+                    </div>
+                <!-- </router-link> -->
                 <el-text></el-text>
                 <el-text class="date">{{ formatDate(createdAt) }}</el-text>
             </div>

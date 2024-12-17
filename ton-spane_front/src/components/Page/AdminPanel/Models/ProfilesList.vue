@@ -6,12 +6,13 @@ import config from "@/config";
 import { validateInputToScript, removeTagsOperators, validateLogin } from "../../../Validation";
 
 export default defineComponent({
-    emits: ['select-user'], 
+    emits: ['select-user'],
     setup(_, { emit }) {
         const loading = ref(true);
         const lists = ref([]);
         const currentDate = new Date().toDateString();
         const defaultUserImage = "https://via.placeholder.com/150";
+        const selectedUsers = ref([]); // Массив для вибраних users
 
         // Получаем sub из Vuex
         // const sub = store.getters.getSub;
@@ -54,7 +55,7 @@ export default defineComponent({
         };
 
         const fetchData = async () => {
-            
+
             try {
                 const response = await axios.get(`${config.API_BASE_URL}/models`);
                 // console.log("sub ", sub);
@@ -132,6 +133,49 @@ export default defineComponent({
             // // }
         };
 
+        const showDeleteConfirmation = () => {
+            const dialog = document.getElementById('deleteDialog');
+            dialog.showModal(); // Открываем диалоговое окно
+        };
+
+        // Функція для закриття діалогу видалення
+        const closeDeleteDialog = () => {
+            const dialog = document.getElementById('deleteDialog');
+            dialog.close();// Закриваємо модальне вікно
+        };
+
+        const handleSelectionChange = (userId) => {
+            if (selectedUsers.value.includes(userId)) {
+                selectedUsers.value = selectedUsers.value.filter(id => id !== userId);
+            } else {
+                selectedUsers.value.push(userId);
+            }
+        };
+
+        const resetSelection = () => {
+            selectedUsers.value = [];
+        };
+        const deleteSelectedUsers = async () => {
+            if (selectedUsers.value.length === 0) {
+                alert("Выберите пользователей для удаления.");
+                return;
+            }
+
+            // try {
+            //     // Выполните запрос на удаление пользователей
+            //     await axios.delete(`${config.API_BASE_URL}/users`);
+
+            //     // Удалите пользователей из списка
+            //     lists.value = lists.value.filter(user => !selectedUsers.value.includes(user.id));
+            //     selectedUsers.value = []; // Очистите массив выбранных пользователей
+
+            //     alert("Выбранные пользователи успешно удалены.");
+            // } catch (error) {
+            //     console.error("Ошибка при удалении пользователей:", error);
+            //     alert("Не удалось удалить выбранных пользователей.");
+            // }
+        };
+
         onMounted(() => {
             fetchData();
         });
@@ -153,14 +197,51 @@ export default defineComponent({
             errors,
             handleInputName,
             handleInputDescription,
+            selectedUsers,
+            handleSelectionChange,
+            resetSelection,
+            deleteSelectedUsers,
+            showDeleteConfirmation,
+            closeDeleteDialog,
         };
     },
 });
 </script>
 
 <template>
-    <div class="btn-add-profile">
-        <el-button type="success" @click="openAddProfileDialog">Добавить профиль</el-button>
+    <!-- Модальне вікно для підтвердження видалення -->
+    <!-- <dialog id="deleteDialog" ref="deleteDialog" v-show="true">
+        <form method="dialog">
+            <p>Вы действительно хотите удалить {{ selectedUsers.length }} пост(ов)?</p>
+            <div style="display: flex; justify-content: space-between;">
+                <el-button type="danger" @click="deleteSelectedUsers">Видалити</el-button>
+                <el-button type="info" @click="closeDeleteDialog">Отменить</el-button>
+            </div>
+        </form>
+    </dialog> -->
+
+    <dialog id="deleteDialog" ref="deleteDialog" >
+        <form method="dialog">
+            <p>Вы действительно хотите удалить {{ selectedUsers.length }} пользователя(ей)?</p>
+            <div style="display: flex; justify-content: space-between;">
+                <el-button type="danger" @click="deleteSelectedUsers">Удалить</el-button>
+                <el-button type="info" @click="closeDeleteDialog">Отменить</el-button>
+            </div>
+        </form>
+    </dialog>
+
+    <div class="container-btn">
+        <div class="btn-add-profile">
+            <el-button type="success" @click="openAddProfileDialog">Добавить профиль</el-button>
+        </div>
+        <div class="btn-add-profile" style="margin-left: 6px;">
+            <el-button v-if="selectedUsers.length > 0" type="danger" @click="showDeleteConfirmation">
+                Удалить({{ selectedUsers.length }})
+            </el-button>
+            <el-button type="info" v-if="selectedUsers.length > 0" @click="resetSelection">
+                Cбросить({{ selectedUsers.length }})
+            </el-button>
+        </div>
     </div>
 
     <!--Добавить профиль-->
@@ -208,12 +289,16 @@ export default defineComponent({
                 <div class="scroll-container" @mousedown="startDrag" @mousemove="dragging" @mouseup="stopDrag"
                     @mouseleave="stopDrag">
                     <el-card v-for="item in lists" :key="item.username"
-                        :body-style="{ padding: '0px', marginBottom: '1px' }" class="card"
-                        @click="handleCardClick(item)">
-                        <img :src="item.profilePicture || defaultUserImage" class="image" />
+                        :body-style="{ padding: '0px', marginBottom: '1px' }" class="card">
+                        <img :src="item.profilePicture || defaultUserImage" class="image"
+                            @click="handleCardClick(item)" />
                         <div class="card-content">
-                            <span>{{ item.username }}</span>
+                            <span @click="handleCardClick(item)">{{ item.username }}</span>
+                            <div class="input-blurred checkbox-delete">
+                                <input v-model="selectedUsers" type="checkbox" :value="item.id" id="isDelete" />
+                            </div>
                         </div>
+
                     </el-card>
                 </div>
             </template>
@@ -246,18 +331,26 @@ export default defineComponent({
     background-color: lightgrey;
 }
 
+.container-btn {
+    display: flex;
+    flex-direction: row;
+    position: relative;
+}
+
 .el-card {
+    position: relative;
     flex: 0 0 auto;
     /* Забороняємо карткам масштабуватися */
     width: 150px;
     /* Фіксована ширина картки */
-    height: 150px;
+    height: 180px;
     border: none;
     transition: transform 0.2s ease-in-out;
     text-align: center;
     background-color: transparent;
     cursor: pointer;
     scroll-snap-align: start;
+    margin: 6px 6px;
     /* Прив'язка картки до початку при прокручуванні */
 }
 
@@ -278,6 +371,13 @@ export default defineComponent({
 }
 
 .btn-add-profile {
+    display: flex;
+    justify-content: end;
+    padding-right: 15px;
+    position: static;
+}
+
+.btn-remove-profile {
     display: flex;
     justify-content: end;
     padding-right: 15px;
@@ -415,6 +515,54 @@ dialog::backdrop {
     /* Отступ сверху */
 }
 
+/* Стили чекбокс */
+.checkbox-delete {
+    margin-top: 0 !important;
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+}
+
+.input-blurred {
+    display: flex;
+    align-items: center;
+    /* Выравнивание по центру по вертикали */
+}
+
+.input-blurred label {
+    font-size: 16px;
+    /* Размер шрифта метки */
+    color: #333;
+    /* Цвет текста метки */
+    margin-right: 10px;
+    /* Отступ справа от метки */
+}
+
+.input-blurred input[type="checkbox"] {
+    width: 20px;
+    /* Ширина чекбокса */
+    height: 20px;
+    /* Высота чекбокса */
+    cursor: pointer;
+    /* Указатель при наведении */
+    accent-color: #4f8cff;
+    /* Цвет чекбокса (для современных браузеров) */
+}
+
+/* Стили для чекбокса при фокусе */
+.input-blurred input[type="checkbox"]:focus {
+    outline: none;
+    /* Убираем стандартное выделение */
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+    /* Тень при фокусе */
+}
+
+/* Стили для состояния чекбокса (при нажатии) */
+.input-blurred input[type="checkbox"]:checked {
+    background-color: #4f8cff;
+    /* Цвет фона при выборе */
+}
+
 @media (max-width: 1200px) {
     .scroll-container {
         flex-wrap: nowrap;
@@ -432,7 +580,7 @@ dialog::backdrop {
     .el-card {
         flex: 0 0 90px;
         /* Фіксована ширина картки */
-        height: 140px;
+        height: 160px;
     }
 
     .image {
