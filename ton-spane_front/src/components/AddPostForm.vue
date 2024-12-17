@@ -6,6 +6,11 @@ import config from "../config";
 
 // Define props
 const props = defineProps({
+  userId: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
   isOpen: {
     type: Boolean,
     required: true,
@@ -18,7 +23,7 @@ const emit = defineEmits(["close"]);
 // Reactive state
 const post = ref({
   caption: "",
-  userId: "936ed3cb-40da-4f18-a6ae-d48b4d34f1b2",  // Здесь будет присвоен sub
+  userId: props.userId, // props напряму
   price: 0,
   isBlurred: false,
   image: null,
@@ -26,13 +31,15 @@ const post = ref({
 
 const error = ref(null);
 
-// Get the `getSub` getter from Vuex store
+// Get Vuex `getSub` getter
 const store = useStore();
 const getSub = computed(() => store.getters.getSub);
 
-// Set userId when component is mounted
+// Assign `userId` from Vuex on mount
 onMounted(() => {
-  post.value.userId = getSub.value;  // Присваиваем значение sub в userId
+  if (!post.value.userId) {
+    post.value.userId = getSub.value; // Встановлюємо userId з Vuex
+  }
 });
 
 // Handle file input change
@@ -85,13 +92,13 @@ const handleSubmit = async () => {
   try {
     const formData = new FormData();
     formData.append("caption", post.value.caption);
-    formData.append("userId", "936ed3cb-40da-4f18-a6ae-d48b4d34f1b2");
+    formData.append("userId",post.value.userId);
     formData.append("price", post.value.price);
     formData.append("isBlurred", post.value.isBlurred);
     formData.append("image", post.value.image);
 
-    console.log("formData", post.value.caption, formData.userId, post.value.price, post.value.isBlurred, post.value.image);
-
+    console.log(props.userId);
+    console.log("formData", post.value.caption, post.value.userId, post.value.price, post.value.isBlurred, post.value.image);
     const response = await axios.post(
       `${config.API_BASE_URL}/posts`, formData, {
       headers: {
@@ -99,10 +106,12 @@ const handleSubmit = async () => {
       }
     }
     );
+
     console.log("response", response);
     alert("Пост добавлен успешно!");
     closeForm();
-  } catch {
+  } catch (err) {
+    console.error(err);
     alert("Ошибка при отправке поста.");
   }
 };
@@ -112,10 +121,11 @@ const closeForm = () => {
   emit("close");
 };
 
+// Limit input for price
 const limitInput = (event) => {
   const value = event.target.value;
   if (value.length > 4) {
-    event.target.value = value.slice(0, 4); // Обрезаем строку до 4 символов
+    event.target.value = value.slice(0, 4);
   }
 };
 
@@ -127,7 +137,7 @@ const triggerFileInput = () => {
 
 
 <template>
-  <div v-if="props.isOpen" class="modal-overlay">
+  <div v-if="isOpen" class="modal-overlay">
     <div class="modal-content dark-theme">
       <button class="close-btn" @click="closeForm">✖</button>
       <form>

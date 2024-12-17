@@ -5,10 +5,10 @@
         <dialog id="deleteDialog" ref="deleteDialog">
             <form method="dialog">
                 <p>Вы действительно хотите удалить {{ selectedPosts.length }} пост(ов)?</p>
-                    <div style="display: flex; justify-content: space-between;" >
-                        <el-button type="danger"  @click="deletePosts">Видалити</el-button>
-                        <el-button type="info" @click="closeDeleteDialog">Отменить</el-button>
-                    </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <el-button type="danger" @click="deletePosts">Видалити</el-button>
+                    <el-button type="info" @click="closeDeleteDialog">Отменить</el-button>
+                </div>
             </form>
         </dialog>
 
@@ -74,13 +74,14 @@
             <!-- Кнопка редагування -->
             <div class="bottom-btn-group">
                 <el-button class="edit-btn" type="warning" @click="openEditDialog(post)">Редагувати</el-button>
-                <input type="checkbox" v-model="selectedPosts" :value="post.id" class="custom-checkbox" />
-
+                <div class="input-blurred checkbox-delete">
+                    <input v-model="selectedPosts" type="checkbox" :value="post.id" id="isDelete" />
+                </div>
             </div>
         </div>
 
         <!-- Форма для додавання поста -->
-        <AddPostForm :isOpen="isFormOpen" @close="closeForm" />
+        <AddPostForm :isOpen="isFormOpen" :userId="props.user? props.user.id : ''" @close="closeForm" />
     </div>
 </template>
 
@@ -410,6 +411,10 @@ dialog::backdrop {
 }
 
 /* Стили чекбокс */
+.checkbox-delete {
+    margin-top: 0 !important;
+}
+
 .input-blurred {
     display: flex;
     align-items: center;
