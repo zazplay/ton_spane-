@@ -1,0 +1,166 @@
+
+:root {
+  --primary-color: #409eff;
+  --success-color: #67c23a;
+  --warning-color: #e6a23c;
+  --danger-color: #f56c6c;
+  --info-color: #909399;
+  --text-color: #2c3e50;
+  --border-color: #dcdfe6;
+  --background-color: #ffffff;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--text-color);
+}
+
+/* Element Plus глобальные переопределения */
+.el-button {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.el-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.el-input__inner {
+  border-radius: 8px;
+}
+
+.el-input__inner:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
+}
+
+.el-form-item__label {
+  font-weight: 500;
+}
+
+.el-select-dropdown__item {
+  padding: 12px 20px;
+}
+
+.el-dropdown-menu__item {
+  padding: 12px 20px;
+}
+
+/* Анимации */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(20px);
+  opacity: 0;
+}
+
+/* Утилиты */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-2 {
+  gap: 8px;
+}
+
+.gap-4 {
+  gap: 16px;
+}
+
+/* Медиа запросы */
+@media screen and (max-width: 768px) {
+  /* Базовые стили для мобильных устройств */
+  html {
+    font-size: 32px !important;
+  }
+
+  body {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Element Plus компоненты для мобильных */
+  .el-message-box {
+    width: 90% !important;
+  }
+
+  .el-dialog {
+    width: 90% !important;
+    margin: 5vh auto !important;
+  }
+
+  .el-drawer {
+    width: 90% !important;
+  }
+
+  .el-dropdown-menu {
+    min-width: 200px !important;
+  }
+
+  /* Увеличенные тени для лучшей видимости на мобильных */
+  .el-card,
+  .el-dialog,
+  .el-dropdown-menu {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+/* Темная тема */
+html.dark {
+  --background-color: #1a1a1a;
+  --text-color: #ffffff;
+  --border-color: #4c4c4c;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+html.dark .el-button--default {
+  background-color: #2c2c2c;
+  border-color: #4c4c4c;
+  color: #ffffff;
+}
+
+html.dark .el-input__inner {
+  background-color: #2c2c2c;
+  border-color: #4c4c4c;
+  color: #ffffff;
+}

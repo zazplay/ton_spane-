@@ -1,44 +1,53 @@
 <template>
-    <el-dialog
-      v-model="dialogVisible"
-      :show-close="true"
-      custom-class="sp-modal"
-      width="450px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="true"
-      :align-center="true"
-      :append-to-body="true"
-    >
-      <div class="sp-container">
-        <el-container>
-          <el-main class="sp-content">
-            <div class="sp-header">
-              <el-image :src="userImg" class="sp-user-avatar" />
-            </div>
-            
-            <h1 class="sp-title">Спонсорская подписка на {{ userNickname }}</h1>
-            
-            <el-card v-for="(item, index) in subscriptionItems" 
-                    :key="index"
-                    class="sp-subscription-item"
-                    :shadow="item.shadow">
-              <img :src="item.icon" class="sp-item-icon" />
-              <span class="sp-item-text">
-                {{ item.text }}
-              </span>
-            </el-card>
-          </el-main>
-          
-          <el-footer class="sp-footer"> 
-            <el-button type="success" class="bottom-fixed" @click="showPaymentModal">
-              Купить подписку
-            </el-button>
-          </el-footer>
-        </el-container>
+  <el-dialog
+    v-model="dialogVisible"
+    :show-close="true"
+    custom-class="modal"
+    width="400px"
+    :close-on-click-modal="false"
+    :close-on-press-escape="true"
+    :align-center="true"
+    :append-to-body="true"
+  >
+    <div class="container">
+      <!-- Аватар и заголовок -->
+      <div class="header">
+        <el-image 
+          :src="userImg" 
+          class="avatar"
+          fit="cover"
+        />
+        <h2 class="title">Подписка на {{ userNickname }}</h2>
       </div>
-      <PaymentModal ref="paymentModalRef" />
-    </el-dialog>
-  </template>
+
+      <!-- Список преимуществ -->
+      <div class="benefits-list">
+        <div 
+          v-for="(item, index) in subscriptionItems" 
+          :key="index"
+          class="benefit-item"
+        >
+          <img :src="item.icon" class="benefit-icon" />
+          <span class="benefit-text">{{ item.text }}</span>
+        </div>
+      </div>
+
+      <!-- Кнопка подписки -->
+      <div class="actions">
+        <el-button 
+          class="subscribe-btn"
+          @click="showPaymentModal"
+        >
+          Оформить подписку
+        </el-button>
+      </div>
+    </div>
+
+    <!-- Модальное окно оплаты -->
+    <PaymentModal ref="paymentModalRef" />
+  </el-dialog>
+</template>
+
   
   
 <script setup>
@@ -76,7 +85,7 @@ const showPaymentModal = () => {
   
 const fetchUserData = async () => {
   try {
-    const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/users/${props.userId}`)
+    const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/models/${props.userId}`)
     if (!response.ok) {
       throw new Error('Network response was not ok')
     }
@@ -119,205 +128,149 @@ defineExpose({
 </script>
 
 <style scoped>
+.modal {
+ border-radius: 16px;
+ overflow: hidden;
+}
+
 :deep(.el-dialog) {
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-  background: rgb(255, 255, 255);
-  backdrop-filter: blur(20px);
+ border-radius: 16px;
+ background: #ffffff;
 }
 
-.sp-modal {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(240, 245, 255, 0.97));
+:deep(.el-dialog__headerbtn) {
+ top: 16px;
+ right: 16px;
 }
 
-.sp-container {
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 0px 5px;
+:deep(.el-dialog__close) {
+ font-size: 20px;
+ color: #666;
 }
 
-.sp-content {
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: center;
+:deep(.el-dialog__close:hover) {
+ color: #4f46e5;
 }
 
-.sp-header {
-  margin-bottom: 0px;
-  position: relative;
+.container {
+ padding: 24px;
+ display: flex;
+ flex-direction: column;
+ gap: 24px;
 }
 
-.sp-user-avatar {
-  height: 90px;
-  border-radius: 10px;
-  box-shadow: 
-    0 4px 15px rgba(0, 0, 0, 0.1),
-    0 0 0 2px rgba(255, 255, 255, 0.7),
-    0 0 0 4px rgba(142, 178, 255, 0.3);
-  transition: all 0.3s ease;
+.header {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ gap: 16px;
 }
 
-.sp-user-avatar:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 
-    0 8px 20px rgba(0, 0, 0, 0.12),
-    0 0 0 2px rgba(255, 255, 255, 0.8),
-    0 0 0 4px rgba(142, 178, 255, 0.4);
+.avatar {
+ width: 80px;
+ height: 80px;
+ border-radius: 12px;
+ box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.sp-title {
-  width: auto;
-  font-size: 18px;
-  padding: 8px 20px;
-  margin: 0 0 5px 0;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
-  color: white;
-  text-align: center;
-  box-shadow: 
-    0 4px 15px rgba(79, 70, 229, 0.3),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  letter-spacing: 0.3px;
-  transition: all 0.3s ease;
+.title {
+ font-size: 18px;
+ font-weight: 600;
+ color: #ffffff;
+ background: #4f46e5;
+ padding: 8px 20px;
+ border-radius: 10px;
+ margin: 0;
+ box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
 
-.sp-title:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 8px 20px rgba(79, 70, 229, 0.4),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+.benefits-list {
+ display: flex;
+ flex-direction: column;
+ gap: 12px;
 }
 
-.sp-subscription-item {
-  width: 90%;
-  height: auto;
-  padding: 12px;
-  margin-bottom: 6px;
-  background: linear-gradient(145deg, 
-    rgba(19, 25, 35, 0.8),
-    rgba(25, 32, 45, 0.7)
-  );
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.05),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+.benefit-item {
+ display: flex;
+ align-items: center;
+ gap: 12px;
+ background: linear-gradient(145deg, 
+   rgba(19, 25, 35, 0.8),
+   rgba(25, 32, 45, 0.7)
+ );
+ padding: 14px 16px;
+ border-radius: 12px;
+ border: 1px solid rgba(255, 255, 255, 0.1);
+ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.sp-item-text {
-  position: relative;
-  margin-left: 35px;
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: 500;
-  letter-spacing: 0.2px;
+.benefit-icon {
+ width: 24px;
+ height: 24px;
+ flex-shrink: 0;
 }
 
-.sp-item-icon {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  margin-right: 12px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-  transition: all 0.3s ease;
+.benefit-text {
+ color: #ffffff;
+ font-size: 15px;
+ font-weight: 500;
+ line-height: 1.4;
 }
 
-.bottom-fixed {
-  width: 70%;
-  padding: 12px 25px;
-  font-size: 16px;
-  margin: 8px auto;
-  border-radius: 14px;
-  height: auto;
-  background: linear-gradient(-45deg, #4338ca, #6d28d9, #7c3aed, #4f46e5);
-  background-size: 300% 300%;
-  animation: gradient 15s ease infinite;
-  border: none;
-  color: white;
-  font-weight: 500;
-  letter-spacing: 0.3px;
-  box-shadow: 
-    0 4px 15px rgba(79, 70, 229, 0.3),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-  display: block;
-  position: relative;
-  left: 34%;
-  transform: translateX(-50%);
+.actions {
+ margin-top: 8px;
+ text-align: center;
 }
 
-
-.sp-footer {
-  padding: 0;
-  margin-top: 5px;
-}
-
-.sp-subscription-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 8px 20px rgba(0, 0, 0, 0.08),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-}
-
-.sp-subscription-item:hover .sp-item-icon {
-  transform: scale(1.1) rotate(5deg);
-}
-
-.bottom-fixed:hover {
-  transform: translateX(-50%) translateY(-2px);
-  background-size: 400% 400%;
-  box-shadow: 
-    0 8px 25px rgba(79, 70, 229, 0.4),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+.subscribe-btn {
+ width: 100%;
+ max-width: 280px;
+ height: 48px;
+ background: linear-gradient(135deg, #22c55e 0%, #059669 100%);
+ color: #ffffff;
+ font-size: 16px;
+ font-weight: 600;
+ border: none;
+ border-radius: 12px;
+ box-shadow: 
+   0 4px 12px rgba(34, 197, 94, 0.2),
+   inset 0 1px 0 rgba(255, 255, 255, 0.1);
+ text-transform: uppercase;
+ letter-spacing: 0.5px;
 }
 
 @media (max-width: 480px) {
-  :deep(.el-dialog) {
-    width: 90% !important;
-    margin: 10px auto !important;
-  }
+ .container {
+   padding: 20px;
+   gap: 20px;
+ }
 
-  .sp-container {
-    padding: 3px;
-  }
+ .avatar {
+   width: 64px;
+   height: 64px;
+ }
 
-  .sp-user-avatar {
-  height: 80px;
-  width: auto;
-  aspect-ratio: 1;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
+ .title {
+   font-size: 16px;
+   padding: 6px 16px;
+ }
 
-  .sp-title {
-    font-size: 15px;
-    padding: 6px 12px;
-  }
+ .benefit-item {
+   padding: 12px 14px;
+ }
 
-  .sp-subscription-item {
-    padding: 10px;
-  }
+ .benefit-icon {
+   width: 20px;
+   height: 20px;
+ }
 
-  .sp-item-text {
-    font-size: 13px;
-  }
+ .benefit-text {
+   font-size: 14px;
+ }
 
-  .bottom-fixed {
-    padding: 10px 20px;
-    font-size: 14px;
-  }
-}
-
-@keyframes gradient {
-  0% { background-position: 0% 50% }
-  50% { background-position: 100% 50% }
-  100% { background-position: 0% 50% }
+ .subscribe-btn {
+   height: 44px;
+   font-size: 15px;
+ }
 }
 </style>

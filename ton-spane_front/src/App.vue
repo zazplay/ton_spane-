@@ -128,3 +128,23 @@ export default {
  }
 }
 </style>
+
+<style>
+/* Стили для уведомлений Element Plus */
+:root {
+  --el-message-z-index: 10000;
+}
+
+.el-message {
+  z-index: var(--el-message-z-index) !important;
+  top: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}
+
+@media screen and (max-width: 768px) {
+  .el-message {
+    width: 90% !important;
+  }
+}
+</style>

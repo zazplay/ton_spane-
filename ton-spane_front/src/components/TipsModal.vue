@@ -11,21 +11,32 @@
       >
         <div class="modal-header">
           <h3>{{ title }}</h3>
-          <button class="close-btn" @click="closeModal">
+          <button 
+            class="close-btn" 
+            @click="closeModal"
+            aria-label="Закрыть"
+          >
             <el-icon><Close /></el-icon>
           </button>
         </div>
 
         <div class="modal-body">
           <div class="amounts-section">
-            <label class="section-label">Сумма</label>
-            <div class="amounts-grid">
+            <label class="section-label" for="amounts-grid">Сумма</label>
+            <div 
+              id="amounts-grid" 
+              class="amounts-grid"
+              role="radiogroup"
+              aria-label="Выберите сумму"
+            >
               <button
                 v-for="value in amounts"
                 :key="value"
                 class="amount-btn"
                 :class="{ active: sum === value }"
                 @click="handleAmountSelect(value)"
+                :aria-pressed="sum === value"
+                type="button"
               >
                 {{ value }} USD
               </button>
@@ -33,40 +44,41 @@
           </div>
 
           <div class="message-section">
-            <label class="section-label">Ваше сообщение</label>
+            <label class="section-label" for="message-input">Ваше сообщение</label>
             <textarea
+              id="message-input"
               v-model="form.message"
               class="message-input"
               placeholder="Напишите что-нибудь приятное..."
               rows="3"
-              @input="(e) => handleMessageInput(e.target.value)"
+              maxlength="500"
+              @input="handleMessageInput"
             ></textarea>
           </div>
 
-          <button class="submit-btn" @click="showPaymentModal" >
+          <button 
+            class="submit-btn" 
+            @click="handleSubmit"
+            :disabled="!isFormValid"
+          >
             Отправить
           </button>
         </div>
       </div>
     </div>
   </Teleport>
-  <PaymentModal ref="paymentModalRef" />
-
+  <PaymentModal 
+    ref="paymentModalRef" 
+    @payment-success="handlePaymentSuccess"
+    @payment-error="handlePaymentError"
+  />
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onBeforeUnmount,defineProps,defineEmits } from 'vue'
+import { ref, reactive, computed, watch, onBeforeUnmount, defineProps, defineEmits } from 'vue'
 import { Close } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import PaymentModal from './Page/PaymentPage/PaymantPage.vue'
-
-const paymentModalRef = ref(null)
-
-const showPaymentModal = () => {
-  paymentModalRef.value.openDialog()
-  isVisible.value = false
-
-}
-
 const props = defineProps({
   dialogDonateVisible: { type: Boolean, required: true },
   initialSum: { type: String, default: '5' },
@@ -75,6 +87,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:dialogDonateVisible', 'sumChange', 'messageChange', 'submit'])
 
+const paymentModalRef = ref(null)
 const amounts = ['5', '10', '20', '50']
 const form = reactive({ message: '' })
 const sum = ref(props.initialSum)
@@ -82,6 +95,10 @@ const sum = ref(props.initialSum)
 const isVisible = computed({
   get: () => props.dialogDonateVisible,
   set: (value) => emit('update:dialogDonateVisible', value)
+})
+
+const isFormValid = computed(() => {
+  return sum.value && sum.value.length > 0
 })
 
 watch(() => isVisible.value, (newValue) => {
@@ -105,210 +122,233 @@ const handleAmountSelect = (value) => {
   emit('sumChange', value)
 }
 
-const handleMessageInput = (value) => {
-  emit('messageChange', value)
+const handleMessageInput = (event) => {
+  form.message = event.target.value
+  emit('messageChange', event.target.value)
 }
 
-// eslint-disable-next-line no-unused-vars
 const handleSubmit = () => {
+  if (!isFormValid.value) return
+  
+  paymentModalRef.value?.openDialog()
   emit('submit', {
     amount: sum.value,
     message: form.message
   })
 }
+
+const handlePaymentSuccess = () => {
+  ElMessage.success('Платеж успешно выполнен!')
+  closeModal()
+}
+
+const handlePaymentError = () => {
+  ElMessage.error('Произошла ошибка при оплате')
+}
 </script>
 
 <style scoped>
 .modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
+ position: fixed;
+ inset: 0;
+ background: rgba(0, 0, 0, 0.7);
+ backdrop-filter: blur(8px);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ z-index: 9999;
 }
 
 .modal-container {
-  position: fixed;
-  left: 50vw;
-  top: 50vh;
-  transform: translate(-50%, -50%);
-  background: var(--el-bg-color);
-  border-radius: 16px;
-  width: 90%;
-  max-width: 440px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-  animation: modalAppear 0.2s ease-out;
-  font-family: Arial, Helvetica, sans-serif;
-
+ position: fixed;
+ left: 50vw;
+ top: 50vh;
+ transform: translate(-50%, -50%);
+ background: linear-gradient(145deg, #2d3748, #1a202c);
+ border-radius: 24px;
+ width: 90%;
+ max-width: 440px;
+ box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7),
+             0 0 0 1px rgba(255, 255, 255, 0.1);
+ animation: modalAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+ font-family: system-ui, -apple-system, sans-serif;
 }
 
 .modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--el-border-color-lighter);
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ padding: 20px 24px;
+ border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .modal-header h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--el-text-color-primary);
+ margin: 0;
+ font-size: 20px;
+ font-weight: 600;
+ color: #fff;
+ letter-spacing: -0.5px;
 }
 
 .close-btn {
-  background: none;
-  border: none;
-  padding: 8px;
-  cursor: pointer;
-  color: var(--el-text-color-secondary);
-  border-radius: 8px;
-  transition: all 0.2s;
+ background: rgba(255, 255, 255, 0.1);
+ border: none;
+ padding: 10px;
+ cursor: pointer;
+ color: rgba(255, 255, 255, 0.8);
+ border-radius: 12px;
+ transition: all 0.2s;
 }
 
 .close-btn:hover {
-  background: var(--el-fill-color-light);
+ background: rgba(255, 255, 255, 0.15);
+ transform: scale(1.05);
 }
 
 .modal-body {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+ padding: 24px;
+ display: flex;
+ flex-direction: column;
+ gap: 28px;
 }
 
 .section-label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-regular);
-  margin-bottom: 12px;
+ display: block;
+ font-size: 15px;
+ font-weight: 500;
+ color: rgba(255, 255, 255, 0.9);
+ margin-bottom: 14px;
 }
 
 .amounts-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+ display: grid;
+ grid-template-columns: repeat(4, 1fr);
+ gap: 12px;
 }
 
 .amount-btn {
-  padding: 12px;
-  border: 1px solid var(--el-border-color);
-  background: var(--el-bg-color);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: var(--el-text-color-primary);
-  font-weight: 500;
+ padding: 14px;
+ border: 2px solid rgba(255, 255, 255, 0.1);
+ background: rgba(255, 255, 255, 0.07);
+ border-radius: 14px;
+ cursor: pointer;
+ transition: all 0.2s;
+ color: rgba(255, 255, 255, 0.9);
+ font-weight: 600;
 }
 
 .amount-btn:hover {
-  border-color: var(--el-color-primary);
-  color: var(--el-color-primary);
+ border-color: rgba(99, 102, 241, 0.5);
+ color: #6366f1;
+ transform: translateY(-2px);
 }
 
 .amount-btn.active {
-  background: var(--el-color-primary);
-  border-color: var(--el-color-primary);
-  color: white;
+ background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+ border-color: transparent;
+ color: white;
+ box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .message-input {
-  width: 90%;
-  padding: 12px;
-  border: 1px solid var(--el-border-color);
-  border-radius: 8px;
-  background: var(--el-bg-color-overlay);
-  color: var(--el-text-color-primary);
-  font-size: 14px;
-  line-height: 1.6;
-  resize: vertical;
-  min-height: 100px;
-  transition: border-color 0.2s;
+ width: 90%;
+ padding: 16px;
+ border: 2px solid rgba(255, 255, 255, 0.1);
+ border-radius: 14px;
+ background: rgba(255, 255, 255, 0.07);
+ color: #fff;
+ font-size: 15px;
+ line-height: 1.6;
+ resize: vertical;
+ min-height: 120px;
+ transition: all 0.2s;
 }
 
 .message-input:focus {
-  outline: none;
-  border-color: var(--el-color-primary);
+ outline: none;
+ border-color: rgba(99, 102, 241, 0.5);
+ background: rgba(255, 255, 255, 0.09);
+}
+
+.message-input::placeholder {
+ color: rgba(255, 255, 255, 0.4);
 }
 
 .submit-btn {
-  background: var(--el-color-success);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: opacity 0.2s;
+ background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+ color: white;
+ border: none;
+ border-radius: 14px;
+ padding: 14px 28px;
+ font-size: 16px;
+ font-weight: 600;
+ cursor: pointer;
+ transition: all 0.2s;
+ box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .submit-btn:hover {
-  opacity: 0.9;
+ transform: translateY(-2px);
+ box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
 }
 
 @keyframes modalAppear {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -45%);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%);
-  }
+ from {
+   opacity: 0;
+   transform: translate(-50%, -45%);
+ }
+ to {
+   opacity: 1;
+   transform: translate(-50%, -50%);
+ }
 }
 
 :deep(body.modal-open) {
-  overflow: hidden;
+ overflow: hidden;
 }
 
 @media (max-width: 480px) {
-  .modal-container {
-    width: 85%;
-  }
+ .modal-container {
+   width: 85%;
+ }
 
-  .modal-header {
-    padding: 12px 16px;
-  }
+ .modal-header {
+   padding: 16px 20px;
+ }
 
-  .modal-header h3 {
-    font-size: 16px;
-  }
+ .modal-header h3 {
+   font-size: 18px;
+ }
 
-  .modal-body {
-    padding: 16px;
-    gap: 20px;
-  }
+ .modal-body {
+   padding: 20px;
+   gap: 24px;
+ }
 
-  .amounts-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
+ .amounts-grid {
+   grid-template-columns: repeat(2, 1fr);
+   gap: 10px;
+ }
 
-  .amount-btn {
-    padding: 10px;
-    font-size: 14px;
-  }
+ .amount-btn {
+   padding: 12px;
+   font-size: 14px;
+ }
 
-  .message-input {
-    font-size: 13px;
-    padding: 10px;
-    min-height: 80px;
-  }
+ .message-input {
+   font-size: 14px;
+   padding: 12px;
+   min-height: 100px;
+ }
 
-  .section-label {
-    font-size: 13px;
-    margin-bottom: 10px;
-  }
+ .section-label {
+   font-size: 14px;
+   margin-bottom: 12px;
+ }
 
-  .submit-btn {
-    font-size: 14px;
-    padding: 10px 20px;
-  }
+ .submit-btn {
+   font-size: 15px;
+   padding: 12px 24px;
+ }
 }
 </style>

@@ -1,39 +1,44 @@
 <template>
-    <div class="sp-container">
-      <el-container>
-        <!-- Header Section -->
-        <el-header class="sp-header">
-          <el-button class="sp-back-btn" @click="handleGoBack" plain>
-            <el-icon><ArrowLeftBold /></el-icon>
-          </el-button>
-          <el-image :src="USER_IMG" class="sp-user-avatar" />
-        </el-header>
+  <div class="subscription-container">
+    <!-- Header -->
+    <div class="header">
+      <button class="back-button" @click="handleGoBack">
         
-        <!-- Main Content Section -->
-        <el-main class="sp-content">
-          <h1 class="sp-title">Спонсорская подписка на {{ USER_NICKNAME }}</h1>
-          
-          <!-- Subscription Cards -->
-          <el-card v-for="(item, index) in subscriptionItems" 
-                  :key="index"
-                  class="sp-subscription-item"
-                  :shadow="item.shadow">
-            <img :src="item.icon" class="sp-item-icon" />
-            <span class="sp-item-text">
-              {{ item.text }}
-            </span>
-          </el-card>
-        </el-main>
-        
-        <el-footer class="sp-footer"> 
-            <el-button type="success" class="bottom-fixed"  @click="showPaymentModal"            >Купить подписку</el-button>
-
-        </el-footer>
-      </el-container>
+        <el-icon><ArrowLeftBold /></el-icon>
+      </button>
+      <button class="subscribe-button" @click="showPaymentModal">
+    Оформить подписку
+    <div class="button-glow"></div>
+  </button>
+      <div class="profile-section">
+        <el-image :src="USER_IMG" class="avatar" />
+        <h1 class="title">Подписка на {{ USER_NICKNAME }}</h1>
+      </div>
     </div>
-    <PaymentModal ref="paymentModalRef" />
 
-  </template>
+    <!-- Subscription Plans -->
+    <div class="plans-container">
+      <div 
+        v-for="(item, index) in subscriptionItems" 
+        :key="index"
+        class="plan-card"
+      >
+        <div class="plan-content">
+          <img :src="item.icon" class="plan-icon" />
+          <span class="plan-text">{{ item.text }}</span>
+        </div>
+        
+      </div>
+      
+    </div>
+    
+  </div>
+
+  <!-- Fixed Subscribe Button -->
+  
+  
+  <PaymentModal ref="paymentModalRef" />
+</template>
   
   <script setup>
 import { ArrowLeftBold } from '@element-plus/icons-vue'
@@ -65,7 +70,7 @@ const showPaymentModal = () => {
 
 const fetchUserData = async () => {
   try {
-    const response = await axios.get(`https://ton-back-e015fa79eb60.herokuapp.com/api/users/${route.params.id}`)
+    const response = await axios.get(`https://ton-back-e015fa79eb60.herokuapp.com/api/models/${route.params.id}`)
     
     // Обновляем данные
     USER_IMG.value = response.data.profilePicture
@@ -106,34 +111,142 @@ const subscriptionItems = [
 ]
 </script>
   
-  <style>
+<style scoped>
+.subscription-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: linear-gradient(145deg, #1a1e2d, #242936);
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  margin-bottom: 100px; /* Space for fixed button */
+}
 
-.bottom-fixed {
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.back-button {
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #fff;
+}
+
+.back-button:hover {
+  transform: translateX(-4px);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.profile-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.avatar {
+  height: 120px;
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+  background: linear-gradient(135deg, #60a5fa, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.plans-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.plan-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.plan-card:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+.plan-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem;
+}
+
+.plan-icon {
+  width: 32px;
+  height: 32px;
+  padding: 8px;
+  background: rgba(96, 165, 250, 0.1);
+  border-radius: 12px;
+}
+
+.plan-text {
+  font-size: 16px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.subscribe-button {
   position: fixed;
-  bottom: 10px;
+  /* bottom: 4rem; */
   left: 50%;
   transform: translateX(-50%);
-  padding: 25px 145px;
-  font-size: 30px;
-  color: white;
-  background: linear-gradient(-45deg, #b2583c, #e73c7e, #23a6d5, #126753);
-  background-size: 400% 400%;
-  animation: gradient 15s ease infinite, float 6s ease-in-out infinite;
-  border-radius: 15px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-
-}
-
-.bottom-fixed:hover {
-  transform: translateX(-50%) translateY(-5px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+  padding: 1rem 1rem;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(-45deg, #3b82f6, #8b5cf6, #ec4899);
   background-size: 200% 200%;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  animation: gradientBG 10s ease infinite;
+  z-index: 100;
+  min-width: 250px;
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+  overflow: hidden;
+  position: relative;
 }
 
-@keyframes gradient {
+.button-glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+  animation: rotate 10s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes gradientBG {
   0% {
     background-position: 0% 50%;
   }
@@ -145,311 +258,46 @@ const subscriptionItems = [
   }
 }
 
-@keyframes float {
-  0% {
-    transform: translateX(-50%) translateY(0px);
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
   }
-  50% {
-    transform: translateX(-50%) translateY(-10px);
-  }
-  100% {
-    transform: translateX(-50%) translateY(0px);
+  to {
+    transform: rotate(360deg);
   }
 }
 
-/* Glowing effect */
-.bottom-fixed::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00,  #002bff, #7a00ff, #ff00c8, #ff0000);
-  background-size: 400%;
-  border-radius: 15px;
-  z-index: -1;
-  animation: glowing 20s linear infinite;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+.subscribe-button:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 12px 30px rgba(59, 130, 246, 0.5);
 }
 
-@keyframes glowing {
-  0% {
-    background-position: 0 0;
+@media (max-width: 768px) {
+  .subscription-container {
+    padding: 1.5rem;
+    border-radius: 20px;
+    margin: 1rem;
+    margin-bottom: 100px;
   }
-  50% {
-    background-position: 400% 0;
-  }
-  100% {
-    background-position: 0 0;
-  }
-}
 
-@media (max-width: 480px) {
-  .bottom-fixed {
-    position: fixed;
-    top: 20px;
-    left: 60% !important;
-    transform: translateX(-50%);
-    height: auto !important;
-    padding: 15px !important;
-    border-radius: 15px;
-    margin: 0 !important;
-    width:auto;
-    max-width: 300px;
-    height: 40px !important;
+  .avatar {
+    width: 100px;
+    height: 100px;
   }
-  
 
-}
-  /* Container Styles */
-  .sp-container {
-    width: 95%;
-    border: #8eb2ff;
-    border-radius: 5%;
-    border: solid;
-    padding-left: 0px;
-    padding: 20px;
-    margin-left: 20px;
-    border-color: rgba(0, 136, 255, 0.493);
-    @media (max-width: 480px) {
-      border-radius: 20px;
-      padding: 0px !important;
-      margin-left: 8px !important;
-    }
+  .title {
+    font-size: 20px;
   }
-  
-  /* Header Styles */
-  .sp-header {
-    height: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 0px;
-    width: 100%;
-    @media (max-width: 480px) {
-      width: 100%;
 
-    }
-
-  }
-  
-  /* Main Content Styles */
-  .sp-content {
-    padding: 0;
-    display: flex;
-    width: 100%;
-    padding-top: 20px;
-    flex-direction: column;
-    gap: 10px;
-    justify-self: center;
-    align-items: center;
-  }
-  
-  /* Subscription Card Styles */
-  .sp-subscription-item {
-      color: rgb(205, 230, 255);
-      font-size: 20px;
-      border-color: rgb(75, 165, 255);
-      display: flex;
-      align-items: center;
-      width: 90%;
-      padding: 20px;
-      background: linear-gradient(145deg, rgba(13, 23, 33, 0.692), rgba(32, 45, 58, 0.544));
-      border-radius: 10px;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      height: 30px;
-      @media (max-width: 480px) {
-        width: 80%;
-        font-size: 0.55rem;
-        padding: 15px;
-        padding-top: 12px;
-        padding-bottom: 12px;
-        font-size: 17px;
-
-
-    }
-  }
-  
-  .sp-subscription-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(75, 165, 255, 0.2);
-      border-color: rgb(100, 180, 255);
-  }
-  
-  /* Card Content Styles */
-  .sp-item-text {
-      color: rgb(205, 230, 255);
-      font-weight: 500;
-      letter-spacing: 0.5px;
-      margin-left: 15px;
-      position: absolute;
-      margin-top: 8px;
-      @media (max-width: 480px) {
-        margin-left: 5px;
-
-      }
-  }
-  
-  .sp-item-icon {
-      width: 25px;
-      height: 25px;
-      margin-right: 10px;
-      background-color: rgba(110, 115, 122, 0);
-      padding: 5px;
-      border-radius: 10%;
-      transition: all 0.3s ease;
-  }
-  
-  .sp-subscription-item:hover .sp-item-icon {
-      transform: scale(1.1);
-  }
-  
-  /* Back Button Styles */
-  .sp-back-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--el-color-primary);
-    border: 2px solid var(--el-color-primary);
-    background: rgba(64, 158, 255, 0.02);
-    padding: 0px 0px;
-    border-radius: 12px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    font-weight: 600;
+  .plan-text {
     font-size: 15px;
-    letter-spacing: 0.3px;
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(8px);
-    margin-left: 0px;
-    width: 50px;
-    @media (max-width: 480px) {
-        width: 50px !important;
-        height: 40px !important;
-        margin-top: 10px !important;
-        margin-left: 10px !important;
-
-
-    }
-
   }
-  
-  .sp-back-btn:hover {
-    background: rgba(64, 158, 255, 0.08);
-    box-shadow: 0 0 20px rgba(64, 158, 255, 0.3), 
-                0 0 0 1px rgba(64, 158, 255, 0.2);
-    transform: translateY(-1px);
-  }
-  
-  .sp-back-btn:active {
-    transform: translateY(1px);
-    box-shadow: 0 0 10px rgba(64, 158, 255, 0.2);
-  }
-  
-  .sp-back-btn .el-icon {
+
+  .subscribe-button {
+    width: 80%;
+    padding: 0.875rem 1.5rem;
     font-size: 16px;
-    transition: transform 0.3s ease;
+    min-width: auto;
   }
-  
-  .sp-back-btn:hover .el-icon {
-    transform: translateX(-3px);
-  }
-  
-  .sp-back-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(64, 158, 255, 0.1),
-      transparent
-    );
-    transition: 0.5s;
-  }
-  
-  .sp-back-btn:hover::before {
-    left: 100%;
-  }
-  
-  /* User Avatar Styles */
-  .sp-user-avatar {
-      height: 150px;
-      width: 150px;
-      border-radius: 10px;
-      align-self: center;
-      @media (max-width: 480px) {
-        width: 100px;
-        height: 100px;
-
-      }
-  }
-  
-  /* Title Styles */
-  .sp-title {
-    width: 92% !important;
-    
-      font-weight: 800;
-      font-size: 22px;
-      color: rgb(0, 0, 0);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      text-shadow: 0 0 10px rgba(255,255,255,0.6),
-                   0 0 20px rgba(142,178,255,0.4),
-                   0 0 30px rgba(178,105,255,0.2);
-      padding: 12px 10px;
-      margin: 0;
-      margin-top: 10px;
-      display: flex;
-      border-radius: 8px;
-      box-shadow: 0 2px 15px rgba(142,178,255,0.3),
-                  0 0 30px rgba(178,105,255,0.2);
-      background: linear-gradient(135deg, #8eb2ff, #b269ff);
-      overflow: hidden;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-      align-self: center;
-      width: 501px;
-      transition: all 0.3s ease;
-      display: flex !important;
-    text-align: center !important;
-    justify-content: center !important;
-      @media (max-width: 480px) {
-      width: 85% !important;
-      font-size: 0.55rem;
-      padding: 7px;
-      font-size: 17px;
-
-    }
-  }
-  
-  .sp-title:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba(142,178,255,0.4),
-                  0 0 40px rgba(178,105,255,0.3);
-      text-shadow: 0 0 15px rgba(255,255,255,0.8),
-                   0 0 25px rgba(142,178,255,0.6),
-                   0 0 35px rgba(178,105,255,0.4);
-  }
-  
-  /* Animation */
-  @keyframes glow {
-      0% { box-shadow: 0 2px 15px rgba(142,178,255,0.3), 0 0 30px rgba(178,105,255,0.2); }
-      50% { box-shadow: 0 2px 20px rgba(142,178,255,0.4), 0 0 40px rgba(178,105,255,0.3); }
-      100% { box-shadow: 0 2px 15px rgba(142,178,255,0.3), 0 0 30px rgba(178,105,255,0.2); }
-  }
-  
-  .sp-title {
-      animation: glow 2s infinite ease-in-out;
-  }
-  
-  .sp-title::-webkit-scrollbar {
-      display: none;
-  }
-  </style>
+}
+</style>

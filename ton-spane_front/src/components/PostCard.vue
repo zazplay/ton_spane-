@@ -1,7 +1,10 @@
 <template>
   <ShareModal v-model:dialogVisible="isShareModalVisible" />
   <TipsModal v-model:dialogDonateVisible="isTipsModalVisible" />
-  <SubscriptionModal />
+  <SubscriptionModal 
+  ref="subscriptionModalRef"
+  :userId="props.user.id"  
+/>
   <el-card class="post-card">
     <div class="header">
       <el-avatar :size="50" class="avatar" :src="user.profilePicture" />

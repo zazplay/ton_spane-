@@ -162,13 +162,13 @@ const copyLink = async () => {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
 .modal-container {
@@ -176,82 +176,88 @@ const copyLink = async () => {
   left: 50vw;
   top: 50vh;
   transform: translate(-50%, -50%);
-  background: var(--el-bg-color);
-  border-radius: 16px;
+  background: linear-gradient(145deg, #2d3748, #1a202c);
+  border-radius: 24px;
   width: 90%;
   max-width: 400px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-  animation: modalAppear 0.2s ease-out;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7),
+              0 0 0 1px rgba(255, 255, 255, 0.1);
+  animation: modalAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--el-border-color-lighter);
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .modal-header h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
-  color: var(--el-text-color-primary);
+  color: #fff;
+  letter-spacing: -0.5px;
 }
 
 .close-btn {
-  background: none;
+  background: rgba(255, 255, 255, 0.1);
   border: none;
-  padding: 8px;
+  padding: 10px;
   cursor: pointer;
-  color: var(--el-text-color-secondary);
-  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .close-btn:hover {
-  background: var(--el-fill-color-light);
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.1);
 }
 
 .modal-body {
-  padding: 20px;
+  padding: 24px;
 }
 
 .share-actions {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .share-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 12px;
+  gap: 10px;
+  padding: 16px;
   border: none;
-  border-radius: 12px;
-  background: var(--el-fill-color-light);
-  color: var(--el-text-color-regular);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.9);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .share-btn:hover {
-  background: var(--el-fill-color);
+  background: rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
 }
 
 .share-btn .el-icon,
 .instagram-icon {
-  font-size: 24px;
-  width: 24px;
-  height: 24px;
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
 }
 
 .share-btn span {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
 }
 
@@ -269,37 +275,44 @@ const copyLink = async () => {
 
 .link-container {
   display: flex;
-  gap: 8px;
-  background: var(--el-fill-color-light);
-  padding: 4px;
-  border-radius: 8px;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.07);
+  padding: 6px;
+  border-radius: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .link-input {
   flex: 1;
   border: none;
   background: none;
-  padding: 8px 12px;
-  font-size: 14px;
-  color: var(--el-text-color-regular);
+  padding: 12px 16px;
+  font-size: 15px;
+  color: #fff;
   outline: none;
 }
 
+.link-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
 .copy-btn {
-  background: var(--el-color-primary);
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   color: white;
   border: none;
-  border-radius: 6px;
-  width: 36px;
+  border-radius: 10px;
+  width: 42px;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .copy-btn:hover {
-  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
 }
 
 @keyframes modalAppear {
@@ -307,7 +320,6 @@ const copyLink = async () => {
     opacity: 0;
     transform: translate(-50%, -45%);
   }
-
   to {
     opacity: 1;
     transform: translate(-50%, -50%);
@@ -320,38 +332,38 @@ const copyLink = async () => {
   }
 
   .modal-header {
-    padding: 12px 16px;
+    padding: 16px 20px;
   }
 
   .modal-header h3 {
-    font-size: 16px;
+    font-size: 18px;
   }
 
   .modal-body {
-    padding: 16px;
+    padding: 20px;
   }
 
   .share-btn {
-    padding: 10px;
+    padding: 12px;
   }
 
   .share-btn .el-icon,
   .instagram-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
   }
 
   .share-btn span {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .link-input {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .copy-btn {
-    width: 32px;
+    width: 38px;
   }
 }
 </style>

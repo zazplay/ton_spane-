@@ -1,173 +1,204 @@
 <template>
-    <el-dialog
-      v-model="dialogVisible"
-      title="Оплата"
-      width="100%"
-      :modal-append-to-body="true"
-      :z-index="9999"
-      :before-close="handleClose"
-    >
-      <el-form :model="form" :rules="rules" ref="paymentForm">
-        <!-- Выбор метода оплаты -->
-        <el-form-item prop="paymentMethod">
-          <el-radio-group v-model="form.paymentMethod">
-            <el-radio label="card">Банковская карта</el-radio>
-            <el-radio label="crypto">Криптовалюта</el-radio>
-          </el-radio-group>
-        </el-form-item>
-  
-        <!-- Форма для оплаты картой -->
-        <template v-if="form.paymentMethod === 'card'">
-          <el-form-item 
-            label="Номер карты" 
-            prop="cardNumber"
+  <Teleport to="body">
+    <div v-if="dialogVisible" class="modal-overlay" @click.self="closeDialog">
+      <div class="modal-dialog payment-modal">
+        <button class="close-button" @click="closeDialog">×</button>
+        <div class="payment-container">
+          <div class="payment-header">
+            <h2 class="payment-title">Оформление подписки</h2>
+            <p class="payment-subtitle">Выберите способ оплаты</p>
+          </div>
 
-          >
-            <el-input
-              v-model="form.cardNumber"
-              :maxlength="19"
-              @input="formatCardNumber"
-              placeholder="XXXX XXXX XXXX XXXX"
-            />
-          </el-form-item>
-          
-          <el-row :gutter="20">
-            <el-col :span="12">
-              <el-form-item 
-                label="Срок действия" 
-                prop="expiryDate"
-                
-              >
-                <el-input
+          <div class="payment-methods">
+            <div 
+              class="payment-method-item"
+              :class="{ 'active': form.paymentMethod === 'card' }"
+              @click="form.paymentMethod = 'card'"
+            >
+              <div class="method-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                  <line x1="2" y1="10" x2="22" y2="10"></line>
+                </svg>
+              </div>
+              <div class="method-info">
+                <span class="method-title">Банковская карта</span>
+                <span class="method-desc">Visa, Mastercard</span>
+              </div>
+            </div>
+
+            <div 
+              class="payment-method-item"
+              :class="{ 'active': form.paymentMethod === 'crypto' }"
+              @click="form.paymentMethod = 'crypto'"
+            >
+              <div class="method-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="8"></circle>
+                  <line x1="12" y1="8" x2="12" y2="16"></line>
+                  <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+              </div>
+              <div class="method-info">
+                <span class="method-title">Криптовалюта</span>
+                <span class="method-desc">BTC, ETH, USDT</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="payment-form" v-if="form.paymentMethod === 'card'">
+            <div class="form-group">
+              <label>Номер карты</label>
+              <input 
+                v-model="form.cardNumber"
+                type="text"
+                placeholder="0000 0000 0000 0000"
+                @input="formatCardNumber"
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Срок</label>
+                <input 
                   v-model="form.expiryDate"
-                  placeholder="ММ/ГГ"
-                  :maxlength="5"
+                  type="text"
+                  placeholder="MM/YY"
                   @input="formatExpiryDate"
-                  style="width: fit-content;"
-                  
                 />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item 
-                label="CVV" 
-                prop="cvv"
-                style="margin-left: 10px;"
-              >
-                <el-input
+              </div>
+              <div class="form-group">
+                <label>CVV</label>
+                <input 
                   v-model="form.cvv"
                   type="password"
-                  :maxlength="3"
-                  show-password
-                  placeholder="XXX"
-                  style="width: 100px; margin-left: 10px !important;"
-
+                  placeholder="***"
+                  maxlength="3"
                 />
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </template>
-  
-        <!-- Заглушка для криптоплатежей -->
-        <template v-else>
-          <el-alert
-            title="Оплата криптовалютой"
-            type="info"
-            description="Функционал оплаты криптовалютой находится в разработке"
-            :closable="false"
-            show-icon
-          />
-        </template>
-      </el-form>
-  
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="dialogVisible = false">Отмена</el-button>
-          <el-button type="primary" @click="submitForm">Оплатить</el-button>
-        </span>
-      </template>
-    </el-dialog>
+              </div>
+            </div>
+          </div>
+
+          <div class="crypto-message" v-else>
+            <div class="message-content">
+              <div class="lock-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </div>
+              <span>Оплата криптовалютой скоро будет доступна</span>
+            </div>
+          </div>
+
+          <div class="payment-footer">
+            <button class="cancel-btn" @click="closeDialog">
+              Отмена
+            </button>
+            <button class="pay-btn" @click="submitForm">
+              Оплатить
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
-  
+
 <script setup>
-import { ref, reactive, defineExpose } from 'vue'
+/* eslint-disable no-unused-vars */
+import { ref, reactive, defineExpose, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { CreditCard, Money, Lock } from '@element-plus/icons-vue'
 
 const dialogVisible = ref(false)
-const paymentForm = ref(null)
 
+
+// Начальное состояние формы
 const form = reactive({
   paymentMethod: 'card',
   cardNumber: '',
   expiryDate: '',
-  cvv: ''
+  cvv: '',
+  amount: '999'
 })
 
-const rules = {
-  cardNumber: [
-    { required: true, message: 'Введите номер карты', trigger: 'blur' },
-    { min: 19, message: 'Неверный формат номера карты', trigger: 'blur' }
-  ],
-  expiryDate: [
-    { required: true, message: 'Введите срок действия карты', trigger: 'blur' },
-    { pattern: /^(0[1-9]|1[0-2])\/([0-9]{2})$/, message: 'Неверный формат даты', trigger: 'blur' }
-  ],
-  cvv: [
-    { required: true, message: 'Введите CVV код', trigger: 'blur' },
-    { min: 3, message: 'CVV должен содержать 3 цифры', trigger: 'blur' }
-  ]
+const closeDialog = () => {
+  dialogVisible.value = false
 }
 
+const toggleScrollLock = (isLocked) => {
+  document.body.style.overflow = isLocked ? 'hidden' : ''
+}
+
+watch(dialogVisible, (newValue) => {
+  toggleScrollLock(newValue)
+})
+
 // Форматирование номера карты
-const formatCardNumber = (value) => {
-  if (!value) return ''
-  const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
-  const matches = v.match(/\d{4,16}/g)
-  const match = (matches && matches[0]) || ''
-  const parts = []
-
-  for (let i = 0, len = match.length; i < len; i += 4) {
-    parts.push(match.substring(i, i + 4))
-  }
-
-  if (parts.length) {
-    form.cardNumber = parts.join(' ')
-  }
+const formatCardNumber = (e) => {
+  let value = e.target.value.replace(/\D/g, '')
+  value = value.replace(/(\d{4})/g, '$1 ').trim()
+  e.target.value = value.substring(0, 19)
+  form.cardNumber = e.target.value
 }
 
 // Форматирование даты
-const formatExpiryDate = (value) => {
-  if (!value) return ''
-  const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
-  if (v.length >= 2) {
-    form.expiryDate = v.slice(0, 2) + '/' + v.slice(2)
+const formatExpiryDate = (e) => {
+  let value = e.target.value.replace(/\D/g, '')
+  
+  if (value.length >= 2) {
+    value = value.substring(0, 2) + '/' + value.substring(2)
   }
+  
+  e.target.value = value.substring(0, 5)
+  form.expiryDate = e.target.value
 }
 
+// Валидация формы перед отправкой
+const validateForm = () => {
+  if (form.paymentMethod === 'card') {
+    if (form.cardNumber.replace(/\s/g, '').length !== 16) {
+      ElMessage.error('Введите корректный номер карты')
+      return false
+    }
+    
+    if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(form.expiryDate)) {
+      ElMessage.error('Введите корректный срок действия карты')
+      return false
+    }
+    
+    if (form.cvv.length !== 3) {
+      ElMessage.error('Введите корректный CVV код')
+      return false
+    }
+  }
+  return true
+}
+
+// Отправка формы
 const submitForm = async () => {
-  if (!paymentForm.value) return
+  if (!validateForm()) return
 
   try {
-    await paymentForm.value.validate()
-    
     if (form.paymentMethod === 'card') {
-      // Всегда показываем ошибку при оплате картой
-      ElMessage.error('Ошибка обработки платежа. Пожалуйста, попробуйте позже или используйте другой способ оплаты.')
+      ElMessage.error('Ошибка обработки платежа. Попробуйте позже или используйте другой способ оплаты.')
       return
     }
     
-    ElMessage.success('Форма успешно отправлена')
+    ElMessage.success('Оплата прошла успешно!')
     dialogVisible.value = false
+    
+    // Очистка формы
+    form.cardNumber = ''
+    form.expiryDate = ''
+    form.cvv = ''
   } catch (error) {
-    ElMessage.error('Пожалуйста, проверьте введенные данные')
+    ElMessage.error('Произошла ошибка при обработке платежа')
   }
 }
 
-const handleClose = (done) => {
-  done()
-}
-
-// Метод для открытия модального окна извне
+// Открытие модального окна
 const openDialog = () => {
   dialogVisible.value = true
 }
@@ -178,128 +209,235 @@ defineExpose({
 </script>
 
 <style scoped>
-:deep(.el-dialog) {
-  max-width: 100%;
-  width: 95% !important;
-  margin: 20px auto;
-}
 
-:deep(.el-form-item) {
-  margin-bottom: 20px;
-}
 
-:deep(.el-input__wrapper) {
-  width: 100%;
-}
-
-.dialog-footer {
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-dialog {
+  position: relative;
+  width: 400px;
+  max-height: 85vh;
+  margin: 0 auto;
+  background: linear-gradient(145deg, #1a1f2e, #242936);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 10;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-container {
+  padding: 24px;
+}
+
+.payment-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.payment-title {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.payment-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 15px;
+  margin: 0;
+}
+
+.payment-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.payment-method-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.payment-method-item.active {
+  background: rgba(52, 211, 153, 0.1);
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.method-icon {
+  width: 24px;
+  height: 24px;
+  color: #fff;
+}
+
+.method-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.method-title {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.method-desc {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+}
+
+.payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
   gap: 12px;
 }
 
-/* Адаптивные стили для мобильных устройств */
-@media (max-width: 768px) {
-  :deep(.el-dialog) {
-    width: 90% !important;
-    margin: 10px auto;
-  }
-
-  :deep(.el-dialog__header) {
-    padding: 15px;
-  }
-
-  :deep(.el-dialog__body) {
-    padding: 15px;
-  }
-
-  :deep(.el-dialog__footer) {
-    padding: 15px;
-  }
-
-  /* Стили для кнопок */
-  :deep(.el-button) {
-    height: 40px;
-    font-size: 14px;
-    padding: 10px 15px;
-    margin-left: 0px !important;
-  }
-
-  /* Стили для меток формы */
-  :deep(.el-form-item__label) {
-    font-size: 16px;
-    margin-top: 8px;
-    margin-bottom: 0px;
-    line-height: 1.1;
-    margin-right: 0px !important;
-    margin-left: 0px !important;
-    padding: 0;
-
-  }
-
-  /* Стили для полей ввода */
-  :deep(.el-input__wrapper) {
-    height: 40px;
-    width: 50px;
-    margin-right: 10px !important;
-  }
-
-  :deep(.el-input__inner) {
-    font-size: 14px;
-  }
-
-  /* Стили для радио-кнопок */
-  :deep(.el-radio) {
-    margin-bottom: 10px;
-    font-size: 14px;
-  }
-
-  :deep(.el-radio__label) {
-    font-size: 14px;
-  }
-
-  /* Стили для футера с кнопками */
-  .dialog-footer {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  :deep(.dialog-footer .el-button) {
-    width: 100%;
-    margin: 0px !important;
-  }
-
-  /* Стили для алерта */
-  :deep(.el-alert) {
-    font-size: 14px;
-  }
-
-  :deep(.el-alert__title) {
-    font-size: 14px;
-  }
-
-  :deep(.el-alert__description) {
-    font-size: 13px;
-    margin: 5px 0 0;
-  }
+label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
 }
 
-/* Дополнительные стили для очень маленьких экранов */
-@media (max-width: 320px) {
-  :deep(.el-dialog__body) {
-    padding: 10px;
+input {
+  width: 100%;
+  height: 44px;
+  padding: 0 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.crypto-message {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.message-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 15px;
+}
+
+.lock-icon {
+  width: 24px;
+  height: 24px;
+  color: #fff;
+}
+
+.payment-footer {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+}
+
+.cancel-btn,
+.pay-btn {
+  height: 48px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  flex: 1;
+  border: none;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.pay-btn {
+  background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
+}
+
+@media (max-width: 480px) {
+  .modal-dialog {
+    width: 90%;
+    max-height: 80vh;
   }
 
-  :deep(.el-form-item) {
-    margin-bottom: 15px;
+  .payment-container {
+    padding: 20px;
   }
 
-  :deep(.el-form-item__label) {
-    font-size: 13px;
+  .payment-title {
+    font-size: 18px;
   }
 
-  :deep(.el-input__inner) {
-    font-size: 13px;
+  input {
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .form-row {
+    grid-template-columns: 1.5fr 1fr;
+  }
+
+  .cancel-btn,
+  .pay-btn {
+    height: 44px;
+    font-size: 14px;
   }
 }
 </style>
