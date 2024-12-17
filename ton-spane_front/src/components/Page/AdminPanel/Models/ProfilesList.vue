@@ -3,7 +3,7 @@
 import { ref, onMounted, defineComponent } from "vue";
 import axios from "axios";
 import config from "@/config";
-import { validateInputToScript, removeTagsOperators, validateLogin } from "../../Validation";
+import { validateInputToScript, removeTagsOperators, validateLogin } from "../../../Validation";
 
 export default defineComponent({
     emits: ['select-user'], 
@@ -56,7 +56,7 @@ export default defineComponent({
         const fetchData = async () => {
             
             try {
-                const response = await axios.get(`${config.API_BASE_URL}/users`);
+                const response = await axios.get(`${config.API_BASE_URL}/models`);
                 // console.log("sub ", sub);
                 lists.value = response.data;
 

@@ -1,7 +1,7 @@
 <script lang="js" setup>
 import { ref } from 'vue';
-import PostsAP from './PostsAP.vue';
-import ProfilesForAp from './ProfilesForAP.vue';
+import PostsAP from './Models/PostsAP.vue';
+import ProfilesForAp from './Models/ProfilesForAP.vue';
 import BotsPage from './BotsPage.vue';
 
 const activeIndex = ref('1'); // Визначаємо активний індекс
@@ -24,8 +24,9 @@ const handleSelect = (index) => {
         <!-- Закріплене меню -->
         <div class="fixed-tabs">
             <el-menu :default-active="activeIndex" mode="horizontal" @select="handleSelect">
-                <el-menu-item index="1" >Профили</el-menu-item>
-                <el-menu-item index="2" >Боты</el-menu-item>
+                <el-menu-item index="1" >Модели</el-menu-item>
+
+                <el-menu-item index="2" >Пользователи</el-menu-item>
                 <el-menu-item index="3">Посты</el-menu-item>
             </el-menu>
         </div>

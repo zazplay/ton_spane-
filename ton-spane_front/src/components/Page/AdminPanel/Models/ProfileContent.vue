@@ -182,7 +182,7 @@ const saveChanges = async () => {
         if (editableData.value.username) updateData.username = editableData.value.username
         if (editableData.value.profileDescription) updateData.profileDescription = editableData.value.profileDescription
 
-        const response = await fetch(`${config.API_BASE_URL}/users/${props.userIdProp}`, {
+        const response = await fetch(`${config.API_BASE_URL}/models/${props.userIdProp}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -217,7 +217,7 @@ const saveChanges = async () => {
 
 const fetchUserData = async () => {
     try {
-        const response = await fetch(`${config.API_BASE_URL}/users/${props.userIdProp}`)
+        const response = await fetch(`${config.API_BASE_URL}/models/${props.userIdProp}`)
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
         const data = await response.json()
 
@@ -244,7 +244,10 @@ const fetchUserPosts = async () => {
         const formattedPosts = data.map(post => ({
             ...post,
             id: post.id,
-            imageUrl: formatImageUrl(post.imageUrl),
+            // Аналогично исправляем здесь
+            imageUrl: post.imageUrl.includes(S3_BASE_URL + S3_BASE_URL)
+                ? post.imageUrl.replace(S3_BASE_URL + S3_BASE_URL, S3_BASE_URL)
+                : post.imageUrl,
             caption: post.caption || '',
             price: String(post.price),
             isBlurred: post.isBlurred || false,
@@ -255,7 +258,6 @@ const fetchUserPosts = async () => {
                 email: userData.value.email || '',
                 profilePicture: userData.value.profilePicture
             },
-            // Include other boolean flags
             initialLiked: false,
             initialShared: false,
             initialDonated: false,
@@ -263,7 +265,7 @@ const fetchUserPosts = async () => {
         }));
 
         userData.value.posts = formattedPosts;
-        console.log("userData.value.posts",userData.value.posts);
+        console.log("userData.value.posts", userData.value.posts);
     } catch (err) {
         console.error('Error fetching user posts:', err);
         userData.value.posts = [];
@@ -284,7 +286,8 @@ watch(() => props.userIdProp, (newValue) => {
     }
 });
 
-onMounted(initializeUserData)
+onMounted(initializeUserData);
+
 </script>
 
 <template>
@@ -401,7 +404,6 @@ onMounted(initializeUserData)
             :showAddButton="true" 
             />
         </div>
-
     </div>
 </template>
 

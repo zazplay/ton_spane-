@@ -17,8 +17,8 @@
 
 <script setup>
 import { ref } from 'vue';
-import ProfilesList from './ProfilesList.vue';
-import ProfileContent from './ProfileContent.vue'; 
+import ProfilesList from './Models/ProfilesList.vue';
+import ProfileContent from './Models/ProfileContent.vue'; 
 
 const selectedUser = ref(null); // Начальное значение null для selectedUser
 

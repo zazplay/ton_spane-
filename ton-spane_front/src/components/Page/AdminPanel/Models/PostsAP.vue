@@ -89,8 +89,8 @@ import axios from 'axios';
 import config from '@/config';
 import { ref, onMounted, defineProps } from 'vue';
 import PostComponent from './PostComponent.vue';
-import AddPostForm from '../../AddPostForm.vue';
-import { validateInputToScript, removeTagsOperators } from "../../Validation";
+import AddPostForm from '../../../AddPostForm.vue';
+import { validateInputToScript, removeTagsOperators } from "../../../Validation";
 
 // Реактивний список постів
 const listPosts = ref([]);

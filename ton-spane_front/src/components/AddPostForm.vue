@@ -26,45 +26,45 @@ const post = ref({
 
 const error = ref(null);
 
-// Get the `getSub` getter from Vuex store
 const store = useStore();
 const getSub = computed(() => store.getters.getSub);
 
-// Set userId when component is mounted
 onMounted(() => {
-  post.value.userId = getSub.value;  // Присваиваем значение sub в userId
+  post.value.userId = getSub.value;  
 });
 
 // Handle file input change
 const handleFileChange = (event) => {
   const file = event.target.files[0];
+  
   if (file) {
     const isImage = file.type.startsWith("image/");
     const isVideo = file.type.startsWith("video/");
-
+    
     if (!isImage && !isVideo) {
       error.value = "Только фото или видео разрешено!";
       post.value.image = null;
       return;
     }
-
+    
     if (isImage) {
       const img = new Image();
       const objectUrl = URL.createObjectURL(file);
-
+      
       img.onload = () => {
         const { width, height } = img;
         URL.revokeObjectURL(objectUrl);
-
-        if (width > 2500 || height > 1260 || width < 512 || height < 512) {
-          error.value = `Неверный размер изображения! Мин: 512x512, Макс: 2500x1260`;
+        
+        // Более мягкие ограничения размера
+        if (width > 3000 || height > 2000 || width < 200 || height < 200) {
+          error.value = `Неверный размер изображения! Мин: 200x200, Макс: 3000x2000`;
           post.value.image = null;
         } else {
           error.value = null;
           post.value.image = file;
         }
       };
-
+      
       img.src = objectUrl;
     } else {
       error.value = null;
@@ -75,7 +75,6 @@ const handleFileChange = (event) => {
     post.value.image = null;
   }
 };
-
 // Handle form submission
 const handleSubmit = async () => {
   if (!post.value.image) {

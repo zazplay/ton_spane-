@@ -21,7 +21,7 @@
     <el-container v-else>
       <el-header class="header">
         <el-image 
-          class="header-image" 
+          class="header-image"
           :src="userData.profileHeader"
           fit="cover"
           @error="() => handleImageError('header')"
@@ -62,34 +62,51 @@
       <el-container>
         <el-main class="main">
           <el-card class="about-section" shadow="never">
-              <template #header>
-                <div class="about-header">
-                  <span class="title">О себе</span>
-                </div>
-              </template>
-              <div class="about-content">
-                {{ userData.profileDescription || 'Описание не добавлено' }}
+            <template #header>
+              <div class="about-header">
+                <span class="title">О себе</span>
               </div>
+            </template>
+            <div class="about-content">
+              {{ userData.profileDescription || 'Описание не добавлено' }}
+            </div>
           </el-card>
         </el-main>
       </el-container>
 
+      <el-button 
+        :type="isSubscribed ? 'success' : 'primary'"
+        class="action-buttonFreeSubscribe" 
+        plain 
+        @click="handleFreeSubscribe"
+      >
+        <div class="subscribe-button-content">
+          <div class="subscribe-main-text">
+            {{ isSubscribed ? 'Вы подписаны' : 'Подписаться' }}
+          </div>
+          <div class="subscribe-sub-text" v-if="!isSubscribed">
+            Только уведомления о новых постах
+          </div>
+        </div>
+      </el-button>
+
       <el-button type="warning" class="action-buttonMonthSub" plain @click="openDonatePage">
         Станьте спонсором всего за 5$ первый месяц
-      </el-button>         
+      </el-button>
+      
       <el-button type="success" class="action-buttonYearSub" plain @click="openDonateYearPage">
         Купить годовую подписку за 150$
       </el-button>
     </el-container>
     
-    <ListPostCards 
-      v-if="isLoaded && userData.posts && userData.posts.length > 0" 
+    <ListPostCards
+      v-if="isLoaded && userData.posts && userData.posts.length > 0"
       :posts="userData.posts"
       :user="userData"
     />
     <div v-else-if="isLoaded && (!userData.posts || userData.posts.length === 0)" class="no-posts">
-      <el-empty 
-        description="Нет публикаций" 
+      <el-empty
+        description="Нет публикаций"
         :image-size="200"
       />
     </div>
@@ -101,18 +118,18 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import ListPostCards from '../../ListPostCards.vue'
 import {
- ElMessage,
- ElSkeleton,
- ElSkeletonItem,
- ElCard,
- ElContainer,
- ElHeader,
- ElAside,
- ElMain,
- ElImage,
- ElText,
- ElButton,
- ElEmpty
+  ElMessage,
+  ElSkeleton,
+  ElSkeletonItem,
+  ElCard,
+  ElContainer,
+  ElHeader,
+  ElAside,
+  ElMain,
+  ElImage,
+  ElText,
+  ElButton,
+  ElEmpty
 } from 'element-plus'
 import { useStore } from 'vuex'
 
@@ -130,34 +147,55 @@ const DEFAULT_AVATAR = 'https://img.icons8.com/?size=100&id=83151&format=png&col
 const userLikes = ref(0)
 const userSubscription = ref(0)
 const isLoaded = ref(false)
+const isSubscribed = ref(false)
 const abortController = new AbortController()
 
 const userData = ref({
- id: userId,
- username: '',
- profilePicture: '',
- profileHeader: '',
- posts: [],
- likes: [],
- profileDescription: ''
+  id: userId,
+  username: '',
+  profilePicture: '',
+  profileHeader: '',
+  posts: [],
+  likes: [],
+  profileDescription: ''
 })
 
 const formatImageUrl = (imageUrl) => {
- if (!imageUrl) return null
- return imageUrl.startsWith('http') ? imageUrl : `${S3_BASE_URL}${imageUrl}`
+  if (!imageUrl) return null
+  return imageUrl.startsWith('http') ? imageUrl : `${S3_BASE_URL}${imageUrl}`
 }
 
 const preparePostsData = (posts = []) => {
- if (!Array.isArray(posts)) return []
- return posts.map(post => ({
-   ...post,
-   id: post.id,
-   userId: userId,
-   imageUrl: formatImageUrl(post.imageUrl),
-   price: String(post.price || 0),
-   isBlurred: post.isBlurred || false,
-   caption: post.caption || ''
- }))
+  if (!Array.isArray(posts)) return []
+  return posts.map(post => ({
+    ...post,
+    id: post.id,
+    userId: userId,
+    imageUrl: formatImageUrl(post.imageUrl),
+    price: String(post.price || 0),
+    isBlurred: post.isBlurred || false,
+    caption: post.caption || ''
+  }))
+}
+
+const checkSubscriptionStatus = async () => {
+  try {
+    const response = await fetch(
+      `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${CurrUserId.value}/following`,
+      {
+        method: 'GET',
+        headers: {
+          'accept': '*/*'
+        }
+      }
+    )
+    if (response.ok) {
+      const followingList = await response.json()
+      isSubscribed.value = followingList.some(user => user.id === userId)
+    }
+  } catch (error) {
+    console.error('Error checking subscription status:', error)
+  }
 }
 
 const fetchUserData = async () => {
@@ -165,10 +203,12 @@ const fetchUserData = async () => {
    const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/models/${route.params.id}`, {
      signal: abortController.signal,
      headers: {
-       'accept': '*/*'
+       'accept': '*/*' 
      }
    })
+
    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+   
    const data = await response.json()
 
    if (!data) {
@@ -177,136 +217,244 @@ const fetchUserData = async () => {
 
    userData.value = {
      ...data,
-     id: userId,
      profilePicture: formatImageUrl(data.profilePicture) || DEFAULT_AVATAR,
      profileHeader: formatImageUrl(data.profileHeader) || DEFAULT_HEADER,
-     posts: preparePostsData(data.posts),
-     likes: data.likes || [],
+     posts: preparePostsData(data.posts || []),
+     followers: data.followers || [],
      profileDescription: data.profileDescription || ''
    }
+
  } catch (err) {
    if (err.name === 'AbortError') return
+   
    console.error('Error fetching user data:', err)
    ElMessage.error('Ошибка при загрузке данных пользователя')
+   
    userData.value = {
-     id: userId,
+     id: route.params.id,
      username: 'Пользователь',
      profilePicture: DEFAULT_AVATAR,
      profileHeader: DEFAULT_HEADER,
      posts: [],
-     likes: [],
+     followers: [],
      profileDescription: ''
    }
  }
 }
 
 const fetchUserPosts = async () => {
- try {
-   const response = await fetch(
-     `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${route.params.id}/requester/${CurrUserId.value}`,
-     { signal: abortController.signal }
-   )
-   
-   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-   const data = await response.json()
-   
-   if (!Array.isArray(data)) {
-     console.error('Posts data is not an array:', data)
-     return []
-   }
-   
-   const formattedPosts = data.map(post => ({
-     ...post,
-     id: post.id,
-     imageUrl: formatImageUrl(post.imageUrl),
-     caption: post.caption || '',
-     price: String(post.price || 0),
-     isBlurred: post.isBlurred || false,
-     createdAt: post.createdAt,
-     model: {
-       id: userId,
-       username: userData.value.username,
-       email: userData.value.email || '',
-       profilePicture: userData.value.profilePicture
-     },
-     initialLiked: post.isLikedByCurrentUser || false,
-     initialShared: false,
-     initialDonated: false,
-     initialSubscribed: false
-   }))
+  try {
+    const response = await fetch(
+      `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${route.params.id}/requester/${CurrUserId.value}`,
+      { signal: abortController.signal }
+    )
+    
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    const data = await response.json()
+    
+    if (!Array.isArray(data)) {
+      console.error('Posts data is not an array:', data)
+      return []
+    }
+    
+    const formattedPosts = data.map(post => ({
+      ...post,
+      id: post.id,
+      imageUrl: formatImageUrl(post.imageUrl),
+      caption: post.caption || '',
+      price: String(post.price || 0),
+      isBlurred: post.isBlurred || false,
+      createdAt: post.createdAt,
+      model: {
+        id: userId,
+        username: userData.value.username,
+        email: userData.value.email || '',
+        profilePicture: userData.value.profilePicture
+      },
+      initialLiked: post.isLikedByCurrentUser || false,
+      initialShared: false,
+      initialDonated: false,
+      initialSubscribed: isSubscribed.value
+    }))
 
-   if (formattedPosts.length > 0) {
-     userData.value.posts = formattedPosts
-     userLikes.value = formattedPosts.reduce((total, post) => total + (post.likes?.length || 0), 0)
-   }
+    if (formattedPosts.length > 0) {
+      userData.value.posts = formattedPosts
+      userLikes.value = formattedPosts.reduce((total, post) => total + (post.likes?.length || 0), 0)
+    }
 
-   return formattedPosts
- } catch (err) {
-   if (err.name === 'AbortError') return
-   console.error('Error fetching user posts:', err)
-   ElMessage.error('Ошибка при загрузке постов пользователя')
-   return []
- }
+    return formattedPosts
+  } catch (err) {
+    if (err.name === 'AbortError') return
+    console.error('Error fetching user posts:', err)
+    ElMessage.error('Ошибка при загрузке постов пользователя')
+    return []
+  }
 }
 
 const fetchUserSubs = async () => {
- try {
-   const response = await fetch(
-     `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${route.params.id}/followers`,
-     { signal: abortController.signal }
-   )
-   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-   const data = await response.json()
-   userSubscription.value = Array.isArray(data) ? data.length : 0
- } catch (err) {
-   if (err.name === 'AbortError') return
-   console.error('Error fetching user subscriptions:', err)
-   ElMessage.error('Ошибка при загрузке подписчиков')
-   userSubscription.value = 0
- }
+  try {
+    // Clear any existing error state
+    userSubscription.value = 0
+
+    const response = await fetch(
+      `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId}/followers`,
+      { 
+        signal: abortController.signal,
+        headers: {
+          'accept': '*/*'
+        }
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const followers = await response.json()
+
+    // Validate that we received an array
+    if (!Array.isArray(followers)) {
+      console.error('Received invalid followers data:', followers)
+      ElMessage.error('Ошибка при загрузке данных подписчиков')
+      return
+    }
+
+    // Update subscription count
+    userSubscription.value = followers.length
+
+    // Check if current user is among followers
+    if (CurrUserId.value) {
+      isSubscribed.value = followers.some(follower => follower.id === CurrUserId.value)
+    }
+
+    // Store followers data if needed for other features
+    const followersData = followers.map(follower => ({
+      id: follower.id,
+      username: follower.username || 'Пользователь',
+      profilePicture: follower.profilePicture,
+      createdAt: follower.createdAt
+    }))
+
+    return followersData
+
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      // Request was aborted, no need to show error
+      return
+    }
+
+    console.error('Error fetching user subscriptions:', err)
+    ElMessage.error('Ошибка при загрузке подписчиков')
+    
+    // Reset subscription count on error
+    userSubscription.value = 0
+    return []
+  }
+}
+
+// Helper function to validate subscription state
+const validateSubscriptionState = () => {
+  if (!CurrUserId.value) {
+    ElMessage.error('Необходимо авторизоваться')
+    return false
+  }
+
+  if (!userId) {
+    ElMessage.error('Ошибка идентификации пользователя')
+    return false
+  }
+
+  return true
+}
+
+// Updated subscription toggle handler
+const handleFreeSubscribe = async () => {
+  if (!validateSubscriptionState()) return
+
+  try {
+    const endpoint = isSubscribed.value ? 'unfollow' : 'follow'
+    const method = isSubscribed.value ? 'DELETE' : 'POST'
+
+    const response = await fetch(
+      `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${CurrUserId.value}/${endpoint}/${userId}`,
+      {
+        method,
+        headers: {
+          'accept': '*/*',
+          'Content-Type': 'application/json'
+        },
+        ...(method === 'POST' && { body: JSON.stringify({}) })
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Failed to ${endpoint}`)
+    }
+
+    // Update local state
+    isSubscribed.value = !isSubscribed.value
+    userSubscription.value += isSubscribed.value ? 1 : -1
+
+    // Show success message
+    ElMessage.success(isSubscribed.value ? 'Вы подписались' : 'Вы отписались')
+
+    // Refresh subscription data to ensure accuracy
+    await fetchUserSubs()
+
+  } catch (error) {
+    console.error(`Error during ${isSubscribed.value ? 'unsubscribe' : 'subscribe'}:`, error)
+    ElMessage.error('Ошибка при изменении подписки')
+    
+    // Refresh subscription data to ensure correct state
+    await fetchUserSubs()
+  }
 }
 
 const handleImageError = (type) => {
- if (type === 'header') {
-   userData.value.profileHeader = DEFAULT_HEADER
- } else if (type === 'avatar') {
-   userData.value.profilePicture = DEFAULT_AVATAR
- }
+  if (type === 'header') {
+    userData.value.profileHeader = DEFAULT_HEADER
+  } else if (type === 'avatar') {
+    userData.value.profilePicture = DEFAULT_AVATAR
+  }
 }
 
 const openDonatePage = () => {
- router.push(`/app/userSubscribeDonate/${userId}`)
+  router.push(`/app/userSubscribeDonate/${userId}`)
 }
 
 const openDonateYearPage = () => {
- router.push(`/app/userSubscribeDonateYear/${userId}`)
+  router.push(`/app/userSubscribeDonateYear/${userId}`)
 }
 
 const initializeUserData = async () => {
- try {
-   isLoaded.value = false
-   await fetchUserData()
-   await Promise.all([
-     fetchUserPosts(),
-     fetchUserSubs()
-   ])
-   setTimeout(() => {
-     isLoaded.value = true
-   }, 300)
- } catch (error) {
-   if (error.name === 'AbortError') return
-   console.error('Error initializing data:', error)
-   ElMessage.error('Ошибка при загрузке данных')
-   isLoaded.value = true
- }
+  try {
+    isLoaded.value = false
+    
+    // Сначала загружаем данные пользователя
+    await fetchUserData()
+    
+    // Затем параллельно загружаем остальные данные
+    await Promise.all([
+      fetchUserPosts(),
+      fetchUserSubs(),
+      checkSubscriptionStatus()
+    ])
+    
+    isLoaded.value = true
+  } catch (error) {
+    if (error.name === 'AbortError') return
+    console.error('Error initializing data:', error)
+    ElMessage.error('Ошибка при загрузке данных')
+    isLoaded.value = true
+  }
 }
 
 onMounted(() => {
- initializeUserData()
+  initializeUserData()
 })
 
 onUnmounted(() => {
- abortController.abort()
+  abortController.abort()
 })
 </script>
 
@@ -316,7 +464,7 @@ onUnmounted(() => {
   width: 95%;
   align-self: center;
   margin-left: 10px;
-  background: #0d1117;
+  background: #0a0f16;
 }
 
 .header {
@@ -331,7 +479,7 @@ onUnmounted(() => {
   max-height: 300px !important;
   border-radius: 20px;
   margin-bottom: 10px;
-  box-shadow: 0 8px 32px rgba(0, 149, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
   transition: transform 0.3s ease;
 }
 
@@ -344,7 +492,7 @@ onUnmounted(() => {
   width: 100%;
   display: flex;
   align-items: center;
-  background: #161b22;
+  background: #131925;
   padding: 20px;
   border-radius: 15px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
@@ -360,8 +508,8 @@ onUnmounted(() => {
   border-radius: 20px;
   align-self: flex-start;
   justify-self: flex-start;
-  border: 2px solid rgba(0, 149, 255, 0.3);
-  box-shadow: 0 0 20px rgba(0, 149, 255, 0.2);
+  border: 2px solid rgba(99, 102, 241, 0.3);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
 }
 
 .username {
@@ -372,14 +520,14 @@ onUnmounted(() => {
   margin: 0;
   padding: 0;
   width: 43%;
-  color: #e6edf3;
-  text-shadow: 0 0 10px rgba(0, 149, 255, 0.3);
+  color: #f3f4f6;
+  text-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
 }
 
 .stat-badge {
   text-align: center;
   color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 2px 4px rgba(0, 149, 255, 0.3);
+  text-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
   font-weight: 500;
   border-radius: 15px;
   padding: 12px 20px;
@@ -387,12 +535,12 @@ onUnmounted(() => {
   margin-left: 20px;
   background: linear-gradient(
     135deg,
-    rgba(0, 149, 255, 0.1) 0%,
-    rgba(0, 89, 255, 0.2) 50%,
-    rgba(0, 149, 255, 0.1) 100%
+    rgba(99, 102, 241, 0.1) 0%,
+    rgba(79, 70, 229, 0.2) 50%,
+    rgba(99, 102, 241, 0.1) 100%
   );
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 149, 255, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.2);
   box-shadow: 
     0 4px 6px rgba(0, 0, 0, 0.2),
     inset 0 1px 2px rgba(255, 255, 255, 0.1);
@@ -402,21 +550,21 @@ onUnmounted(() => {
 .stat-badge:hover {
   background: linear-gradient(
     135deg,
-    rgba(0, 149, 255, 0.2) 0%,
-    rgba(0, 89, 255, 0.3) 50%,
-    rgba(0, 149, 255, 0.2) 100%
+    rgba(99, 102, 241, 0.2) 0%,
+    rgba(79, 70, 229, 0.3) 50%,
+    rgba(99, 102, 241, 0.2) 100%
   );
   transform: translateY(-2px);
   box-shadow: 
     0 8px 12px rgba(0, 0, 0, 0.3),
     inset 0 2px 4px rgba(255, 255, 255, 0.2),
-    0 0 15px rgba(0, 149, 255, 0.3);
+    0 0 15px rgba(99, 102, 241, 0.3);
 }
 
 .stat-badgeLikes {
   text-align: center;
   color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 2px 4px rgba(255, 0, 0, 0.5);
+  text-shadow: 0 2px 4px rgba(244, 63, 94, 0.5);
   font-weight: 500;
   border-radius: 15px;
   padding: 12px 20px;
@@ -424,37 +572,37 @@ onUnmounted(() => {
   margin-left: 20px;
   background: linear-gradient(
     135deg,
-    rgba(255, 0, 0, 0.2) 0%,
-    rgba(255, 0, 0, 0.35) 50%, 
-    rgba(255, 0, 0, 0.2) 100%
+    rgba(244, 63, 94, 0.2) 0%,
+    rgba(225, 29, 72, 0.35) 50%, 
+    rgba(244, 63, 94, 0.2) 100%
   );
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 0, 0, 0.3);
+  border: 1px solid rgba(244, 63, 94, 0.3);
   box-shadow: 
     0 4px 6px rgba(0, 0, 0, 0.2),
     inset 0 1px 2px rgba(255, 255, 255, 0.2),
-    0 0 15px rgba(255, 0, 0, 0.2);
+    0 0 15px rgba(244, 63, 94, 0.2);
   transition: all 0.4s ease;
 }
 
 .stat-badgeLikes:hover {
   background: linear-gradient(
     135deg,
-    rgba(255, 0, 0, 0.3) 0%,
-    rgba(255, 0, 0, 0.45) 50%,
-    rgba(255, 0, 0, 0.3) 100%
+    rgba(244, 63, 94, 0.3) 0%,
+    rgba(225, 29, 72, 0.45) 50%,
+    rgba(244, 63, 94, 0.3) 100%
   );
   transform: translateY(-2px);
   box-shadow: 
     0 8px 12px rgba(0, 0, 0, 0.3),
     inset 0 2px 4px rgba(255, 255, 255, 0.3),
-    0 0 20px rgba(255, 0, 0, 0.4);
+    0 0 20px rgba(244, 63, 94, 0.4);
 }
 
 .stat-badgeSubs {
   text-align: center;
   color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 2px 4px rgba(147, 51, 234, 0.5);
+  text-shadow: 0 2px 4px rgba(139, 92, 246, 0.5);
   font-weight: 500;
   border-radius: 15px;
   padding: 12px 20px;
@@ -462,33 +610,32 @@ onUnmounted(() => {
   margin-left: 20px;
   background: linear-gradient(
     135deg,
-    rgba(147, 51, 234, 0.2) 0%,
-    rgba(168, 85, 247, 0.35) 50%,
-    rgba(147, 51, 234, 0.2) 100%
+    rgba(139, 92, 246, 0.2) 0%,
+    rgba(124, 58, 237, 0.35) 50%,
+    rgba(139, 92, 246, 0.2) 100%
   );
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(147, 51, 234, 0.3);
+  border: 1px solid rgba(139, 92, 246, 0.3);
   box-shadow: 
     0 4px 6px rgba(0, 0, 0, 0.2),
     inset 0 1px 2px rgba(255, 255, 255, 0.2),
-    0 0 15px rgba(147, 51, 234, 0.2);
+    0 0 15px rgba(139, 92, 246, 0.2);
   transition: all 0.4s ease;
 }
 
 .stat-badgeSubs:hover {
   background: linear-gradient(
     135deg,
-    rgba(147, 51, 234, 0.3) 0%,
-    rgba(168, 85, 247, 0.45) 50%,
-    rgba(147, 51, 234, 0.3) 100%
+    rgba(139, 92, 246, 0.3) 0%,
+    rgba(124, 58, 237, 0.45) 50%,
+    rgba(139, 92, 246, 0.3) 100%
   );
   transform: translateY(-2px);
   box-shadow: 
     0 8px 12px rgba(0, 0, 0, 0.3),
     inset 0 2px 4px rgba(255, 255, 255, 0.3),
-    0 0 20px rgba(147, 51, 234, 0.4);
+    0 0 20px rgba(139, 92, 246, 0.4);
 }
-
 .main {
   display: flex;
   flex-direction: column;
@@ -503,21 +650,19 @@ onUnmounted(() => {
   width: 99%;
   min-height: 150px;
   margin: 1.5% 0 0 5px;
-  background: linear-gradient(145deg, rgba(22, 27, 34, 0.95), rgba(22, 27, 34, 0.85));
-  border: 1px solid rgba(88, 166, 255, 0.15);
+  background: linear-gradient(145deg, rgba(19, 25, 37, 0.95), rgba(19, 25, 37, 0.85));
+  border: 1px solid rgba(99, 102, 241, 0.15);
   border-radius: 12px;
   box-shadow: 
     0 4px 20px rgba(0, 0, 0, 0.2),
-    inset 0 0 60px rgba(88, 166, 255, 0.03);
+    inset 0 0 60px rgba(99, 102, 241, 0.03);
   backdrop-filter: blur(10px);
 }
 
-
-/* Переопределяем стили Element Plus */
 .about-section :deep(.el-card__header) {
   padding: 18px 24px;
   background: transparent;
-  border-bottom: 1px solid rgba(88, 166, 255, 0.15);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.15);
 }
 
 .about-section :deep(.el-card__body) {
@@ -528,7 +673,7 @@ onUnmounted(() => {
 .about-header .title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #58a6ff;
+  color: #818cf8;
   letter-spacing: 0.3px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
@@ -541,71 +686,151 @@ onUnmounted(() => {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* Убираем стандартные стили карточки */
 .about-section :deep(.el-card) {
   background: transparent;
   border: none;
   color: white;
 }
 
-/* Стили для пустого состояния */
 .about-content:empty::before,
 .about-content:contains('Описание не добавлено') {
   color: rgba(255, 255, 255, 0.5);
   font-style: italic;
 }
-/* Стили кнопок */
+
+/* Стили кнопок подписки */
+.action-buttonFreeSubscribe,
 .action-buttonYearSub,
 .action-buttonMonthSub {
   width: 99%;
-  height: 5.7%;
+  height: auto !important;
   align-self: center;
   font-weight: bold;
-  padding: 20px;
+  padding: 15px 20px;
   margin: 10px 0;
-  border: none;
+  border: none !important;
   border-radius: 12px;
-  color: white;
-  transition: all 0.3s ease;
-  cursor: pointer;
+  color: white !important;
   font-size: 1.25rem !important;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
+/* Стили для бесплатной подписки */
+.action-buttonFreeSubscribe.el-button--primary {
+  background: linear-gradient(-45deg, #f6c13b,  #6366f1, #8b5cf6) !important;
+  background-size: 200% 200%;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+  animation: gradientBG 10s ease infinite;
+}
+
+.action-buttonFreeSubscribe.el-button--success {
+  background: linear-gradient(-45deg, #34d399, #059669, #10b981) !important;
+  background-size: 200% 200%;
+  box-shadow: 0 4px 15px rgba(52, 211, 153, 0.3);
+  animation: gradientBG 10s ease infinite;
+}
+
+.subscribe-button-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.subscribe-main-text {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.subscribe-sub-text {
+  font-size: 0.875rem;
+  font-weight: normal;
+  opacity: 0.9;
+}
+
+/* Стили для платных подписок */
 .action-buttonYearSub {
-  background: linear-gradient(135deg, #9d50bb 0%, #6e48aa 100%) !important;
-  box-shadow: 0 4px 15px rgba(157, 80, 187, 0.3);
-}
-
-.action-buttonYearSub:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 8px 25px rgba(157, 80, 187, 0.4),
-    0 0 15px rgba(157, 80, 187, 0.3);
-  background: linear-gradient(135deg, #b867d9 0%, #9d50bb 100%) !important;
+  background: linear-gradient(-45deg, #7c3aed, #4f46e5, #ec4899) !important;
+  background-size: 200% 200%;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+  animation: gradientBG 10s ease infinite;
 }
 
 .action-buttonMonthSub {
-  background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%) !important;
-  box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
+  background: linear-gradient(-45deg, #6366f1, #3b82f6, #8b5cf6) !important;
+  background-size: 200% 200%;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+  animation: gradientBG 10s ease infinite;
+}
+
+/* Общие эффекты для всех кнопок */
+.action-buttonYearSub::before,
+.action-buttonMonthSub::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+  animation: rotate 10s linear infinite;
+  pointer-events: none;
+}
+
+.action-buttonFreeSubscribe:hover,
+.action-buttonYearSub:hover,
+.action-buttonMonthSub:hover {
+  transform: translateY(-2px);
+}
+
+.action-buttonFreeSubscribe.el-button--primary:hover {
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+}
+
+.action-buttonFreeSubscribe.el-button--success:hover {
+  box-shadow: 0 8px 25px rgba(52, 211, 153, 0.4);
+}
+
+.action-buttonYearSub:hover {
+  box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
 }
 
 .action-buttonMonthSub:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 8px 25px rgba(0, 180, 219, 0.4),
-    0 0 15px rgba(0, 180, 219, 0.3);
-  background: linear-gradient(135deg, #00d2ff 0%, #00b4db 100%) !important;
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
 }
 
-/* Стили для состояния загрузки */
+@keyframes gradientBG {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .loading-container {
   padding: 20px;
-  background: #0d1117;
+  background: #0a0f16;
   min-height: 100vh;
 }
 
 .loading-card {
-  background: #161b22;
+  background: #131925;
   border: none;
   border-radius: 16px;
   overflow: hidden;
@@ -616,7 +841,7 @@ onUnmounted(() => {
 }
 
 .loading-card :deep(.el-skeleton__item) {
-  background: linear-gradient(90deg, #1c2128 25%, #2d333b 50%, #1c2128 75%);
+  background: linear-gradient(90deg, #1a2332 25%, #2d3748 50%, #1a2332 75%);
   background-size: 400% 100%;
   animation: skeleton-loading 1.4s ease infinite;
 }
@@ -630,13 +855,23 @@ onUnmounted(() => {
   }
 }
 
-/* Медиа-запросы для мобильных устройств */
 @media (max-width: 480px) {
   .content-container {
     flex-direction: column !important;
     width: 98%;
   }
   
+  .layout {
+    width: 100%;
+    margin-left: 0;
+    padding: 10px;
+  }
+
+  .header-image {
+    border-radius: 12px;
+    max-height: 200px !important;
+  }
+
   .main {
     width: 100%;
     padding: 0 15px;
@@ -688,6 +923,7 @@ onUnmounted(() => {
     font-size: 14px;
   }
 
+  .action-buttonFreeSubscribe,
   .action-buttonYearSub,
   .action-buttonMonthSub {
     width: 100%;
@@ -697,12 +933,48 @@ onUnmounted(() => {
     height: auto;
   }
 
+  .subscribe-main-text {
+    font-size: 0.875rem;
+  }
+
+  .subscribe-sub-text {
+    font-size: 0.75rem;
+  }
+
   .loading-container {
     padding: 10px;
   }
 
   .loading-card :deep(.el-skeleton__item) {
     margin-bottom: 10px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .main {
+    width: 90%;
+  }
+  
+  .action-buttonFreeSubscribe,
+  .action-buttonYearSub,
+  .action-buttonMonthSub {
+    width: 95%;
+    font-size: 1rem !important;
+  }
+  
+  .subscribe-main-text {
+    font-size: 1rem;
+  }
+  
+  .subscribe-sub-text {
+    font-size: 0.8rem;
+  }
+  
+  .stat-badge,
+  .stat-badgeLikes,
+  .stat-badgeSubs {
+    width: auto !important;
+    margin: 5px;
   }
 }
 </style>
