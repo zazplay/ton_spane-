@@ -167,6 +167,10 @@ const props = defineProps({
   isLikedByCurrentUser: {
     type: Boolean,
     default: false
+  },
+  isSubscribed: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -182,7 +186,7 @@ onMounted(() => {
 const subscriptionModalRef = ref(null)
 const isLiked = ref(props.isLikedByCurrentUser)
 const likes = ref(props.likes.length)
-const isSubscribed = ref(props.initialSubscribed)
+const isSubscribed = ref(props.isSubscribed)
 const isShared = ref(props.initialShared)
 const isDonated = ref(props.initialDonated)
 const isShareModalVisible = ref(false)
@@ -246,10 +250,40 @@ const handleLike = async () => {
   }
 }
 
-const handleSubscribe = () => {
-  isSubscribed.value = !isSubscribed.value
-  emit('subscribe', isSubscribed.value)
-}
+const handleSubscribe = async () => {
+  try {
+    if (isSubscribed.value) {
+      // Отписка
+      await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId.value}/unfollow/${props.user.id}`, {
+        method: 'DELETE',
+        headers: {
+          'accept': '*/*',
+          'Content-Type': 'application/json'
+        }
+      });
+      isSubscribed.value = !isSubscribed.value;
+
+    } else {
+      // Подписка
+      await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId.value}/follow/${props.user.id}`, {
+        method: 'POST',
+        headers: {
+          'accept': '*/*',
+          'Content-Type': 'application/json'
+        },
+        body: '' 
+      });
+      isSubscribed.value = !isSubscribed.value;
+
+    }
+    
+    // Обновляем флажок и уведомляем родительский компонент
+    emit('subscribe', isSubscribed.value);
+  } catch (error) {
+    console.error('Error while subscribing/unsubscribing:', error);
+  }
+};
+
 
 const handleShare = () => {
   isShared.value = !isShared.value

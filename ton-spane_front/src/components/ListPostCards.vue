@@ -27,6 +27,8 @@ defineProps({
       :comments="post.comments"
       :likes="post.likes"
       :isLikedByCurrentUser="post.isLikedByCurrentUser"  
+      :isSubscribed="post.isSubscribed"  
+
     />
   </div>
 </template>
