@@ -1,13 +1,42 @@
+<script setup>
+import { ref } from 'vue';
+import ProfilesList from './ProfilesList.vue';
+import ProfileContent from './ProfileContent.vue';
+
+const selectedUser = ref(null);
+const profilesListRef = ref(null);
+
+const handleUserSelect = (userId) => {
+    selectedUser.value = userId;
+    console.log("Выбранный пользователь", selectedUser.value);
+};
+
+const handleUserCreated = async (newUserId) => {
+    // Обновляем список пользователей
+    if (profilesListRef.value) {
+        await profilesListRef.value.fetchData();
+    }
+    
+    // Автоматически выбираем нового пользователя
+    selectedUser.value = newUserId;
+};
+</script>
+
 <template>
     <div class="container">
         <div class="left">
-            <ProfilesList @select-user="handleUserSelect" />
+            <ProfilesList 
+                ref="profilesListRef"
+                @select-user="handleUserSelect"
+                @user-created="handleUserCreated"
+            />
         </div>
         <div class="right">
             <div v-if="selectedUser">
-                <!-- Add create post button here -->
-                
-                <ProfileContent :userIdProp="selectedUser" />
+                <ProfileContent 
+                    :key="selectedUser" 
+                    :userIdProp="selectedUser" 
+                />
             </div>
             <div v-else class="empty-state-container">
                 <el-empty
@@ -27,25 +56,8 @@
                 </el-empty>
             </div>
         </div>
-
-        
-        
     </div>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-import ProfilesList from './ProfilesList.vue';
-import ProfileContent from './ProfileContent.vue';
-
-const selectedUser = ref(null);
-
-const handleUserSelect = (userId) => {
-    selectedUser.value = userId;
-    console.log("selectedUser", selectedUser.value);
-};
-</script>
-
 <style scoped>
 .container {
     display: flex;

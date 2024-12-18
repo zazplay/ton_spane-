@@ -135,13 +135,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted,defineEmits } from 'vue'
+import { ref, onMounted, defineEmits,defineExpose } from 'vue'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
 import config from '@/config'
 import { validateInputToScript, removeTagsOperators, validateLogin } from "../../../Validation"
 
-const emit = defineEmits(['select-user'])
+const emit = defineEmits(['select-user', 'user-created'])
 const formRef = ref(null)
 const defaultUserImage = "https://via.placeholder.com/150"
 
@@ -258,15 +258,16 @@ const saveNewProfile = async () => {
 
         loading.value = true
         
-        await axios.post(`${config.API_BASE_URL}/models`, {
+        const response = await axios.post(`${config.API_BASE_URL}/models`, {
             username: newProfile.value.username,
             password: newProfile.value.password,
             profileDescription: newProfile.value.description
         })
         
         dialogVisible.value = false
+        emit('user-created', response.data.id) // Добавлено событие для родительского компонента
         newProfile.value = { username: '', password: '', description: '' }
-        selectedUsers.value = [] // Сбрасываем выбранных пользователей
+        selectedUsers.value = []
         await fetchData()
         ElMessage.success('Профиль успешно добавлен')
         
@@ -310,6 +311,11 @@ const deleteSelectedUsers = async () => {
         console.error('Ошибка при удалении пользователей:', error)
     }
 }
+
+// Предоставляем методы для родительского компонента
+defineExpose({
+    fetchData
+})
 
 onMounted(() => {
     fetchData()
