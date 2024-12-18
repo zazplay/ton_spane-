@@ -1,0 +1,443 @@
+<template>
+  <Teleport to="body">
+    <div v-if="dialogVisible" class="modal-overlay" @click.self="closeDialog">
+      <div class="modal-dialog payment-modal">
+        <button class="close-button" @click="closeDialog">×</button>
+        <div class="payment-container">
+          <div class="payment-header">
+            <h2 class="payment-title">Оформление подписки</h2>
+            <p class="payment-subtitle">Выберите способ оплаты</p>
+          </div>
+
+          <div class="payment-methods">
+            <div 
+              class="payment-method-item"
+              :class="{ 'active': form.paymentMethod === 'card' }"
+              @click="form.paymentMethod = 'card'"
+            >
+              <div class="method-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                  <line x1="2" y1="10" x2="22" y2="10"></line>
+                </svg>
+              </div>
+              <div class="method-info">
+                <span class="method-title">Банковская карта</span>
+                <span class="method-desc">Visa, Mastercard</span>
+              </div>
+            </div>
+
+            <div 
+              class="payment-method-item"
+              :class="{ 'active': form.paymentMethod === 'crypto' }"
+              @click="form.paymentMethod = 'crypto'"
+            >
+              <div class="method-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="8"></circle>
+                  <line x1="12" y1="8" x2="12" y2="16"></line>
+                  <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+              </div>
+              <div class="method-info">
+                <span class="method-title">Криптовалюта</span>
+                <span class="method-desc">BTC, ETH, USDT</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="payment-form" v-if="form.paymentMethod === 'card'">
+            <div class="form-group">
+              <label>Номер карты</label>
+              <input 
+                v-model="form.cardNumber"
+                type="text"
+                placeholder="0000 0000 0000 0000"
+                @input="formatCardNumber"
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Срок</label>
+                <input 
+                  v-model="form.expiryDate"
+                  type="text"
+                  placeholder="MM/YY"
+                  @input="formatExpiryDate"
+                />
+              </div>
+              <div class="form-group">
+                <label>CVV</label>
+                <input 
+                  v-model="form.cvv"
+                  type="password"
+                  placeholder="***"
+                  maxlength="3"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="crypto-message" v-else>
+            <div class="message-content">
+              <div class="lock-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </div>
+              <span>Оплата криптовалютой скоро будет доступна</span>
+            </div>
+          </div>
+
+          <div class="payment-footer">
+            <button class="cancel-btn" @click="closeDialog">
+              Отмена
+            </button>
+            <button class="pay-btn" @click="submitForm">
+              Оплатить
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Teleport>
+</template>
+
+<script setup>
+/* eslint-disable no-unused-vars */
+import { ref, reactive, defineExpose, watch,defineEmits } from 'vue'
+import { ElMessage } from 'element-plus'
+
+const dialogVisible = ref(false)
+
+const emit = defineEmits(['paymentSuccess', 'paymentError'])
+
+// Начальное состояние формы
+const form = reactive({
+  paymentMethod: 'card',
+  cardNumber: '',
+  expiryDate: '',
+  cvv: '',
+  amount: '999'
+})
+
+const closeDialog = () => {
+  dialogVisible.value = false
+}
+
+const toggleScrollLock = (isLocked) => {
+  document.body.style.overflow = isLocked ? 'hidden' : ''
+}
+
+watch(dialogVisible, (newValue) => {
+  toggleScrollLock(newValue)
+})
+
+// Форматирование номера карты
+const formatCardNumber = (e) => {
+  let value = e.target.value.replace(/\D/g, '')
+  value = value.replace(/(\d{4})/g, '$1 ').trim()
+  e.target.value = value.substring(0, 19)
+  form.cardNumber = e.target.value
+}
+
+// Форматирование даты
+const formatExpiryDate = (e) => {
+  let value = e.target.value.replace(/\D/g, '')
+  
+  if (value.length >= 2) {
+    value = value.substring(0, 2) + '/' + value.substring(2)
+  }
+  
+  e.target.value = value.substring(0, 5)
+  form.expiryDate = e.target.value
+}
+
+// Валидация формы перед отправкой
+const validateForm = () => {
+  if (form.paymentMethod === 'card') {
+    if (form.cardNumber.replace(/\s/g, '').length !== 16) {
+      ElMessage.error('Введите корректный номер карты')
+      return false
+    }
+    
+    if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(form.expiryDate)) {
+      ElMessage.error('Введите корректный срок действия карты')
+      return false
+    }
+    
+    if (form.cvv.length !== 3) {
+      ElMessage.error('Введите корректный CVV код')
+      return false
+    }
+  }
+  return true
+}
+
+// Отправка формы
+const submitForm = async () => {
+  if (!validateForm()) return
+
+  try {
+    if (form.paymentMethod === 'card') {
+      ElMessage.error('Ошибка обработки платежа. Попробуйте позже или используйте другой способ оплаты.')
+      return
+    }
+    
+    ElMessage.success('Оплата прошла успешно!')
+    dialogVisible.value = false
+    
+    // Очистка формы
+    form.cardNumber = ''
+    form.expiryDate = ''
+    form.cvv = ''
+  } catch (error) {
+    ElMessage.error('Произошла ошибка при обработке платежа')
+  }
+}
+
+// Открытие модального окна
+const openDialog = () => {
+  dialogVisible.value = true
+}
+
+defineExpose({
+  openDialog
+})
+</script>
+
+<style scoped>
+
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-dialog {
+  position: relative;
+  width: 400px;
+  max-height: 85vh;
+  margin: 0 auto;
+  background: linear-gradient(145deg, #1a1f2e, #242936);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 10;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-container {
+  padding: 24px;
+}
+
+.payment-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.payment-title {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.payment-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 15px;
+  margin: 0;
+}
+
+.payment-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.payment-method-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.payment-method-item.active {
+  background: rgba(52, 211, 153, 0.1);
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.method-icon {
+  width: 24px;
+  height: 24px;
+  color: #fff;
+}
+
+.method-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.method-title {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.method-desc {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+}
+
+.payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 12px;
+}
+
+label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+
+input {
+  width: 100%;
+  height: 44px;
+  padding: 0 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.crypto-message {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.message-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 15px;
+}
+
+.lock-icon {
+  width: 24px;
+  height: 24px;
+  color: #fff;
+}
+
+.payment-footer {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+}
+
+.cancel-btn,
+.pay-btn {
+  height: 48px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  flex: 1;
+  border: none;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.pay-btn {
+  background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
+}
+
+@media (max-width: 480px) {
+  .modal-dialog {
+    width: 90%;
+    max-height: 80vh;
+  }
+
+  .payment-container {
+    padding: 20px;
+  }
+
+  .payment-title {
+    font-size: 18px;
+  }
+
+  input {
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .form-row {
+    grid-template-columns: 1.5fr 1fr;
+  }
+
+  .cancel-btn,
+  .pay-btn {
+    height: 44px;
+    font-size: 14px;
+  }
+}
+</style>
