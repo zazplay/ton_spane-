@@ -1,175 +1,265 @@
-<script>
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router"; // Імпортуємо useRouter
-import { useStore } from 'vuex' // Импортируем useStore
-import axios from "axios";
-import config from "@/config";
+<script setup>
+import { ref, onMounted, computed } from 'vue'
+import { useStore } from 'vuex'
+import { ElMessage } from 'element-plus'
+import ListPostCards from '../../ListPostCards.vue' // Assuming this is the correct path
 
-export default {
-    setup() {
-        const loading = ref(true);
-        const lists = ref([]);
-        const currentDate = new Date().toDateString();
-        const router = useRouter(); // Отримуємо інстанс роутера
-        const store = useStore(); // Получаем инстанс хранилища Vuex
+const store = useStore()
+const followingList = ref([])
+const allPosts = ref([])
+const loading = ref(true)
+const CurrUserId = computed(() => store.getters.getSub)
 
-        // Устанавливаем изображение пользователя по умолчанию
-        const defaultUserImage = "https://via.placeholder.com/150";
+// Format image URL if needed
+const formatImageUrl = (url) => url // Add any URL formatting logic if needed
 
-        // Получаем sub из Vuex
-        const sub = store.getters.getSub;
+// Fetch posts for a single model
+const fetchModelPosts = async (modelId, modelData) => {
+  try {
+    const response = await fetch(
+      `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${modelId}/requester/${CurrUserId.value}`
+    )
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    
+    if (!Array.isArray(data)) {
+      console.error('Posts data is not an array:', data)
+      return []
+    }
+    
+    return data.map(post => ({
+      ...post,
+      id: post.id,
+      imageUrl: formatImageUrl(post.imageUrl),
+      caption: post.caption || '',
+      price: String(post.price || 0),
+      isBlurred: post.isBlurred || false,
+      createdAt: post.createdAt,
+      model: {
+        id: modelData.id,
+        username: modelData.username,
+        email: modelData.email || '',
+        profilePicture: modelData.profilePicture
+      },
+      initialLiked: post.isLikedByCurrentUser || false,
+      initialShared: false,
+      initialDonated: false,
+      initialSubscribed: post.isSubscribed || false
+    }))
+  } catch (error) {
+    console.error('Error fetching model posts:', error)
+    ElMessage.error(`Ошибка при загрузке постов пользователя ${modelData.username}`)
+    return []
+  }
+}
 
-        const setLoading = () => {
-            loading.value = true;
-            setTimeout(() => {
-                loading.value = false;
-            }, 2000);
-        };
+// Fetch following list and their posts
+const fetchAllModelPosts = async () => {
+  try {
+    // Fetch following list
+    const response = await fetch(
+      `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${CurrUserId.value}/following`,
+      {
+        headers: {
+          'accept': '*/*'
+        }
+      }
+    )
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch following list')
+    }
+    
+    followingList.value = await response.json()
+    
+    // Fetch posts for each model
+    const allModelPosts = await Promise.all(
+      followingList.value.map(model => fetchModelPosts(model.id, model))
+    )
+    
+    // Flatten and sort posts by date
+    allPosts.value = allModelPosts
+      .flat()
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      
+    loading.value = false
+  } catch (error) {
+    console.error('Error fetching all model posts:', error)
+    ElMessage.error('Ошибка при загрузке постов')
+    loading.value = false
+  }
+}
 
-        const fetchData = async () => {
-            try {
-                const userId = "3e5a8e90-f048-4f75-a295-61e29f7e66e7";//две подписки
-                const response = await axios.get(`${config.API_BASE_URL}/subscriptions/${userId}/following`);
-                console.log("sub ", sub);
-                // const response = await axios.get(`${config.API_BASE_URL}/subscriptions/${sub}/following`);
-                lists.value = response.data;
-                
-                loading.value = false;
-            } catch (error) {
-                console.error("Ошибка при получении данных:", error);
-                loading.value = false;
-            }
-        };
-
-        const handleCardClick = (item) => {
-            console.log("Перейти на профиль пользователя: ", item.username);
-            // перехода на профиль пользователя
-            router.push(`/app/user/${item.id}`);
-        };
-
-        onMounted(() => {
-            fetchData();
-        });
-
-        return {
-            loading,
-            lists,
-            currentDate,
-            setLoading,
-            defaultUserImage, // Возвращаем ссылку на изображение по умолчанию
-            handleCardClick,  // Возвращаем метод для обработки кликов
-        };
-    },
-};
+onMounted(() => {
+  fetchAllModelPosts()
+})
 </script>
 
 <template>
-    <!-- Контейнер с элементами skeleton для загрузки данных -->
-    <el-space style="width: 100%" fill>
-        <el-skeleton style="display: flex; gap: 8px" :loading="loading" animated :count="3">
-            <!-- Шаблон, который отображается во время загрузки -->
-            <template #template>
-                <div style="flex: 1">
-                    <!-- Skeleton для изображения -->
-                    <el-skeleton-item variant="image" style="height: 240px" />
-                    <div style="padding: 14px">
-                        <!-- Skeleton для заголовка -->
-                        <el-skeleton-item variant="h3" style="width: 50%" />
-                        <div
-                            style="display: flex; align-items: center; justify-items: space-between; margin-top: 16px; height: 16px;">
-                            <!-- Skeleton для текста -->
-                            <el-skeleton-item variant="text" style="margin-right: 16px" />
-                            <!-- Skeleton для текста -->
-                            <el-skeleton-item variant="text" style="width: 30%" />
-                        </div>
-                    </div>
-                </div>
-            </template>
-
-            <!-- Этот блок отображается, когда данные загружены -->
-            <template #default>
-                <div class="scroll-container">
-                    <el-card v-for="item in lists" :key="item.username"
-                        :body-style="{ padding: '0px', marginBottom: '1px' }" class="card"
-                        @click="handleCardClick(item)">
-                        <img :src="item.profilePicture || defaultUserImage" class="image" />
-                        <div class="card-content">
-                            <span>{{ item.username }}</span>
-                        </div>
-                    </el-card>
-                </div>
-            </template>
-        </el-skeleton>
-    </el-space>
-
-    <el-container>
-
-    </el-container>
+  <div class="title">Ваши подписки:</div>
+  <el-scrollbar v-if="followingList.length > 0">
+    <div class="scrollbar-flex-content">
+      <p v-for="item in followingList" :key="item.id" class="scrollbar-demo-item">
+        <el-card style="max-width: 150px">
+          <template #header>{{ item.username }}</template>
+          <img
+            :src="item.profilePicture"
+            style="width: 100%; margin: 0px;"
+          />
+        </el-card>
+      </p>
+    </div>
+  </el-scrollbar>
+  <el-empty
+    v-else
+    description="У вас пока нет подписок"
+    :image-size="200"
+  />
+  
+  <div class="title">Последние действия:</div>
+  <div v-if="loading" class="loading">
+    <el-loading />
+  </div>
+  <ListPostCards 
+    v-else-if="allPosts.length > 0" 
+    :posts="allPosts" 
+    style="margin-top: 20px;"
+  />
+  <el-empty
+    v-else
+    description="Нет доступных постов"
+    :image-size="200"
+  />
 </template>
 
+
 <style scoped>
-.scroll-container {
-    width: 100%;
-    overflow-x: auto;
-    white-space: nowrap;
-    padding: 10px 0;
-    padding-left: 10px;
+.title {
+ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+ font-size: 24px;
+ font-weight: 700;
+ margin: 5px 0;
+ padding: 0 5px;
+ letter-spacing: 0.5px;
+ position: relative;
+ display: inline-block;
+ background: linear-gradient(135deg, #9bbdff 0%, #3568c7 100%);
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+ text-shadow: 2px 2px 4px rgba(79, 140, 255, 0.3);
+}
+
+.title::after {
+ content: '';
+ position: absolute;
+ bottom: -2px;
+ left: 0;
+ width: 100%;
+ height: 2px;
+ background: linear-gradient(90deg, transparent, #80aaff, transparent);
+ opacity: 0.7;
+}
+
+
+@keyframes glow {
+ 0%, 100% {
+   filter: drop-shadow(0 0 2px rgba(128, 170, 255, 0.4));
+ }
+ 50% {
+   filter: drop-shadow(0 0 5px rgba(79, 140, 255, 0.6));
+ }
 }
 
 .el-card {
-    display: inline-block;
-    width: 100px;
-    /* Ширина карточки */
-    height: 150px;
-    /* Увеличена высота карточки */
-    margin-right: 20px;
-    border: none;
-    /* Убрали border */
-    transition: transform 0.2s ease-in-out;
-    text-align: center;
-    /* Выравнивание текста */
-    background-color: transparent;
-    /* Прозрачный фон */
-    cursor: pointer;
-    /* Курсор для клика */
+  width: auto;
+  margin-bottom: 10px;
+  background: linear-gradient(165deg, #1f2937, #111827);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25),
+              0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  margin-left: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.image {
-    width: 100px;
-    /* Ширина изображения */
-    height: 100px;
-    /* Высота изображения */
-    object-fit: cover;
-    /* margin-bottom: 5px; */
-    border-radius: 10px;
-    /* Закругленные края изображения */
+.el-card:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  border-color: rgba(0, 180, 219, 0.3);
 }
 
-.card:hover {
-    transform: scale(1.1);
-    /* Увеличиваем карточку при наведении */
+.el-card__header {
+  padding: 15px;
+  border-bottom: 1px solid rgba(0, 180, 219, 0.2);
+  background: linear-gradient(to right, #1f2937, #111827);
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.card-content {
-    padding: 5px 0;
-    font-size: 14px;
-    /* Размер шрифта */
+.el-card__body {
+  padding: 0px !important;
+  background: rgba(17, 24, 39, 0.98);
 }
 
-@media (max-width: 1200px) {
-    .scroll-container {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
+.el-card img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: contrast(1.05) brightness(1.05);
+}
 
-    .el-card {
-        width: 90px;
-        height: 110px;
-    }
+.scrollbar-flex-content {
+  display: flex;
+  gap: 20px;
+  padding: 4px;
+}
 
-    .image {
-        width: 90px;
-        height: 85px;
-    }
+.scrollbar-demo-item {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+  text-align: center;
+  width: auto;
+}
+
+.el-scrollbar ::-webkit-scrollbar {
+  height: 8px;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.el-scrollbar ::-webkit-scrollbar-track {
+  background: rgba(17, 24, 39, 0.2);
+  border-radius: 4px;
+}
+
+.el-scrollbar ::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #00b4db, #0083b0);
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.el-scrollbar ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #0083b0, #00b4db);
+}
+
+@media (max-width: 480px) {
+  .el-card {
+    width: 95%;
+    align-self: center;
+  }
+  
+  .el-card__header {
+    font-size: 16px;
+    padding: 12px;
+  }
 }
 </style>

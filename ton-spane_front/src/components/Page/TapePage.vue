@@ -31,6 +31,7 @@
       <el-main class="main-container-content">
         <el-container>
           <el-tabs v-model="activeTab" class="demo-tabs containet-style">
+            
             <el-tab-pane label="Для вас" name="first">
               <!-- Состояние загрузки -->
               <div v-if="!isDataLoaded" class="loading-container">
@@ -71,7 +72,11 @@
               <ListPostCards v-else :posts="posts" />
             </el-tab-pane>
             <el-tab-pane label="Подписки" name="second">
+              <keep-alive>
+
               <FollowingPage />
+              </keep-alive>
+
             </el-tab-pane>
             <el-tab-pane label="Понравилось" name="third">Role</el-tab-pane>
           </el-tabs>
