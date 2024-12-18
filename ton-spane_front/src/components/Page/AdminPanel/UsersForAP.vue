@@ -102,6 +102,17 @@
           </span>
         </el-form-item>
 
+        <el-form-item label="Email" prop="email">
+          <el-input
+            v-model="newUser.email"
+            type="email"
+            placeholder="Введите email"
+          />
+          <span v-if="errors.email" class="error-message">
+            {{ errors.email }}
+          </span>
+        </el-form-item>
+
         <el-form-item label="Пароль" prop="password">
           <el-input
             v-model="newUser.password"
@@ -151,7 +162,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted,defineEmits } from 'vue'
+import { ref, onMounted, defineEmits } from 'vue'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
 import config from '@/config'
@@ -176,12 +187,14 @@ const dragState = ref({ isDragging: false, startX: 0, scrollLeft: 0 })
 
 const newUser = ref({
   username: '',
+  email: '',
   password: '',
   description: ''
 })
 
 const errors = ref({
   username: '',
+  email: '',
   description: ''
 })
 
@@ -190,6 +203,10 @@ const validationRules = {
   username: [
     { required: true, message: 'Введите имя пользователя', trigger: 'blur' },
     { min: 3, message: 'Минимум 3 символа', trigger: 'blur' }
+  ],
+  email: [
+    { required: true, message: 'Введите email', trigger: 'blur' },
+    { type: 'email', message: 'Введите корректный email', trigger: 'blur' }
   ],
   password: [
     { required: true, message: 'Введите пароль', trigger: 'blur' },
@@ -222,16 +239,27 @@ const saveUser = async () => {
 
     await axios.post(API_URL, {
       username: newUser.value.username,
-      password: newUser.value.password,
-      profileDescription: newUser.value.description
+      email: newUser.value.email,
+      password: newUser.value.password
     })
-    
+
     ElMessage.success('Профиль успешно добавлен')
     dialogVisible.value = false
-    newUser.value = { username: '', password: '', description: '' }
+    
+    newUser.value = { 
+      username: '',
+      email: '',
+      password: '',
+      description: ''
+    }
+    
     await fetchUsers()
   } catch (error) {
-    ElMessage.error('Ошибка при сохранении профиля')
+    if (error.response?.status === 500) {
+      ElMessage.error('Ошибка сервера при сохранении профиля. Проверьте правильность данных')
+    } else {
+      ElMessage.error('Ошибка при сохранении профиля')
+    }
     console.error('Error saving user:', error)
   }
 }
