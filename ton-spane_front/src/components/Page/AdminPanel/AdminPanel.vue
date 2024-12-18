@@ -30,7 +30,7 @@
   <script setup>
   import { ref, computed } from 'vue'
   import ProfilesForAp from './Models/ProfilesForAP.vue'
-  import ModelsPage from './ModelsPage.vue'
+  import ModelsPage from './Models/ModelsPage.vue'
   import PostsAP from './PostsAP.vue'
   
   // State
