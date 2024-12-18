@@ -107,12 +107,12 @@
 
 <script setup>
 /* eslint-disable no-unused-vars */
-import { ref, reactive, defineExpose, watch } from 'vue'
+import { ref, reactive, defineExpose, watch,defineEmits } from 'vue'
 import { ElMessage } from 'element-plus'
-import { CreditCard, Money, Lock } from '@element-plus/icons-vue'
 
 const dialogVisible = ref(false)
 
+const emit = defineEmits(['paymentSuccess', 'paymentError'])
 
 // Начальное состояние формы
 const form = reactive({

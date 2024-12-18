@@ -1,19 +1,20 @@
 <!--ProfileContent-->
-<script lang="js" setup>
-import { ref, onMounted, defineProps, watch } from 'vue'
+<script setup>
+import { ref, onMounted, watch, onUnmounted,defineProps } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import config from '@/config'
-import PostsAP from './PostsAP.vue'
+import PostsAP from '../PostsAP.vue'
+import CreatePost from './AddPostForm.vue'
 
 const props = defineProps({
-    userIdProp: {
-        type: String,
-        required: false, // Параметр не обов'язковий
-    },
+   userIdProp: {
+       type: String,
+       required: false,
+   },
 });
 
-console.log("props.userIdProp", props.userIdProp)
+const showPostModal = ref(false);
 
 const S3_BASE_URL = 'https://tonimages.s3.us-east-1.amazonaws.com/'
 const DEFAULT_HEADER = 'https://placehold.co/600x200'
@@ -27,264 +28,255 @@ const isUploadingHeader = ref(false)
 const activeNames = ref(['1'])
 
 const userData = ref({
-    id: '',
-    username: '',
-    email: '',
-    profilePicture: '',
-    profileHeader: '',
-    profileDescription: '',
-    createdAt: '',
-    posts: [],
-    likes: [],
+   id: '',
+   username: '',
+   email: '',
+   profilePicture: '',
+   profileHeader: '',
+   profileDescription: '',
+   createdAt: '',
+   posts: [],
+   likes: [],
 });
 
 const preparePostsData = (posts) => {
-    return posts.map(post => ({
-        ...post,
-        id: post.id,
-        userId: props.userIdProp,
-        imageUrl: formatImageUrl(post.imageUrl),
-        price: String(post.price),
-        isBlurred: post.isBlurred || false,
-        caption: post.caption || ''
-    }))
+   return posts.map(post => ({
+       ...post,
+       id: post.id,
+       userId: props.userIdProp,
+       imageUrl: formatImageUrl(post.imageUrl),
+       price: String(post.price),
+       isBlurred: post.isBlurred || false,
+       caption: post.caption || ''
+   }))
 }
+
 const editableData = ref({
-    username: '',
-    profileDescription: '',
+   username: '',
+   profileDescription: '',
 })
 
 const editFormRules = {
-    username: [
-        { required: true, message: 'Пожалуйста, введите имя пользователя', trigger: 'blur' },
-        { min: 3, message: 'Минимум 3 символа', trigger: 'blur' }
-    ]
+   username: [
+       { required: true, message: 'Пожалуйста, введите имя пользователя', trigger: 'blur' },
+       { min: 3, message: 'Минимум 3 символа', trigger: 'blur' }
+   ]
 }
 
 const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('ru-RU', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    })
+   return new Date(dateString).toLocaleDateString('ru-RU', {
+       year: 'numeric',
+       month: 'long',
+       day: 'numeric'
+   })
 }
 
 const formatImageUrl = (imageUrl) => {
-    if (!imageUrl) return null
-    return imageUrl.startsWith('http') ? imageUrl : `${S3_BASE_URL}${imageUrl}`
+   if (!imageUrl) return null
+   return imageUrl.startsWith('http') ? imageUrl : `${S3_BASE_URL}${imageUrl}`
 }
 
 const handleImageError = (type) => {
-    if (type === 'header') {
-        userData.value.profileHeader = DEFAULT_HEADER
-    } else if (type === 'avatar') {
-        userData.value.profilePicture = DEFAULT_AVATAR
-    }
+   if (type === 'header') {
+       userData.value.profileHeader = DEFAULT_HEADER
+   } else if (type === 'avatar') {
+       userData.value.profilePicture = DEFAULT_AVATAR
+   }
 }
 
 const uploadImage = async (file, type) => {
-    const formData = new FormData()
-    formData.append('image', file)
+   const formData = new FormData()
+   formData.append('image', file)
 
-    const loadingState = type === 'avatar' ? isUploadingAvatar : isUploadingHeader
-    const endpoint = type === 'avatar' ? 'profile-image' : 'profile-header'
+   const loadingState = type === 'avatar' ? isUploadingAvatar : isUploadingHeader
+   const endpoint = type === 'avatar' ? 'profile-image' : 'profile-header'
 
-    try {
-        loadingState.value = true
+   try {
+       loadingState.value = true
 
-        const response = await fetch(`${config.API_BASE_URL}/users/${props.userIdProp}/${endpoint}`, {
-            method: 'PATCH',
-            body: formData
-        })
+       const response = await fetch(`${config.API_BASE_URL}/users/${props.userIdProp}/${endpoint}`, {
+           method: 'PATCH',
+           body: formData
+       })
 
-        if (!response.ok) throw new Error('Failed to upload image')
+       if (!response.ok) throw new Error('Failed to upload image')
 
-        const contentType = response.headers.get("content-type");
-        let data = {};
+       const contentType = response.headers.get("content-type");
+       let data = {};
 
-        if (contentType && contentType.includes("application/json")) {
-            data = await response.json();
-        } else {
-            data = {
-                [type === 'avatar' ? 'profilePicture' : 'profileHeader']: URL.createObjectURL(file)
-            };
-        }
+       if (contentType && contentType.includes("application/json")) {
+           data = await response.json();
+       } else {
+           data = {
+               [type === 'avatar' ? 'profilePicture' : 'profileHeader']: URL.createObjectURL(file)
+           };
+       }
 
-        if (type === 'avatar') {
-            userData.value.profilePicture = formatImageUrl(data.profilePicture) || URL.createObjectURL(file);
-        } else {
-            userData.value.profileHeader = formatImageUrl(data.profileHeader) || URL.createObjectURL(file);
-        }
+       if (type === 'avatar') {
+           userData.value.profilePicture = formatImageUrl(data.profilePicture) || URL.createObjectURL(file);
+       } else {
+           userData.value.profileHeader = formatImageUrl(data.profileHeader) || URL.createObjectURL(file);
+       }
 
-        ElMessage({
-            message: 'Изображение успешно обновлено',
-            type: 'success'
-        })
+       ElMessage.success('Изображение успешно обновлено')
+       await fetchUserData();
 
-        await fetchUserData();
-
-    } catch (error) {
-        console.error('Error uploading image:', error)
-        ElMessage({
-            message: 'Ошибка при загрузке изображения',
-            type: 'error'
-        })
-    } finally {
-        loadingState.value = false
-    }
+   } catch (error) {
+       console.error('Error uploading image:', error)
+       ElMessage.error('Ошибка при загрузке изображения')
+   } finally {
+       loadingState.value = false
+   }
 }
 
 const handleFileChange = async (event, type) => {
-    const file = event.target.files[0]
-    if (!file) return
+   const file = event.target.files[0]
+   if (!file) return
 
-    if (!file.type.startsWith('image/')) {
-        ElMessage({
-            message: 'Пожалуйста, выберите изображение',
-            type: 'error'
-        })
-        return
-    }
+   if (!file.type.startsWith('image/')) {
+       ElMessage.error('Пожалуйста, выберите изображение')
+       return
+   }
 
-    const maxSize = 5 * 1024 * 1024
-    if (file.size > maxSize) {
-        ElMessage({
-            message: 'Размер файла не должен превышать 5MB',
-            type: 'error'
-        })
-        return
-    }
+   const maxSize = 5 * 1024 * 1024
+   if (file.size > maxSize) {
+       ElMessage.error('Размер файла не должен превышать 5MB')
+       return
+   }
 
-    await uploadImage(file, type)
+   await uploadImage(file, type)
 }
 
 const startEditing = () => {
-    editableData.value = {
-        username: userData.value.username || '',
-        profileDescription: userData.value.profileDescription || '',
-    }
-    isEditing.value = true
+   editableData.value = {
+       username: userData.value.username || '',
+       profileDescription: userData.value.profileDescription || '',
+   }
+   isEditing.value = true
 }
 
 const cancelEditing = () => {
-    isEditing.value = false
-    editableData.value = {
-        username: '',
-        profileDescription: '',
-    }
+   isEditing.value = false
+   editableData.value = {
+       username: '',
+       profileDescription: '',
+   }
 }
 
 const saveChanges = async () => {
-    try {
-        isSubmitting.value = true
+   try {
+       isSubmitting.value = true
 
-        const updateData = {}
-        if (editableData.value.username) updateData.username = editableData.value.username
-        if (editableData.value.profileDescription) updateData.profileDescription = editableData.value.profileDescription
+       const updateData = {}
+       if (editableData.value.username) updateData.username = editableData.value.username
+       if (editableData.value.profileDescription) updateData.profileDescription = editableData.value.profileDescription
 
-        const response = await fetch(`${config.API_BASE_URL}/users/${props.userIdProp}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updateData)
-        })
+       const response = await fetch(`${config.API_BASE_URL}/models/${props.userIdProp}`, {
+           method: 'PATCH',
+           headers: {
+               'Content-Type': 'application/json',
+           },
+           body: JSON.stringify(updateData)
+       })
 
-        if (!response.ok) throw new Error('Failed to update profile')
+       if (!response.ok) throw new Error('Failed to update profile')
 
-        userData.value = {
-            ...userData.value,
-            username: editableData.value.username || userData.value.username,
-            profileDescription: editableData.value.profileDescription || userData.value.profileDescription
-        }
+       userData.value = {
+           ...userData.value,
+           username: editableData.value.username || userData.value.username,
+           profileDescription: editableData.value.profileDescription || userData.value.profileDescription
+       }
 
-        ElMessage({
-            message: 'Профиль успешно обновлен',
-            type: 'success'
-        })
-
-        isEditing.value = false
-    } catch (error) {
-        console.error('Error updating profile:', error)
-        ElMessage({
-            message: 'Ошибка при обновлении профиля',
-            type: 'error'
-        })
-    } finally {
-        isSubmitting.value = false
-    }
+       ElMessage.success('Профиль успешно обновлен')
+       isEditing.value = false
+       await initializeUserData()
+   } catch (error) {
+       console.error('Error updating profile:', error)
+       ElMessage.error('Ошибка при обновлении профиля')
+   } finally {
+       isSubmitting.value = false
+   }
 }
 
 const fetchUserData = async () => {
-    try {
-        const response = await fetch(`${config.API_BASE_URL}/users/${props.userIdProp}`)
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-        const data = await response.json()
+   try {
+       const response = await fetch(`${config.API_BASE_URL}/models/${props.userIdProp}`)
+       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+       const data = await response.json()
 
-        userData.value = {
-            ...data,
-            profilePicture: formatImageUrl(data.profilePicture) || DEFAULT_AVATAR,
-            profileHeader: formatImageUrl(data.profileHeader) || DEFAULT_HEADER,
-            posts: preparePostsData(data.posts || []),
-            likes: data.likes || [],
-        }
-        isLoaded.value = true
-    } catch (err) {
-        console.error('Error fetching user data:', err)
-        isLoaded.value = true
-    }
+       userData.value = {
+           ...data,
+           profilePicture: formatImageUrl(data.profilePicture) || DEFAULT_AVATAR,
+           profileHeader: formatImageUrl(data.profileHeader) || DEFAULT_HEADER,
+           posts: preparePostsData(data.posts || []),
+           likes: data.likes || [],
+       }
+       isLoaded.value = true
+   } catch (err) {
+       console.error('Error fetching user data:', err)
+       isLoaded.value = true
+   }
 }
 
 const fetchUserPosts = async () => {
-    try {
-        const response = await fetch(`${config.API_BASE_URL}/posts/requester/${props.userIdProp}`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const data = await response.json();
+   try {
+       const response = await fetch(`${config.API_BASE_URL}/posts/user/${props.userIdProp}/requester/${props.userIdProp}`);
+       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+       const data = await response.json();
 
-        const formattedPosts = data.map(post => ({
-            ...post,
-            id: post.id,
-            imageUrl: formatImageUrl(post.imageUrl),
-            caption: post.caption || '',
-            price: String(post.price),
-            isBlurred: post.isBlurred || false,
-            createdAt: post.createdAt,
-            user: {
-                id: props.userIdProp,
-                username: userData.value.username,
-                email: userData.value.email || '',
-                profilePicture: userData.value.profilePicture
-            },
-            // Include other boolean flags
-            initialLiked: false,
-            initialShared: false,
-            initialDonated: false,
-            initialSubscribed: false
-        }));
+       const formattedPosts = data.map(post => ({
+           ...post,
+           id: post.id,
+           imageUrl: post.imageUrl.includes(S3_BASE_URL)
+               ? post.imageUrl.replace(S3_BASE_URL, S3_BASE_URL)
+               : post.imageUrl,
+           caption: post.caption || '',
+           price: String(post.price),
+           isBlurred: post.isBlurred || false,
+           createdAt: post.createdAt,
+           user: {
+               id: props.userIdProp,
+               username: userData.value.username,
+               email: userData.value.email || '',
+               profilePicture: userData.value.profilePicture
+           },
+           initialLiked: false,
+           initialShared: false,
+           initialDonated: false,
+           initialSubscribed: false
+       }));
 
-        userData.value.posts = formattedPosts;
-        console.log("userData.value.posts",userData.value.posts);
-    } catch (err) {
-        console.error('Error fetching user posts:', err);
-        userData.value.posts = [];
-    }
+       userData.value.posts = formattedPosts;
+   } catch (err) {
+       console.error('Error fetching user posts:', err);
+       userData.value.posts = [];
+   }
 };
 
 const initializeUserData = async () => {
-    await fetchUserData()
-    await fetchUserPosts()
+   await fetchUserData()
+   await fetchUserPosts()
 }
 
-// Наблюдатель за изменением userIdProp
+const handlePostsUpdate = async () => {
+   console.log("Data update triggered")
+   await initializeUserData()
+}
+
 watch(() => props.userIdProp, (newValue) => {
-    console.log(props.userIdProp, newValue)
-    if (newValue) {
-        console.log("reload");
-        initializeUserData(); //fetchUserData();  // Загружаем данные при изменении userIdProp
-    }
+   if (newValue) {
+       initializeUserData();
+   }
 });
 
-onMounted(initializeUserData)
+onMounted(() => {
+   initializeUserData();
+   window.addEventListener('postsDataChanged', handlePostsUpdate);
+});
+
+onUnmounted(() => {
+   window.removeEventListener('postsDataChanged', handlePostsUpdate);
+});
 </script>
 
 <template>
@@ -382,7 +374,18 @@ onMounted(initializeUserData)
                     <el-button type="primary" @click="startEditing">
                         Редактировать профиль
                     </el-button>
+                    <div class="create-post-button">
+                    <el-button 
+                        type="primary" 
+                        @click="showPostModal = true"
+                        class="add-post-btn"
+                    >
+                        Добавить пост
+                    </el-button>
+                </div>
+                    
                 </template>
+                
                 <template v-else>
                     <el-button type="success" @click="saveChanges" :loading="isSubmitting">
                         Сохранить
@@ -401,7 +404,11 @@ onMounted(initializeUserData)
             :showAddButton="true" 
             />
         </div>
-
+        <CreatePost 
+    :isOpen="showPostModal"
+    :userId="userData.id" 
+    @close="showPostModal = false"
+        />
     </div>
 </template>
 
