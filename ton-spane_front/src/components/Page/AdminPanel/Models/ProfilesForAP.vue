@@ -162,7 +162,7 @@ const emit = defineEmits(['select-user'])
 
 // Константы
 const defaultUserImg = "https://via.placeholder.com/150"
-const API_URL = `${config.API_BASE_URL}/users`
+const API_URL = `${config.API_BASE_URL}/models`
 
 // Состояние компонента
 const formRef = ref(null)
@@ -252,7 +252,7 @@ const deleteUsers = async () => {
     deleteDialogVisible.value = false
     await fetchUsers()
   } catch (error) {
-    ElMessage.error('Ошибка при удалении пользователей')
+    ElMessage.error('Ошибка при удалении пользователей (удалите все посты пользователя перед удалением пользователя)')
     console.error('Error deleting users:', error)
   }
 }

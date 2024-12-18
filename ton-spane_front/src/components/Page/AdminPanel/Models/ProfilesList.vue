@@ -300,7 +300,7 @@ const deleteSelectedUsers = async () => {
         deleteDialogVisible.value = false
         await fetchData()
     } catch (error) {
-        ElMessage.error('Ошибка при удалении пользователей')
+        ElMessage.error('шибка при удалении пользователей (удалите все посты пользователя перед удалением пользователя)')
         console.error('Ошибка при удалении пользователей:', error)
     }
 }

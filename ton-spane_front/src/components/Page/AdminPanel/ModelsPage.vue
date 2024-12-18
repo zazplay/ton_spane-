@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        <!-- Add the CreatePost modal component -->
+        
         
     </div>
 </template>
