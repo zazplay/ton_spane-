@@ -220,7 +220,7 @@ const fetchUserData = async () => {
 
 const fetchUserPosts = async () => {
    try {
-       const response = await fetch(`${config.API_BASE_URL}/posts/requester/${props.userIdProp}`);
+       const response = await fetch(`${config.API_BASE_URL}/posts/user/${props.userIdProp}/requester/${props.userIdProp}`);
        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
        const data = await response.json();
 
