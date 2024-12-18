@@ -29,9 +29,10 @@
   
   <script setup>
   import { ref, computed } from 'vue'
-  import ProfilesForAp from './Models/ProfilesForAP.vue'
+  import UsersForAp from './UsersForAP.vue'
   import ModelsPage from './Models/ModelsPage.vue'
   import PostsAP from './PostsAP.vue'
+  
   
   // State
   const activeTab = ref('users')
@@ -39,7 +40,7 @@
   
   // Tabs Configuration
   const tabs = [
-    { id: 'users', label: 'Пользователи', component: ProfilesForAp },
+    { id: 'users', label: 'Пользователи', component: UsersForAp },
     { id: 'models', label: 'Модели', component: ModelsPage },
     { id: 'posts', label: 'Посты', component: PostsAP }
   ]
