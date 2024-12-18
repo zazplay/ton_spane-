@@ -14,22 +14,21 @@ defineProps({
 <template>
   <div class="posts-container">
     <PostCard
-      v-for="post in posts"
-      :key="post.id"          
-      :id="post.id"
-      :user="post.model"
-      :imageUrl="post.imageUrl"
-      :caption="post.caption"
-      :isBlurred="post.isBlurred"
-      :price="post.price"
-      :createdAt="post.createdAt"
-      :updatedAt="post.updatedAt"
-      :comments="post.comments"
-      :likes="post.likes"
-      :isLikedByCurrentUser="post.isLikedByCurrentUser"  
-      :isSubscribed="post.isSubscribed"  
-
-    />
+  v-for="post in posts"
+  :key="post.id"
+  :id="post.id"
+  :user="post.model"
+  :imageUrl="post.imageUrl"
+  :caption="post.caption"
+  :isBlurred="post.isBlurred"
+  :price="post.price"
+  :createdAt="post.createdAt"
+  :updatedAt="post.updatedAt"
+  :comments="post.comments"
+  :likes="post.likes"
+  :isLikedByCurrentUser="post.isLikedByCurrentUser"
+  :isSubscribed="post.isSubscribed"
+/>
   </div>
 </template>
 

@@ -31,6 +31,7 @@
       <el-main class="main-container-content">
         <el-container>
           <el-tabs v-model="activeTab" class="demo-tabs containet-style">
+            
             <el-tab-pane label="Для вас" name="first">
               <!-- Состояние загрузки -->
               <div v-if="!isDataLoaded" class="loading-container">
@@ -71,7 +72,11 @@
               <ListPostCards v-else :posts="posts" />
             </el-tab-pane>
             <el-tab-pane label="Подписки" name="second">
+              <keep-alive>
+
               <FollowingPage />
+              </keep-alive>
+
             </el-tab-pane>
             <el-tab-pane label="Понравилось" name="third">Role</el-tab-pane>
           </el-tabs>
@@ -84,7 +89,7 @@
 <script>
 import { BellFilled, Box } from '@element-plus/icons-vue';
 import ListPostCards from '../ListPostCards.vue';
-import AddPostForm from '../AddPostForm.vue';
+import AddPostForm from './AdminPanel/Models/AddPostForm.vue';
 import { ref, computed } from 'vue'
 import FollowingPage from './FollowingPage/FollowingPage.vue';
 import config from '../../config';
@@ -118,21 +123,20 @@ export default {
       this.isFormOpen = false;
     },
     async fetchPosts() {
-      try {
-        this.isDataLoaded = false;
-        const response = await fetch(`${config.API_BASE_URL}/posts/requester/${this.userId}`)
-        const data = await response.json()
-        console.log('Posts data:', data)
-        this.posts = data
-        setTimeout(() => {
-          this.isDataLoaded = true;
-        }, 1000);
-      } catch (error) {
-        console.error('Error fetching posts:', error)
-        this.isDataLoaded = true;
-        this.posts = [];
-      }
-    }
+  try {
+    this.isDataLoaded = false;
+    const response = await fetch(`${config.API_BASE_URL}/posts/requester/${this.userId}`)
+    const data = await response.json()
+    this.posts = data
+    setTimeout(() => {
+      this.isDataLoaded = true;
+    }, 1000);
+  } catch (error) {
+    console.error('Error fetching posts:', error)
+    this.isDataLoaded = true;
+    this.posts = [];
+  }
+}
   },
   mounted() {
     this.fetchPosts()

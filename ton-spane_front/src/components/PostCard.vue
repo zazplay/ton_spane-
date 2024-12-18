@@ -1,120 +1,21 @@
-<template>
-  <ShareModal v-model:dialogVisible="isShareModalVisible" />
-  <TipsModal v-model:dialogDonateVisible="isTipsModalVisible" />
-  <SubscriptionModal 
-  ref="subscriptionModalRef"
-  :userId="props.user.id"  
-/>
-  <el-card class="post-card">
-    <div class="header">
-      <el-avatar :size="50" class="avatar" :src="user.profilePicture" />
-      <div class="user-info">
-        <router-link 
-          :to="`/app/user/${user.id}`" 
-          class="username"
-        >
-          {{ user.username }}
-        </router-link>
-        <el-text></el-text>
-        <el-text class="date">{{ formatDate(createdAt) }}</el-text>
-      </div>
-      <el-button 
-        :type="isSubscribed ? 'success' : 'primary'" 
-        @click="handleSubscribe"
-        plain
-        class="subBtn"
-      >
-        {{ isSubscribed ? 'Вы подписаны' : 'Подписаться' }}
-      </el-button>
-    </div>
-
-    <div class="demo-image__preview">
-      <div 
-        class="image-container" 
-        @click="handleImageClick"
-      >
-        <el-image
-          class="post-image"
-          :class="{ 'blurred': isBlurred }"
-          :src="imageUrl"
-          :zoom-rate="1.2"
-          :max-scale="7"
-          :min-scale="0.2"
-          :preview-src-list="isBlurred ? [] : [imageUrl]"
-          :initial-index="4"
-          fit="cover"
-          @error="() => {}"
-          :preview-teleported="true"
-        >
-          <template #error>
-            <div class="image-slot">
-            </div>
-          </template>
-        </el-image>
-        
-        <div v-if="isBlurred" class="lock-overlay">
-          <el-icon :size="50" class="lock-icon">
-            <Lock />
-          </el-icon>
-          <span class="lock-text">{{ price }}$</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="actions">
-      <div class="action-buttons">
-        <el-check-tag 
-          :checked="isLiked"
-          @change="handleLike"
-          class="action-tag heart"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="25"
-            height="25"
-            viewBox="0 0 24 24"
-            :fill="isLiked ? 'red' : 'none'"
-            stroke="red"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-          </svg>
-          <span style="margin-left: 5px">{{ likes }}</span>
-        </el-check-tag>
-        
-        <el-check-tag 
-          :checked="isShared"
-          @change="handleShare"
-          class="action-tag share"
-        >
-          <el-icon size="25px"><Share /></el-icon>
-        </el-check-tag>
-
-        <el-check-tag 
-          :checked="isDonated"
-          @change="handleDonate"
-          class="action-tag donate"
-        >
-          <el-icon size="25px"><Money /></el-icon>
-        </el-check-tag>
-      </div>
-      <el-text class="description" tag="b" emphasis>
-        {{ caption.length > 100 ? caption.slice(0, 100) + '...' : caption }}
-      </el-text>
-    </div>
-  </el-card>
-</template>
-
 <script setup>
-
 import { ref, defineProps, defineEmits, computed, onMounted } from 'vue'
 import ShareModal from './ShareModal.vue' 
 import TipsModal from './TipsModal.vue'
 import SubscriptionModal from '../components/Page/SubOnCardModal/SubCardModal.vue'
 import { useStore } from 'vuex'
 import { Lock, Share, Money } from '@element-plus/icons-vue'
+
+const S3_BASE_URL = 'https://tonimages.s3.us-east-1.amazonaws.com/'
+
+const formatImageUrl = (imageUrl) => {
+  if (!imageUrl) return null;
+    const cleanUrl = imageUrl.replace(new RegExp(S3_BASE_URL, 'g'), '');
+  if (cleanUrl.startsWith('http')) {
+    return cleanUrl;
+  }
+    return `${S3_BASE_URL}${cleanUrl}`;
+}
 
 const props = defineProps({
   id: {
@@ -191,6 +92,8 @@ const isShared = ref(props.initialShared)
 const isDonated = ref(props.initialDonated)
 const isShareModalVisible = ref(false)
 const isTipsModalVisible = ref(false)
+
+const formattedImageUrl = computed(() => formatImageUrl(props.imageUrl))
 
 const handleImageClick = () => {
   if (props.isBlurred && subscriptionModalRef.value) {
@@ -274,7 +177,6 @@ const handleSubscribe = async () => {
         body: '' 
       });
       isSubscribed.value = !isSubscribed.value;
-
     }
     
     // Обновляем флажок и уведомляем родительский компонент
@@ -282,8 +184,7 @@ const handleSubscribe = async () => {
   } catch (error) {
     console.error('Error while subscribing/unsubscribing:', error);
   }
-};
-
+}
 
 const handleShare = () => {
   isShared.value = !isShared.value
@@ -296,7 +197,119 @@ const handleDonate = () => {
   isTipsModalVisible.value = true
   emit('donate', isDonated.value)
 }
+
+console.log('Original Image URL:', props.imageUrl)
+console.log('Formatted Image URL:', formattedImageUrl.value)
 </script>
+
+<template>
+  <ShareModal v-model:dialogVisible="isShareModalVisible" />
+  <TipsModal v-model:dialogDonateVisible="isTipsModalVisible" />
+  <SubscriptionModal 
+    ref="subscriptionModalRef"
+    :userId="props.user.id"  
+  />
+  <el-card class="post-card">
+    <div class="header">
+      <el-avatar :size="50" class="avatar" :src="props.user.profilePicture" />
+      <div class="user-info">
+        <router-link 
+          :to="`/app/user/${user.id}`" 
+          class="username"
+        >
+          {{ user.username }}
+        </router-link>
+        <el-text></el-text>
+        <el-text class="date">{{ formatDate(createdAt) }}</el-text>
+      </div>
+      <el-button 
+        :type="isSubscribed ? 'success' : 'primary'" 
+        @click="handleSubscribe"
+        plain
+        class="subBtn"
+      >
+        {{ isSubscribed ? 'Вы подписаны' : 'Подписаться' }}
+      </el-button>
+    </div>
+
+    <div class="demo-image__preview">
+      <div 
+        class="image-container" 
+        @click="handleImageClick"
+      >
+        <el-image
+          class="post-image"
+          :class="{ 'blurred': isBlurred }"
+          :src="formattedImageUrl"
+          :zoom-rate="1.2"
+          :max-scale="7"
+          :min-scale="0.2"
+          :preview-src-list="isBlurred ? [] : [formattedImageUrl]"
+          :initial-index="4"
+          fit="cover"
+          @error="() => {}"
+          :preview-teleported="true"
+        >
+          <template #error>
+            <div class="image-slot">
+            </div>
+          </template>
+        </el-image>
+        
+        <div v-if="isBlurred" class="lock-overlay">
+          <el-icon :size="50" class="lock-icon">
+            <Lock />
+          </el-icon>
+          <span class="lock-text">{{ price }}$</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <div class="action-buttons">
+        <el-check-tag 
+          :checked="isLiked"
+          @change="handleLike"
+          class="action-tag heart"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="25"
+            height="25"
+            viewBox="0 0 24 24"
+            :fill="isLiked ? 'red' : 'none'"
+            stroke="red"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <span style="margin-left: 5px">{{ likes }}</span>
+        </el-check-tag>
+        
+        <el-check-tag 
+          :checked="isShared"
+          @change="handleShare"
+          class="action-tag share"
+        >
+          <el-icon size="25px"><Share /></el-icon>
+        </el-check-tag>
+
+        <el-check-tag 
+          :checked="isDonated"
+          @change="handleDonate"
+          class="action-tag donate"
+        >
+          <el-icon size="25px"><Money /></el-icon>
+        </el-check-tag>
+      </div>
+      <el-text class="description" tag="b" emphasis>
+        {{ caption.length > 100 ? caption.slice(0, 100) + '...' : caption }}
+      </el-text>
+    </div>
+  </el-card>
+</template>
 
 <style scoped>
 .post-card {
