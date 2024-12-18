@@ -1,274 +1,85 @@
-<!--ProfilesList-->
-<script>
-import { ref, onMounted, defineComponent } from "vue";
-import axios from "axios";
-import config from "@/config";
-import { validateInputToScript, removeTagsOperators, validateLogin } from "../../../Validation";
-
-export default defineComponent({
-    emits: ['select-user'],
-    setup(_, { emit }) {
-        const loading = ref(true);
-        const lists = ref([]);
-        const currentDate = new Date().toDateString();
-        const defaultUserImage = "https://via.placeholder.com/150";
-        const selectedUsers = ref([]); // Массив для вибраних users
-
-        // Получаем sub из Vuex
-        // const sub = store.getters.getSub;
-        let isDragging = false;
-        let startX = 0;
-        let scrollLeft = 0;
-
-        const newProfile = ref({
-            username: '',
-            // profilePicture: '',
-            description: ''
-        });
-
-        const errors = ref({
-            username: '',
-            description: ''
-        });
-        const startDrag = (event) => {
-            isDragging = true;
-            startX = event.pageX - event.target.offsetLeft;
-            scrollLeft = event.target.scrollLeft;
-        };
-
-        const dragging = (event) => {
-            if (!isDragging) return;
-            event.preventDefault();
-            const x = event.pageX - event.target.offsetLeft;
-            const walk = (x - startX) * 3; // Кількість переміщення
-            event.target.scrollLeft = scrollLeft - walk;
-        };
-
-        const stopDrag = () => {
-            isDragging = false;
-        };
-        const setLoading = () => {
-            loading.value = true;
-            setTimeout(() => {
-                loading.value = false;
-            }, 2000);
-        };
-
-        const fetchData = async () => {
-
-            try {
-                const response = await axios.get(`${config.API_BASE_URL}/models`);
-                // console.log("sub ", sub);
-                lists.value = response.data;
-
-                loading.value = false;
-            } catch (error) {
-                console.error("Ошибка при получении данных:", error);
-                loading.value = false;
-            }
-        };
-
-        const handleCardClick = (item) => {
-            console.log("Перейти на профіль користувача: ", item.username, item);
-            // Отправляем событие в родительский компонент с id пользователя
-            emit('select-user', item.id);
-        };
-
-        const openAddProfileDialog = () => {
-            const dialog = document.getElementById('addProfileDialog');
-            dialog.showModal(); // Открываем диалоговое окно
-        };
-
-        const closeAddProfileDialog = () => {
-            const dialog = document.getElementById('addProfileDialog');
-            dialog.close(); // Закрываем диалоговое окно
-        };
-
-        const handleInputName = () => {
-            errors.value.username = ''
-
-            const lengthLogin = validateLogin(newProfile.value.username);
-            if (!lengthLogin.executionResult) {
-                errors.value.username = lengthLogin.messange;
-            }
-
-            const result = validateInputToScript(newProfile.value.username);
-            if (!result.executionResult) {
-                errors.value.username = result.messange;
-                newProfile.value.username = removeTagsOperators(newProfile.value.username);
-            }
-        }
-
-        const handleInputDescription = () => {
-            errors.value.description = '';
-            const result = validateInputToScript(newProfile.value.description);
-            if (!result.executionResult) {
-                errors.value.description = result.messange;
-                newProfile.value.description = removeTagsOperators(newProfile.value.description);
-            }
-        }
-
-        const saveNewProfile = () => {
-            if (newProfile.value.username.length < 3) {
-                errors.value.username = 'Логин не может быть меньше 3 символов.'
-                return;
-            }
-
-            console.log('Сохранение профиля:', newProfile.value);
-
-            // Здесь добавить код для отправки данных на сервер
-
-            closeAddProfileDialog(); // Закрываем диалог после сохранения
-
-            // Сброс значений формы после успешного сохранения
-            // newProfile.value = { username: '', description: '' };
-            // // } else {
-            // // Если есть ошибки, очищать значения некорректных полей
-            // if (errors.value.username) {
-            //     newProfile.value.username = ''; // Удаляем некорректное значение
-            // }
-            // if (errors.value.description) {
-            //     newProfile.value.description = ''; // Удаляем некорректное значение
-            // }
-            // // }
-        };
-
-        const showDeleteConfirmation = () => {
-            const dialog = document.getElementById('deleteDialog');
-            dialog.showModal(); // Открываем диалоговое окно
-        };
-
-        // Функція для закриття діалогу видалення
-        const closeDeleteDialog = () => {
-            const dialog = document.getElementById('deleteDialog');
-            dialog.close();// Закриваємо модальне вікно
-        };
-
-        const handleSelectionChange = (userId) => {
-            if (selectedUsers.value.includes(userId)) {
-                selectedUsers.value = selectedUsers.value.filter(id => id !== userId);
-            } else {
-                selectedUsers.value.push(userId);
-            }
-        };
-
-        const resetSelection = () => {
-            selectedUsers.value = [];
-        };
-        const deleteSelectedUsers = async () => {
-            if (selectedUsers.value.length === 0) {
-                alert("Выберите пользователей для удаления.");
-                return;
-            }
-
-            // try {
-            //     // Выполните запрос на удаление пользователей
-            //     await axios.delete(`${config.API_BASE_URL}/users`);
-
-            //     // Удалите пользователей из списка
-            //     lists.value = lists.value.filter(user => !selectedUsers.value.includes(user.id));
-            //     selectedUsers.value = []; // Очистите массив выбранных пользователей
-
-            //     alert("Выбранные пользователи успешно удалены.");
-            // } catch (error) {
-            //     console.error("Ошибка при удалении пользователей:", error);
-            //     alert("Не удалось удалить выбранных пользователей.");
-            // }
-        };
-
-        onMounted(() => {
-            fetchData();
-        });
-
-        return {
-            loading,
-            lists,
-            currentDate,
-            setLoading,
-            defaultUserImage, // Возвращаем ссылку на изображение по умолчанию
-            handleCardClick,  // Возвращаем метод для обработки кликов
-            startDrag,
-            dragging,
-            stopDrag,
-            newProfile,
-            openAddProfileDialog,
-            closeAddProfileDialog,
-            saveNewProfile,
-            errors,
-            handleInputName,
-            handleInputDescription,
-            selectedUsers,
-            handleSelectionChange,
-            resetSelection,
-            deleteSelectedUsers,
-            showDeleteConfirmation,
-            closeDeleteDialog,
-        };
-    },
-});
-</script>
-
 <template>
-    <!-- Модальне вікно для підтвердження видалення -->
-    <!-- <dialog id="deleteDialog" ref="deleteDialog" v-show="true">
-        <form method="dialog">
-            <p>Вы действительно хотите удалить {{ selectedUsers.length }} пост(ов)?</p>
-            <div style="display: flex; justify-content: space-between;">
-                <el-button type="danger" @click="deleteSelectedUsers">Видалити</el-button>
-                <el-button type="info" @click="closeDeleteDialog">Отменить</el-button>
-            </div>
-        </form>
-    </dialog> -->
-
-    <dialog id="deleteDialog" ref="deleteDialog" >
-        <form method="dialog">
-            <p>Вы действительно хотите удалить {{ selectedUsers.length }} пользователя(ей)?</p>
-            <div style="display: flex; justify-content: space-between;">
+    <el-dialog
+        v-model="deleteDialogVisible"
+        title="Подтверждение удаления"
+        width="400px"
+        destroy-on-close
+    >
+        <span>Вы действительно хотите удалить {{ selectedUsers.length }} пользователя(ей)?</span>
+        <template #footer>
+            <div class="dialog-footer">
+                <el-button @click="closeDeleteDialog">Отменить</el-button>
                 <el-button type="danger" @click="deleteSelectedUsers">Удалить</el-button>
-                <el-button type="info" @click="closeDeleteDialog">Отменить</el-button>
             </div>
-        </form>
-    </dialog>
+        </template>
+    </el-dialog>
 
     <div class="container-btn">
         <div class="btn-add-profile">
-            <el-button type="success" @click="openAddProfileDialog">Добавить профиль</el-button>
+            <el-button type="primary" @click="dialogVisible = true">
+                Добавить профиль
+            </el-button>
         </div>
         <div class="btn-add-profile" style="margin-left: 6px;">
-            <el-button v-if="selectedUsers.length > 0" type="danger" @click="showDeleteConfirmation">
-                Удалить({{ selectedUsers.length }})
-            </el-button>
-            <el-button type="info" v-if="selectedUsers.length > 0" @click="resetSelection">
-                Cбросить({{ selectedUsers.length }})
-            </el-button>
+            <template v-if="selectedUsers.length > 0">
+                <el-button type="danger" @click="showDeleteConfirmation">
+                    Удалить ({{ selectedUsers.length }})
+                </el-button>
+                <el-button type="info" @click="resetSelection">
+                    Cбросить
+                </el-button>
+            </template>
         </div>
     </div>
 
-    <!--Добавить профиль-->
-    <dialog id="addProfileDialog" ref="addProfileDialog">
-        <form method="dialog" class="edit-modal-window">
-            <button type="button" class="close-btn" @click="closeAddProfileDialog">✖</button>
-            <h3>Добавить профиль</h3>
-
-            <label for="userName">Имя:</label>
-            <div class="input-userName">
-                <input id="userName" type="text" v-model="newProfile.username" v-on:input="handleInputName"
-                    placeholder="Введите имя профиля" />
+    <el-dialog
+        v-model="dialogVisible"
+        title="Добавить профиль"
+        width="500px"
+        destroy-on-close
+    >
+        <el-form 
+            ref="formRef"
+            :model="newProfile"
+            :rules="rules"
+            label-position="top"
+        >
+            <el-form-item label="Имя" prop="username">
+                <el-input
+                    v-model="newProfile.username"
+                    @input="handleInputName"
+                    placeholder="Введите имя профиля"
+                />
                 <span v-if="errors.username" class="error-message">{{ errors.username }}</span>
-            </div>
+            </el-form-item>
 
-            <label for="description">Описание:</label>
-            <div class="input-caption">
-                <textarea id="description" v-model="newProfile.description" v-on:input="handleInputDescription"
-                    placeholder="Введите описание"></textarea>
+            <el-form-item label="Пароль" prop="password">
+                <el-input
+                    v-model="newProfile.password"
+                    type="password"
+                    placeholder="Введите пароль"
+                    show-password
+                />
+            </el-form-item>
+
+            <el-form-item label="Описание" prop="description">
+                <el-input
+                    v-model="newProfile.description"
+                    type="textarea"
+                    :rows="4"
+                    @input="handleInputDescription"
+                    placeholder="Введите описание"
+                />
                 <span v-if="errors.description" class="error-message">{{ errors.description }}</span>
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <div class="dialog-footer">
+                <el-button @click="dialogVisible = false">Отмена</el-button>
+                <el-button type="primary" @click="saveNewProfile">Сохранить</el-button>
             </div>
-
-            <el-button type="success" style="width: max-content; padding: 5px; margin-top: 20px;" plain
-                @click.prevent="saveNewProfile">Сохранить
-            </el-button>
-        </form>
-    </dialog>
+        </template>
+    </el-dialog>
 
     <el-space style="width: 100%" fill>
         <el-skeleton style="display: flex; gap: 8px" :loading="loading" animated :count="3">
@@ -286,19 +97,36 @@ export default defineComponent({
             </template>
 
             <template #default>
-                <div class="scroll-container" @mousedown="startDrag" @mousemove="dragging" @mouseup="stopDrag"
-                    @mouseleave="stopDrag">
-                    <el-card v-for="item in lists" :key="item.username"
-                        :body-style="{ padding: '0px', marginBottom: '1px' }" class="card">
-                        <img :src="item.profilePicture || defaultUserImage" class="image"
-                            @click="handleCardClick(item)" />
+                <div 
+                    class="scroll-container" 
+                    @mousedown="startDrag" 
+                    @mousemove="dragging" 
+                    @mouseup="stopDrag"
+                    @mouseleave="stopDrag"
+                >
+                    <el-card
+                        v-for="item in lists"
+                        :key="item.id"
+                        :body-style="{ padding: '0px', marginBottom: '1px' }"
+                        class="card"
+                    >
+                        <img
+                            :src="item.profilePicture || defaultUserImage"
+                            class="image"
+                            @click="handleCardClick(item)"
+                            @error="handleImageError"
+                        />
                         <div class="card-content">
-                            <span @click="handleCardClick(item)">{{ item.username }}</span>
-                            <div class="input-blurred checkbox-delete">
-                                <input v-model="selectedUsers" type="checkbox" :value="item.id" id="isDelete" />
+                            <el-text class="username" @click="handleCardClick(item)">
+                                {{ item.username }}
+                            </el-text>
+                            <div class="checkbox-delete">
+                                <el-checkbox
+                                    :model-value="selectedUsers.includes(item.id)"
+                                    @change="(val) => handleCheckboxChange(val, item.id)"
+                                />
                             </div>
                         </div>
-
                     </el-card>
                 </div>
             </template>
@@ -306,16 +134,187 @@ export default defineComponent({
     </el-space>
 </template>
 
+<script setup>
+import { ref, onMounted,defineEmits } from 'vue'
+import { ElMessage } from 'element-plus'
+import axios from 'axios'
+import config from '@/config'
+import { validateInputToScript, removeTagsOperators, validateLogin } from "../../../Validation"
+
+const emit = defineEmits(['select-user'])
+const formRef = ref(null)
+const defaultUserImage = "https://via.placeholder.com/150"
+
+const loading = ref(true)
+const lists = ref([])
+const selectedUsers = ref([])
+const dialogVisible = ref(false)
+const deleteDialogVisible = ref(false)
+
+const newProfile = ref({
+    username: '',
+    password: '',
+    description: ''
+})
+
+const errors = ref({
+    username: '',
+    description: ''
+})
+
+const rules = {
+    username: [
+        { required: true, message: 'Введите имя пользователя', trigger: 'blur' },
+        { min: 3, message: 'Минимум 3 символа', trigger: 'blur' }
+    ],
+    password: [
+        { required: true, message: 'Введите пароль', trigger: 'blur' },
+        { min: 6, message: 'Минимум 6 символов', trigger: 'blur' }
+    ],
+    description: [
+        { required: true, message: 'Введите описание', trigger: 'blur' }
+    ]
+}
+
+let isDragging = false
+let startX = 0
+let scrollLeft = 0
+
+const fetchData = async () => {
+    try {
+        const response = await axios.get(`${config.API_BASE_URL}/models`)
+        lists.value = response.data
+        loading.value = false
+    } catch (error) {
+        console.error("Ошибка при получении данных:", error)
+        ElMessage.error('Ошибка при получении данных')
+        loading.value = false
+    }
+}
+
+const handleCardClick = (item) => {
+    emit('select-user', item.id)
+}
+
+const handleCheckboxChange = (checked, id) => {
+    if (checked) {
+        selectedUsers.value.push(id)
+    } else {
+        selectedUsers.value = selectedUsers.value.filter(userId => userId !== id)
+    }
+}
+
+const handleImageError = (e) => {
+    e.target.src = defaultUserImage
+}
+
+const startDrag = (event) => {
+    isDragging = true
+    startX = event.pageX - event.target.offsetLeft
+    scrollLeft = event.target.scrollLeft
+}
+
+const dragging = (event) => {
+    if (!isDragging) return
+    event.preventDefault()
+    const x = event.pageX - event.target.offsetLeft
+    const walk = (x - startX) * 3
+    event.target.scrollLeft = scrollLeft - walk
+}
+
+const stopDrag = () => {
+    isDragging = false
+}
+
+const handleInputName = () => {
+    errors.value.username = ''
+    const lengthLogin = validateLogin(newProfile.value.username)
+    if (!lengthLogin.executionResult) {
+        errors.value.username = lengthLogin.messange
+    }
+    
+    const result = validateInputToScript(newProfile.value.username)
+    if (!result.executionResult) {
+        errors.value.username = result.messange
+        newProfile.value.username = removeTagsOperators(newProfile.value.username)
+    }
+}
+
+const handleInputDescription = () => {
+    errors.value.description = ''
+    const result = validateInputToScript(newProfile.value.description)
+    if (!result.executionResult) {
+        errors.value.description = result.messange
+        newProfile.value.description = removeTagsOperators(newProfile.value.description)
+    }
+}
+
+const saveNewProfile = async () => {
+    if (!formRef.value) return
+
+    try {
+        const valid = await formRef.value.validate()
+        if (!valid) return
+
+        await axios.post(`${config.API_BASE_URL}/models`, {
+            username: newProfile.value.username,
+            password: newProfile.value.password,
+            profileDescription: newProfile.value.description
+        })
+        
+        ElMessage.success('Профиль успешно добавлен')
+        dialogVisible.value = false
+        newProfile.value = { username: '', password: '', description: '' }
+        await fetchData()
+    } catch (error) {
+        ElMessage.error('Ошибка при сохранении профиля')
+        console.error('Ошибка при сохранении профиля:', error)
+    }
+}
+
+const showDeleteConfirmation = () => {
+    deleteDialogVisible.value = true
+}
+
+const closeDeleteDialog = () => {
+    deleteDialogVisible.value = false
+}
+
+const resetSelection = () => {
+    selectedUsers.value = []
+}
+
+const deleteSelectedUsers = async () => {
+    if (selectedUsers.value.length === 0) {
+        ElMessage.warning('Выберите пользователей для удаления')
+        return
+    }
+
+    try {
+        for (const id of selectedUsers.value) {
+            await axios.delete(`${config.API_BASE_URL}/models/${id}`)
+        }
+        
+        ElMessage.success('Пользователи успешно удалены')
+        selectedUsers.value = []
+        deleteDialogVisible.value = false
+        await fetchData()
+    } catch (error) {
+        ElMessage.error('Ошибка при удалении пользователей')
+        console.error('Ошибка при удалении пользователей:', error)
+    }
+}
+
+onMounted(() => {
+    fetchData()
+})
+</script>
+
 <style scoped>
 .scroll-container {
     display: flex;
-    /* Використовуємо Flexbox */
     flex-wrap: wrap;
-    /* Додаємо перенесення рядків */
-    /* gap: 8px; */
-    /* Відстань між елементами */
     padding: 10px 0;
-
 }
 
 .scroll-container::-webkit-scrollbar {
@@ -340,9 +339,7 @@ export default defineComponent({
 .el-card {
     position: relative;
     flex: 0 0 auto;
-    /* Забороняємо карткам масштабуватися */
     width: 150px;
-    /* Фіксована ширина картки */
     height: 180px;
     border: none;
     transition: transform 0.2s ease-in-out;
@@ -351,7 +348,6 @@ export default defineComponent({
     cursor: pointer;
     scroll-snap-align: start;
     margin: 6px 6px;
-    /* Прив'язка картки до початку при прокручуванні */
 }
 
 .image {
@@ -377,145 +373,12 @@ export default defineComponent({
     position: static;
 }
 
-.btn-remove-profile {
-    display: flex;
-    justify-content: end;
-    padding-right: 15px;
-}
-
-/* Стили для діалогового вікна */
-dialog {
-    border: none;
-    border-radius: 10px;
-    background-color: rgb(30, 27, 27);
-}
-
-dialog::backdrop {
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-.edit-modal-window {
-    display: flex;
-    flex-direction: column;
-    width: 500px;
-    background-color: rgb(30, 27, 27);
-}
-
-/* Стилизация текстового input */
-.input-caption {
-    display: flex;
-    flex-direction: column;
-    margin-top: 10px;
-}
-
-.input-caption label {
-    font-size: 16px;
-    color: #333;
-    margin-bottom: 5px;
-}
-
-.input-caption textarea {
-    padding: 10px;
-    /* Отступы внутри текстового поля */
-    border: 2px solid #4f8cff;
-    /* Цвет рамки */
-    border-radius: 5px;
-    /* Закругление углов */
-    font-size: 16px;
-    /* Размер шрифта */
-    resize: vertical;
-    /* Позволяет изменять размер только по вертикали */
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    /* Плавные переходы */
-    min-height: 100px;
-    /* Минимальная высота текстового поля */
-}
-
-.input-caption textarea:focus {
-    border-color: #2563eb;
-    /* Цвет рамки при фокусе */
-    box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
-    /* Тень при фокусе */
-    outline: none;
-    /* Убираем стандартное выделение */
-}
-
-.input-caption textarea::placeholder {
-    color: #aaa;
-    /* Цвет текста плейсхолдера */
-}
-
-.input-userName {
-    display: flex;
-    flex-direction: column;
-    /* Расположение метки и поля ввода в столбик */
-    margin-top: 10px;
-    margin-bottom: 10px;
-    /* Отступ сверху */
-}
-
-.input-userName label {
-    font-size: 16px;
-    /* Размер шрифта метки */
-    color: #333;
-    /* Цвет текста метки */
-    margin-bottom: 5px;
-    /* Отступ снизу от метки */
-}
-
-.input-userName input[type="text"] {
-    padding: 10px;
-    /* Отступы внутри поля ввода */
-    border: 2px solid #4f8cff;
-    /* Цвет рамки */
-    border-radius: 5px;
-    /* Закругление углов */
-    font-size: 16px;
-    /* Размер шрифта */
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    /* Плавные переходы */
-}
-
-.input-userName input[type="text"]:focus {
-    border-color: #2563eb;
-    /* Цвет рамки при фокусе */
-    box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
-    /* Тень при фокусе */
-    outline: none;
-    /* Убираем стандартное выделение */
-}
-
-.input-userName input[type="text"]::placeholder {
-    color: #aaa;
-    /* Цвет текста плейсхолдера */
-}
-
-/* Кнопка закрытия */
-.close-btn {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #ffffff;
-}
-
-.close-btn:hover {
-    color: #ff0000;
-}
-
 .error-message {
     color: red;
-    /* Цвет текста ошибки */
     font-size: 14px;
-    /* Размер шрифта */
     margin-top: 5px;
-    /* Отступ сверху */
 }
 
-/* Стили чекбокс */
 .checkbox-delete {
     margin-top: 0 !important;
     position: absolute;
@@ -523,63 +386,19 @@ dialog::backdrop {
     left: 5px;
 }
 
-.input-blurred {
-    display: flex;
-    align-items: center;
-    /* Выравнивание по центру по вертикали */
-}
-
-.input-blurred label {
-    font-size: 16px;
-    /* Размер шрифта метки */
-    color: #333;
-    /* Цвет текста метки */
-    margin-right: 10px;
-    /* Отступ справа от метки */
-}
-
-.input-blurred input[type="checkbox"] {
-    width: 20px;
-    /* Ширина чекбокса */
-    height: 20px;
-    /* Высота чекбокса */
-    cursor: pointer;
-    /* Указатель при наведении */
-    accent-color: #4f8cff;
-    /* Цвет чекбокса (для современных браузеров) */
-}
-
-/* Стили для чекбокса при фокусе */
-.input-blurred input[type="checkbox"]:focus {
-    outline: none;
-    /* Убираем стандартное выделение */
-    box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
-    /* Тень при фокусе */
-}
-
-/* Стили для состояния чекбокса (при нажатии) */
-.input-blurred input[type="checkbox"]:checked {
-    background-color: #4f8cff;
-    /* Цвет фона при выборе */
-}
-
 @media (max-width: 1200px) {
     .scroll-container {
         flex-wrap: nowrap;
         overflow-x: auto;
-        /* Додаємо горизонтальний скрол */
         gap: 10px;
-        /* Відстань між елементами */
         scroll-snap-type: x mandatory;
         cursor: grab;
-        /* Зміна курсору для натискання */
         padding: 0;
         margin-bottom: 10px;
     }
 
     .el-card {
         flex: 0 0 90px;
-        /* Фіксована ширина картки */
         height: 160px;
     }
 
@@ -591,19 +410,6 @@ dialog::backdrop {
     .btn-add-profile {
         padding-right: 5px;
         margin: 10px 0 20px;
-    }
-
-    dialog {
-        width: 80%;
-    }
-
-    .edit-modal-window {
-        width: 100%;
-    }
-
-    .close-btn {
-        font-size: 1, 2rem;
-        /* Уменьшаем размер кнопки закрытия */
     }
 }
 </style>

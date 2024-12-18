@@ -140,7 +140,6 @@ const router = useRouter()
 const route = useRoute()
 const userId = route.params.id
 
-const S3_BASE_URL = 'https://tonimages.s3.us-east-1.amazonaws.com/'
 const DEFAULT_HEADER = 'https://placehold.co/600x200'
 const DEFAULT_AVATAR = 'https://img.icons8.com/?size=100&id=83151&format=png&color=22C3E6'
 
@@ -162,7 +161,7 @@ const userData = ref({
 
 const formatImageUrl = (imageUrl) => {
   if (!imageUrl) return null
-  return imageUrl.startsWith('http') ? imageUrl : `${S3_BASE_URL}${imageUrl}`
+  return imageUrl
 }
 
 const preparePostsData = (posts = []) => {

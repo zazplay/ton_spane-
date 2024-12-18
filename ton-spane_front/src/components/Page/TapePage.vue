@@ -84,7 +84,7 @@
 <script>
 import { BellFilled, Box } from '@element-plus/icons-vue';
 import ListPostCards from '../ListPostCards.vue';
-import AddPostForm from '../AddPostForm.vue';
+import AddPostForm from './AdminPanel/Models/AddPostForm.vue';
 import { ref, computed } from 'vue'
 import FollowingPage from './FollowingPage/FollowingPage.vue';
 import config from '../../config';
@@ -118,21 +118,20 @@ export default {
       this.isFormOpen = false;
     },
     async fetchPosts() {
-      try {
-        this.isDataLoaded = false;
-        const response = await fetch(`${config.API_BASE_URL}/posts/requester/${this.userId}`)
-        const data = await response.json()
-        console.log('Posts data:', data)
-        this.posts = data
-        setTimeout(() => {
-          this.isDataLoaded = true;
-        }, 1000);
-      } catch (error) {
-        console.error('Error fetching posts:', error)
-        this.isDataLoaded = true;
-        this.posts = [];
-      }
-    }
+  try {
+    this.isDataLoaded = false;
+    const response = await fetch(`${config.API_BASE_URL}/posts/requester/${this.userId}`)
+    const data = await response.json()
+    this.posts = data
+    setTimeout(() => {
+      this.isDataLoaded = true;
+    }, 1000);
+  } catch (error) {
+    console.error('Error fetching posts:', error)
+    this.isDataLoaded = true;
+    this.posts = [];
+  }
+}
   },
   mounted() {
     this.fetchPosts()
