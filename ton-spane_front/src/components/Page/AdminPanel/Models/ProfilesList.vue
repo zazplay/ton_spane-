@@ -17,7 +17,7 @@
     <div class="container-btn">
         <div class="btn-add-profile">
             <el-button type="primary" @click="dialogVisible = true">
-                Добавить профиль
+                Добавить модель
             </el-button>
         </div>
         <div class="btn-add-profile" style="margin-left: 6px;">
@@ -256,19 +256,25 @@ const saveNewProfile = async () => {
         const valid = await formRef.value.validate()
         if (!valid) return
 
+        loading.value = true
+        
         await axios.post(`${config.API_BASE_URL}/models`, {
             username: newProfile.value.username,
             password: newProfile.value.password,
             profileDescription: newProfile.value.description
         })
         
-        ElMessage.success('Профиль успешно добавлен')
         dialogVisible.value = false
         newProfile.value = { username: '', password: '', description: '' }
+        selectedUsers.value = [] // Сбрасываем выбранных пользователей
         await fetchData()
+        ElMessage.success('Профиль успешно добавлен')
+        
     } catch (error) {
         ElMessage.error('Ошибка при сохранении профиля')
         console.error('Ошибка при сохранении профиля:', error)
+    } finally {
+        loading.value = false
     }
 }
 

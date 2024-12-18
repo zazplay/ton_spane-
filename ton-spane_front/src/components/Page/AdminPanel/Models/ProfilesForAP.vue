@@ -3,8 +3,8 @@
     <!-- Панель управления пользователями -->
     <div class="control-panel">
       <div class="control-panel__left">
-        <el-button type="primary" @click="dialogVisible = true">
-          Добавить профиль
+        <el-button type="primary" @click="dialogVisible = true"> 
+          Добавить модель
         </el-button>
       </div>
       <div class="control-panel__right">

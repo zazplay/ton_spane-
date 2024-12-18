@@ -406,7 +406,7 @@ onUnmounted(() => {
         </div>
         <CreatePost 
     :isOpen="showPostModal"
-    :userId="userData.id" 
+    :userId="props.userIdProp" 
     @close="showPostModal = false"
         />
     </div>
