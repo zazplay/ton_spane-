@@ -1,10 +1,10 @@
 <script setup>
-import { ref, computed, onMounted,defineProps,defineEmits } from "vue";
+import { ref, computed, onMounted, defineProps, defineEmits } from "vue";
 import { useStore } from "vuex";
-import { ElMessage } from 'element-plus';
 import axios from "axios";
-import config from "@/config";
+import config from "../config";
 
+// Define props
 const props = defineProps({
   userId: {
     type: String,
@@ -17,11 +17,13 @@ const props = defineProps({
   },
 });
 
+// Define emits
 const emit = defineEmits(["close"]);
 
+// Reactive state
 const post = ref({
   caption: "",
-  userId: props.userId,
+  userId: props.userId, // props напряму
   price: 0,
   isBlurred: false,
   image: null,
@@ -29,45 +31,47 @@ const post = ref({
 
 const error = ref(null);
 
+// Get Vuex `getSub` getter
 const store = useStore();
 const getSub = computed(() => store.getters.getSub);
 
+// Assign `userId` from Vuex on mount
 onMounted(() => {
   if (!post.value.userId) {
-    post.value.userId = getSub.value;
+    post.value.userId = getSub.value; // Встановлюємо userId з Vuex
   }
 });
 
+// Handle file input change
 const handleFileChange = (event) => {
   const file = event.target.files[0];
-  
   if (file) {
     const isImage = file.type.startsWith("image/");
     const isVideo = file.type.startsWith("video/");
-    
+
     if (!isImage && !isVideo) {
       error.value = "Только фото или видео разрешено!";
       post.value.image = null;
       return;
     }
-    
+
     if (isImage) {
       const img = new Image();
       const objectUrl = URL.createObjectURL(file);
-      
+
       img.onload = () => {
         const { width, height } = img;
         URL.revokeObjectURL(objectUrl);
-        
-        if (width > 3000 || height > 2000 || width < 200 || height < 200) {
-          error.value = `Неверный размер изображения! Мин: 200x200, Макс: 3000x2000`;
+
+        if (width > 2500 || height > 1260 || width < 512 || height < 512) {
+          error.value = `Неверный размер изображения! Мин: 512x512, Макс: 2500x1260`;
           post.value.image = null;
         } else {
           error.value = null;
           post.value.image = file;
         }
       };
-      
+
       img.src = objectUrl;
     } else {
       error.value = null;
@@ -79,69 +83,45 @@ const handleFileChange = (event) => {
   }
 };
 
+// Handle form submission
 const handleSubmit = async () => {
-  if (!post.value.userId) {
-    error.value = "Ошибка: ID пользователя не определен";
-    return;
-  }
-
   if (!post.value.image) {
     error.value = "Пожалуйста, добавьте фото или видео!";
     return;
   }
-
   try {
     const formData = new FormData();
     formData.append("caption", post.value.caption);
-    formData.append("userId", post.value.userId);
-    formData.append("price", post.value.price.toString());
+    formData.append("userId",post.value.userId);
+    formData.append("price", post.value.price);
     formData.append("isBlurred", post.value.isBlurred);
     formData.append("image", post.value.image);
 
+    console.log(props.userId);
+    console.log("formData", post.value.caption, post.value.userId, post.value.price, post.value.isBlurred, post.value.image);
     const response = await axios.post(
-      `${config.API_BASE_URL}/posts`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          "accept": "*/*"
-        }
+      `${config.API_BASE_URL}/posts`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
       }
+    }
     );
 
-    if (response.status === 201) {
-      ElMessage.success("Пост добавлен успешно!");
-      
-      post.value = {
-        caption: "",
-        userId: props.userId,
-        price: 0,
-        isBlurred: false,
-        image: null,
-      };
-      
-      window.dispatchEvent(new CustomEvent('postsDataChanged', {
-        detail: response.data
-      }));
-      
-      closeForm();
-    }
+    console.log("response", response);
+    alert("Пост добавлен успешно!");
+    closeForm();
   } catch (err) {
-    const errorMessage = err.response?.data?.message || "Ошибка при отправке поста.";
-    console.error('Error details:', {
-      status: err.response?.status,
-      message: errorMessage,
-      data: err.response?.data
-    });
-    error.value = errorMessage;
-    ElMessage.error(errorMessage);
+    console.error(err);
+    alert("Ошибка при отправке поста.");
   }
 };
 
+// Close form
 const closeForm = () => {
   emit("close");
 };
 
+// Limit input for price
 const limitInput = (event) => {
   const value = event.target.value;
   if (value.length > 4) {
@@ -149,6 +129,7 @@ const limitInput = (event) => {
   }
 };
 
+// Trigger file input click
 const triggerFileInput = () => {
   document.querySelector('input[type="file"]').click();
 };

@@ -12,7 +12,7 @@
   </button>
       <div class="profile-section">
         <el-image :src="USER_IMG" class="avatar" />
-        <h1 class="title">ГОДОВОЕ СПОНСОРТВО {{ USER_NICKNAME }}</h1>
+        <h1 class="title">ГОДОВАЯ ПОДПИСКА НА {{ USER_NICKNAME }}</h1>
       </div>
     </div>
 

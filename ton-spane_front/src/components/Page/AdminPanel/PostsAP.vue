@@ -50,7 +50,9 @@
 
         <div class="container-btn-add-delete">
             <!-- Кнопка для додавання нового поста -->
-           
+            <el-button v-if="props.showAddButton" class="add-post-btn" type="success" @click="openForm">
+                Добавить пост
+            </el-button>
 
             <!-- Кнопка для видалення вибраних постів -->
             <el-button class="delete-btn" v-if="selectedPosts.length > 0" type="danger" @click="showDeleteConfirmation">
@@ -71,7 +73,7 @@
                 :caption="post.caption" :isBlurred="post.isBlurred" :price="post.price" :createdAt="post.createdAt" />
             <!-- Кнопка редагування -->
             <div class="bottom-btn-group">
-                <el-button class="edit-btn" type="warning" @click="openEditDialog(post)">Редактировать</el-button>
+                <el-button class="edit-btn" type="warning" @click="openEditDialog(post)">Редагувати</el-button>
                 <div class="input-blurred checkbox-delete">
                     <input v-model="selectedPosts" type="checkbox" :value="post.id" id="isDelete" />
                 </div>
@@ -82,112 +84,121 @@
         <AddPostForm :isOpen="isFormOpen" :userId="props.user? props.user.id : ''" @close="closeForm" />
     </div>
 </template>
+
 <script lang="js" setup>
 import axios from 'axios';
 import config from '@/config';
-import { ref, onMounted, defineProps, onUnmounted } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ref, onMounted, defineProps } from 'vue';
 import PostComponent from './PostComponent.vue';
-import AddPostForm from './Models/AddPostForm.vue';
+import AddPostForm from '../../AddPostForm.vue';
 import { validateInputToScript, removeTagsOperators } from "../../Validation";
 
+// Реактивний список постів
 const listPosts = ref([]);
-const selectedPosts = ref([]);
-const deleteDialog = ref(null);
-const isFormOpen = ref(false);
-const editDialog = ref(null);
-const editForm = ref({ caption: '', price: 0, isBlurred: false, id: null });
+const selectedPosts = ref([]); // Массив для вибраних постів
+const deleteDialog = ref(null); // Ссилка на елемент діалогу видалення
+const isFormOpen = ref(false); // Стан для відкриття форми
+const editDialog = ref(null); // Ссилка на діалог редагування
+const editForm = ref({ caption: '', price: 0, isBlurred: false, id: null }); // Дані для редагування
 
 const errors = ref({
     description: ''
 });
 
-const props = defineProps({
-    postsParam: {
-        type: Object,
-        required: false
-    },
-    user: {
-        type: Object,
-        required: false
-    },
-    showAddButton: {
-        type: Boolean,
-        default: false,
-    },
-});
+const props = defineProps(
+    {
+        postsParam: {
+            type: Object,
+            required: false
+        },
+        user: {
+            type: Object,
+            required: false
+        },
 
+        showAddButton: {
+            type: Boolean,
+            default: false, // Кнопка буде відображатися за замовчуванням
+        },
+    })
+// Асинхронна функція для отримання постів
 const getPosts = async () => {
     console.log('user', props.user)
     console.log('postsParam', props.postsParam)
 
+    // let getPostStr = '';
     try {
+        // if (props.userId === null) {
+        //     getPostStr = `${config.API_BASE_URL}/posts`;
+        // }
+        // else {
+        //     console.log(props.userId);
+        //     getPostStr = `${config.API_BASE_URL}/posts/requester/${props.userId}`
+        // }
+        //TODO: Изменить запрос для получения всех постов
         if (!props.postsParam) {
             const response = await axios.get(`${config.API_BASE_URL}/posts/requester/a7248fe8-a4c1-4d49-bf22-5722f537916a`);
-            listPosts.value = response.data;
+            listPosts.value = response.data; // Оновлюємо список пості
         }
+
+        // const response = await axios.get(getPostStr);
+        // listPosts.value = response.data; // Оновлюємо список пості
     } catch (error) {
         console.error('Помилка при отриманні постів:', error);
     }
 };
 
+// Функція для видалення вибраних постів
 const deletePosts = async () => {
     try {
         for (const postId of selectedPosts.value) {
             await axios.delete(`${config.API_BASE_URL}/posts/${postId}`);
+            // Видаляємо пост зі списку після успішного видалення
+            listPosts.value = listPosts.value.filter(post => post.id !== postId);
         }
-        
-        // Обновляем только локальный список
-        if (!props.postsParam) {
-            listPosts.value = listPosts.value.filter(post => !selectedPosts.value.includes(post.id));
-        }
-        
-        // Отправляем событие об обновлении
-        window.dispatchEvent(new Event('postsDataChanged'));
-        
+
+        // Скидаємо вибір і закриваємо модальне вікно
         resetSelection();
         closeDeleteDialog();
-        
-        ElMessage({
-            message: 'Посты успешно удалены',
-            type: 'success'
-        });
     } catch (error) {
         console.error('Помилка при видаленні постів:', error);
-        ElMessage({
-            message: 'Ошибка при удалении постов',
-            type: 'error'
-        });
     }
 };
 
+// Функція для відкриття діалогу підтвердження видалення
 const showDeleteConfirmation = () => {
-    deleteDialog.value.showModal();
+    deleteDialog.value.showModal(); // Відкриваємо модальне вікно для видалення
 };
 
+// Функція для закриття діалогу видалення
 const closeDeleteDialog = () => {
-    deleteDialog.value.close();
+    deleteDialog.value.close(); // Закриваємо модальне вікно
 };
 
+// Функція для скидання вибраних постів
 const resetSelection = () => {
     selectedPosts.value = [];
 };
 
+// Функція для відкриття форми
+const openForm = () => {
+    isFormOpen.value = true;
+};
 
+// Функція для закриття форми
 const closeForm = () => {
     isFormOpen.value = false;
-    // Отправляем событие об обновлении
-    window.dispatchEvent(new Event('postsDataChanged'));
 };
 
+// Функція для відкриття діалогу редагування
 const openEditDialog = (post) => {
-    editForm.value = { ...post };
-    editDialog.value.showModal();
+    editForm.value = { ...post }; // Копіюємо дані поста для редагування
+    editDialog.value.showModal(); // Відкриваємо модальне вікно редагування
 };
 
+// Функція для закриття діалогу редагування
 const closeEditDialog = () => {
-    editDialog.value.close();
-    editForm.value = { caption: '', price: 0, isBlurred: false, id: null };
+    editDialog.value.close(); // Закриваємо модальне вікно редагування
 };
 
 const handleInputDescription = () => {
@@ -199,6 +210,7 @@ const handleInputDescription = () => {
     }
 }
 
+// Функція для збереження змін поста з використанням fetch
 const savePostChanges = async () => {
     try {
         const response = await fetch(`${config.API_BASE_URL}/posts/${editForm.value.id}`, {
@@ -206,55 +218,37 @@ const savePostChanges = async () => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(editForm.value),
+            body: JSON.stringify(editForm.value), // Перетворюємо дані в JSON
         });
 
-        if (!response.ok) {
-            throw new Error('Ошибка при сохранении изменений');
+        // if (!response.ok) {
+        //     throw new Error(`Помилка при збереженні змін: ${response.statusText}`);
+        // }
+
+        // Оновлюємо пост у списку після збереження змін
+        const updatedPost = await response.json(); // Отримуємо оновлений пост з відповіді
+
+        const postIndex = listPosts.value.findIndex(post => post.id === updatedPost.id);
+        if (postIndex !== -1) {
+            listPosts.value[postIndex] = updatedPost; // Оновлюємо пост у списку
         }
 
-        const updatedPost = await response.json();
-
-        // Обновляем локальный список только если не используем postsParam
-        if (!props.postsParam) {
-            const postIndex = listPosts.value.findIndex(post => post.id === updatedPost.id);
-            if (postIndex !== -1) {
-                listPosts.value[postIndex] = updatedPost;
-            }
-        }
-
-        // Отправляем событие об обновлении
-        window.dispatchEvent(new Event('postsDataChanged'));
-        
-        closeEditDialog();
-        
-        ElMessage({
-            message: 'Пост успешно обновлен',
-            type: 'success'
-        });
+        closeEditDialog(); // Закриваємо модальне вікно
     } catch (error) {
         console.error('Помилка при збереженні змін:', error);
-        ElMessage({
-            message: 'Ошибка при обновлении поста',
-            type: 'error'
-        });
     }
 };
 
 const limitInput = (event) => {
     const value = event.target.value;
     if (value.length > 4) {
-        event.target.value = value.slice(0, 4);
+        event.target.value = value.slice(0, 4); // Обрезаем строку до 4 символов
     }
 };
 
+// Отримуємо пости при монтуванні компонента
 onMounted(() => {
     getPosts();
-});
-
-onUnmounted(() => {
-    // Очищаем выбранные посты при размонтировании компонента
-    selectedPosts.value = [];
 });
 </script>
 

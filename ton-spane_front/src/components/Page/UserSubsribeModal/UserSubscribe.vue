@@ -12,7 +12,7 @@
   </button>
       <div class="profile-section">
         <el-image :src="USER_IMG" class="avatar" />
-        <h1 class="title">Спонсорство {{ USER_NICKNAME }}</h1>
+        <h1 class="title">Подписка на {{ USER_NICKNAME }}</h1>
       </div>
     </div>
 
@@ -32,7 +32,11 @@
       
     </div>
     
-  </div>  
+  </div>
+
+  <!-- Fixed Subscribe Button -->
+  
+  
   <PaymentModal ref="paymentModalRef" />
 </template>
   
