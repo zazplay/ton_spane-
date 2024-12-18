@@ -94,7 +94,7 @@ const uploadImage = async (file, type) => {
    try {
        loadingState.value = true
 
-       const response = await fetch(`${config.API_BASE_URL}/users/${props.userIdProp}/${endpoint}`, {
+       const response = await fetch(`${config.API_BASE_URL}/models/${props.userIdProp}/${endpoint}`, {
            method: 'PATCH',
            body: formData
        })
