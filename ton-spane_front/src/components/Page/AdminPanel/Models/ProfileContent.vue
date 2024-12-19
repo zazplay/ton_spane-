@@ -1,6 +1,6 @@
 <!--ProfileContent-->
 <script setup>
-import { ref, onMounted, watch, onUnmounted,defineProps } from 'vue'
+import { ref, onMounted, watch, onUnmounted,defineProps,reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import config from '@/config'
@@ -14,7 +14,9 @@ const props = defineProps({
    },
 });
 
-const showPostModal = ref(false);
+const showPostModal = ref(false)
+const userLikes = ref(0)
+const userSubscription = ref(0)
 
 const S3_BASE_URL = 'https://tonimages.s3.us-east-1.amazonaws.com/'
 const DEFAULT_HEADER = 'https://placehold.co/600x200'
@@ -37,19 +39,7 @@ const userData = ref({
    createdAt: '',
    posts: [],
    likes: [],
-});
-
-const preparePostsData = (posts) => {
-   return posts.map(post => ({
-       ...post,
-       id: post.id,
-       userId: props.userIdProp,
-       imageUrl: formatImageUrl(post.imageUrl),
-       price: String(post.price),
-       isBlurred: post.isBlurred || false,
-       caption: post.caption || ''
-   }))
-}
+})
 
 const editableData = ref({
    username: '',
@@ -63,13 +53,7 @@ const editFormRules = {
    ]
 }
 
-const formatDate = (dateString) => {
-   return new Date(dateString).toLocaleDateString('ru-RU', {
-       year: 'numeric',
-       month: 'long',
-       day: 'numeric'
-   })
-}
+
 
 const formatImageUrl = (imageUrl) => {
    if (!imageUrl) return null
@@ -101,25 +85,25 @@ const uploadImage = async (file, type) => {
 
        if (!response.ok) throw new Error('Failed to upload image')
 
-       const contentType = response.headers.get("content-type");
-       let data = {};
+       const contentType = response.headers.get("content-type")
+       let data = {}
 
        if (contentType && contentType.includes("application/json")) {
-           data = await response.json();
+           data = await response.json()
        } else {
            data = {
                [type === 'avatar' ? 'profilePicture' : 'profileHeader']: URL.createObjectURL(file)
-           };
+           }
        }
 
        if (type === 'avatar') {
-           userData.value.profilePicture = formatImageUrl(data.profilePicture) || URL.createObjectURL(file);
+           userData.value.profilePicture = formatImageUrl(data.profilePicture) || URL.createObjectURL(file)
        } else {
-           userData.value.profileHeader = formatImageUrl(data.profileHeader) || URL.createObjectURL(file);
+           userData.value.profileHeader = formatImageUrl(data.profileHeader) || URL.createObjectURL(file)
        }
 
        ElMessage.success('Изображение успешно обновлено')
-       await fetchUserData();
+       await fetchUserData()
 
    } catch (error) {
        console.error('Error uploading image:', error)
@@ -198,6 +182,25 @@ const saveChanges = async () => {
    }
 }
 
+// Fetch user subscriptions
+const fetchUserSubs = async () => {
+  try {
+    userSubscription.value = 0
+    const response = await fetch(
+      `${config.API_BASE_URL}/subscriptions/${props.userIdProp}/followers`
+    )
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    const followers = await response.json()
+    
+    if (Array.isArray(followers)) {
+      userSubscription.value = followers.length
+    }
+  } catch (err) {
+    console.error('Error fetching user subscriptions:', err)
+    userSubscription.value = 0
+  }
+}
+
 const fetchUserData = async () => {
    try {
        const response = await fetch(`${config.API_BASE_URL}/models/${props.userIdProp}`)
@@ -247,16 +250,108 @@ const fetchUserPosts = async () => {
        }));
 
        userData.value.posts = formattedPosts;
+       userLikes.value = formattedPosts.reduce((total, post) => total + (post.likes?.length || 0), 0);
    } catch (err) {
        console.error('Error fetching user posts:', err);
        userData.value.posts = [];
+       userLikes.value = 0;
    }
-};
+}
+
+const preparePostsData = (posts) => {
+   return posts.map(post => ({
+       ...post,
+       id: post.id,
+       userId: props.userIdProp,
+       imageUrl: formatImageUrl(post.imageUrl),
+       price: String(post.price),
+       isBlurred: post.isBlurred || false,
+       caption: post.caption || ''
+   }))
+}
 
 const initializeUserData = async () => {
    await fetchUserData()
-   await fetchUserPosts()
+   await Promise.all([
+     fetchUserPosts(),
+     fetchUserSubs()
+   ])
 }
+
+const showSubscribersModal = ref(false)
+const subscribersForm = reactive({
+    count: 1
+})
+const isAddingSubscribers = ref(false)
+
+// Функция добавления подписчиков
+const handleAddSubscribers = async () => {
+    try {
+        isAddingSubscribers.value = true
+        const results = await addMultipleSubscribers(subscribersForm.count)
+        
+        // Показываем результат
+        ElMessage({
+            message: `Успешно добавлено ${results.successful} подписчиков, ${results.failed} не удалось`,
+            type: results.failed === 0 ? 'success' : 'warning'
+        })
+        
+        showSubscribersModal.value = false
+    } catch (error) {
+        ElMessage.error('Произошла ошибка при добавлении подписчиков')
+    } finally {
+        isAddingSubscribers.value = false
+    }
+}
+
+// Функция добавления множественных подписчиков
+const addMultipleSubscribers = async (subscribersCount) => {
+    const results = {
+        successful: 0,
+        failed: 0
+    };
+
+    try {
+        // Создаем все запросы сразу
+        const requests = Array(subscribersCount).fill().map(() => 
+            fetch(
+                `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/3dc42836-ded0-42af-a574-b6eaf1fcc8c0/follow/${props.userIdProp}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'accept': '*/*'
+                    }
+                }
+            )
+        );
+
+        // Разбиваем запросы на чанки по 200 для избежания перегрузки браузера
+        const chunkSize = 200;
+        for (let i = 0; i < requests.length; i += chunkSize) {
+            const chunk = requests.slice(i, i + chunkSize);
+            const responses = await Promise.allSettled(chunk);
+            
+            responses.forEach(response => {
+                if (response.status === 'fulfilled' && response.value.status === 201) {
+                    results.successful++;
+                } else {
+                    results.failed++;
+                }
+            });
+
+            // Минимальная задержка между чанками
+            if (i + chunkSize < requests.length) {
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+        }
+
+        await initializeUserData();
+    } catch (err) {
+        console.error('Error in batch subscriber addition:', err);
+    }
+
+    return results;
+};
 
 const handlePostsUpdate = async () => {
    console.log("Data update triggered")
@@ -265,18 +360,18 @@ const handlePostsUpdate = async () => {
 
 watch(() => props.userIdProp, (newValue) => {
    if (newValue) {
-       initializeUserData();
+       initializeUserData()
    }
-});
+})
 
 onMounted(() => {
-   initializeUserData();
-   window.addEventListener('postsDataChanged', handlePostsUpdate);
-});
+   initializeUserData()
+   window.addEventListener('postsDataChanged', handlePostsUpdate)
+})
 
 onUnmounted(() => {
-   window.removeEventListener('postsDataChanged', handlePostsUpdate);
-});
+   window.removeEventListener('postsDataChanged', handlePostsUpdate)
+})
 </script>
 
 <template>
@@ -336,14 +431,26 @@ onUnmounted(() => {
                     </div>
 
                     <div class="stats">
-                        <el-text class="stat-badge">
-                            <el-text class="stat-text">{{ userData.likes.length }} лайков</el-text>
+                        <el-text class="stat-badge" type="primary">
+                            <el-text class="stat-text">{{ userData.posts.length }} публикации</el-text>
                         </el-text>
-                        <el-text class="stat-date">
-                            На сайте с {{ formatDate(userData.createdAt) }}
+                        <el-text class="stat-badgeLikes" type="primary"> <el-text class="stat-text">{{ userLikes }}  лайков</el-text></el-text>
+
+                                
+                           
+                        <div style="display: flex; flex-direction: column; align-items: center; margin-top: -20px" >
+                        <div style="display: flex; flex-direction: row; align-items: center; margin-left: 15px;">
+                            <el-icon size="35px" color="green" @click="showSubscribersModal = true"><CirclePlusFilled/></el-icon>
+                        </div>
+                        <el-text class="stat-badgeSubs" type="primary">
+                            <el-text class="stat-text">{{ userSubscription }} подписчиков</el-text>
                         </el-text>
+                        </div>
+                       
                     </div>
+                    
                 </el-aside>
+               
             </el-container>
 
             <el-container>
@@ -375,15 +482,14 @@ onUnmounted(() => {
                         Редактировать профиль
                     </el-button>
                     <div class="create-post-button">
-                    <el-button 
-                        type="primary" 
-                        @click="showPostModal = true"
-                        class="add-post-btn"
-                    >
-                        Добавить пост
-                    </el-button>
-                </div>
-                    
+                        <el-button 
+                            type="primary" 
+                            @click="showPostModal = true"
+                            class="add-post-btn"
+                        >
+                            Добавить пост
+                        </el-button>
+                    </div>
                 </template>
                 
                 <template v-else>
@@ -398,18 +504,53 @@ onUnmounted(() => {
         </el-container>
         <div style="position: relative;">
             <PostsAP v-if="userData.posts.length" 
-            :postsParam="userData.posts" 
-            :user="userData" 
-            :userId="userData.id"
-            :showAddButton="true" 
+                :postsParam="userData.posts" 
+                :user="userData" 
+                :userId="userData.id"
+                :showAddButton="true" 
             />
         </div>
         <CreatePost 
-    :isOpen="showPostModal"
-    :userId="props.userIdProp" 
-    @close="showPostModal = false"
+            :isOpen="showPostModal"
+            :userId="props.userIdProp" 
+            @close="showPostModal = false"
         />
     </div>
+    <div v-else class="loading-container">
+        <el-skeleton :rows="3" animated />
+    </div>
+
+
+    <el-dialog
+            v-model="showSubscribersModal"
+            title="Добавить подписчиков"
+            width="30%"
+            :close-on-click-modal="false"
+        >
+            <el-form :model="subscribersForm">
+                <el-form-item label="Количество подписчиков">
+                    <el-input-number 
+                        v-model="subscribersForm.count"
+                        :min="1"
+                        :max="1000"
+                        controls-position="right"
+                    />
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="showSubscribersModal = false">Отмена</el-button>
+                    <el-button
+                        type="primary"
+                        @click="handleAddSubscribers"
+                        :loading="isAddingSubscribers"
+                    >
+                        Добавить
+                    </el-button>
+                </span>
+            </template>
+        </el-dialog>
+
 </template>
 
 <style scoped>
@@ -545,41 +686,69 @@ onUnmounted(() => {
 
 .stats {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 10px;
     margin-left: auto;
+    
 }
 
-.stat-badge {
+.stat-badge,
+.stat-badgeLikes,
+.stat-badgeSubs {
+    text-align: center;
     color: rgba(255, 255, 255, 0.95);
-    text-shadow: 0 2px 4px rgba(56, 189, 248, 0.3);
     font-weight: 500;
     border-radius: 15px;
     padding: 12px 20px;
-    background: linear-gradient(135deg,
-            rgba(56, 189, 248, 0.15) 0%,
-            rgba(2, 132, 199, 0.25) 50%,
-            rgba(56, 189, 248, 0.15) 100%);
+    width: auto;
+    margin-left: 20px;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(56, 189, 248, 0.25);
-    box-shadow:
+    transition: all 0.4s ease;
+}
+
+.stat-badge {
+    text-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+    background: linear-gradient(
+        135deg,
+        rgba(99, 102, 241, 0.1) 0%,
+        rgba(79, 70, 229, 0.2) 50%,
+        rgba(99, 102, 241, 0.1) 100%
+    );
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    box-shadow: 
         0 4px 6px rgba(0, 0, 0, 0.2),
         inset 0 1px 2px rgba(255, 255, 255, 0.1);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.stat-badge:hover {
-    background: linear-gradient(135deg,
-            rgba(56, 189, 248, 0.25) 0%,
-            rgba(2, 132, 199, 0.35) 50%,
-            rgba(56, 189, 248, 0.25) 100%);
-    transform: translateY(-2px);
-    box-shadow:
-        0 8px 12px rgba(0, 0, 0, 0.3),
-        inset 0 2px 4px rgba(255, 255, 255, 0.2),
-        0 0 20px rgba(56, 189, 248, 0.4);
+.stat-badgeLikes {
+    text-shadow: 0 2px 4px rgba(244, 63, 94, 0.5);
+    background: linear-gradient(
+        135deg,
+        rgba(244, 63, 94, 0.2) 0%,
+        rgba(225, 29, 72, 0.35) 50%, 
+        rgba(244, 63, 94, 0.2) 100%
+    );
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    box-shadow: 
+        0 4px 6px rgba(0, 0, 0, 0.2),
+        inset 0 1px 2px rgba(255, 255, 255, 0.2),
+        0 0 15px rgba(244, 63, 94, 0.2);
 }
 
+.stat-badgeSubs {
+    text-shadow: 0 2px 4px rgba(139, 92, 246, 0.5);
+    background: linear-gradient(
+        135deg,
+        rgba(139, 92, 246, 0.2) 0%,
+        rgba(124, 58, 237, 0.35) 50%,
+        rgba(139, 92, 246, 0.2) 100%
+    );
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    box-shadow: 
+        0 4px 6px rgba(0, 0, 0, 0.2),
+        inset 0 1px 2px rgba(255, 255, 255, 0.2),
+        0 0 15px rgba(139, 92, 246, 0.2);
+}
 .stat-date {
     color: #94a3b8;
     font-size: 0.9rem;
@@ -694,6 +863,7 @@ onUnmounted(() => {
         flex-direction: column;
         align-items: center;
         text-align: center;
+        padding: 5px;
     }
 
     .profile-image {
@@ -708,11 +878,25 @@ onUnmounted(() => {
     }
 
     .stats {
-        width: 100%;
+        width: 90%;
         align-items: center;
         margin-left: 0;
         margin-top: 20px;
+
     }
+
+    .stat-badge,
+.stat-badgeLikes,
+.stat-badgeSubs {
+    
+    margin-left: 5px;
+    width: auto;
+    padding-left: 5px;
+    padding-right: 5px;
+    
+
+    
+}
 
     .stat-date {
         text-align: center;

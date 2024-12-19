@@ -25,7 +25,6 @@
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: start;">
-
                     <div class="input-blurred">
                         <input v-model="editForm.isBlurred" type="checkbox" id="isBlurred" />
                         <label for="isBlurred" style="color: white;">Размытое изображение</label>
@@ -40,7 +39,7 @@
                     </div>
                 </div>
 
-                <button type="button" class="close-btn " @click="closeEditDialog">✖</button>
+                <button type="button" class="close-btn" @click="closeEditDialog">✖</button>
                 <el-button type="success" style="width: max-content; padding: 5px;" plain
                     @click.prevent="savePostChanges">
                     Редактировать
@@ -48,10 +47,34 @@
             </form>
         </dialog>
 
-        <div class="container-btn-add-delete">
-            <!-- Кнопка для додавання нового поста -->
-           
+        <!-- Модальное окно для добавления лайков -->
+        <dialog id="likesDialog" ref="likesDialog" class="likes-dialog">
+            <form method="dialog" class="edit-modal-window">
+                <h3>Добавить лайки</h3>
+                <div class="input-likes">
+                    <label for="likesCount" style="color: white;">Количество лайков:</label>
+                    <el-input-number 
+                        v-model="likesForm.count"
+                        :min="1"
+                        :max="1000"
+                        controls-position="right"
+                    />
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                    <el-button @click="closeLikesDialog">Отмена</el-button>
+                    <el-button
+                        type="primary"
+                        @click.prevent="handleAddLikes"
+                        :loading="isAddingLikes"
+                    >
+                        Добавить
+                    </el-button>
+                </div>
+                <button type="button" class="close-btn" @click="closeLikesDialog">✖</button>
+            </form>
+        </dialog>
 
+        <div class="container-btn-add-delete">
             <!-- Кнопка для видалення вибраних постів -->
             <el-button class="delete-btn" v-if="selectedPosts.length > 0" type="danger" @click="showDeleteConfirmation">
                 Удалить {{ selectedPosts.length }} пост(ов)
@@ -61,16 +84,15 @@
             </el-button>
         </div>
 
-
         <!-- Виведення карток постів -->
-        <!-- <div v-for="post in listPosts" :key="post.id" class="post-item">
-            <PostComponent :id="post.id" :user="user ? user : post.user" :imageUrl="post.imageUrl"
-                :caption="post.caption" :isBlurred="post.isBlurred" :price="post.price" :createdAt="post.createdAt" /> -->
         <div v-for="post in (postsParam ? postsParam : listPosts)" :key="post.id" class="post-item">
             <PostComponent :id="post.id" :user="user ? user : post.user" :imageUrl="post.imageUrl"
                 :caption="post.caption" :isBlurred="post.isBlurred" :price="post.price" :createdAt="post.createdAt" />
-            <!-- Кнопка редагування -->
             <div class="bottom-btn-group">
+                <div class="likes-section">
+                    <el-icon size="30px" color="green" @click="openLikesDialog(post)"><CirclePlusFilled /></el-icon> 
+                    <span class="likes-count">{{ post.likes ? post.likes.length : 0 }} лайков</span>
+                </div>
                 <el-button class="edit-btn" type="warning" @click="openEditDialog(post)">Редактировать</el-button>
                 <div class="input-blurred checkbox-delete">
                     <input v-model="selectedPosts" type="checkbox" :value="post.id" id="isDelete" />
@@ -78,14 +100,14 @@
             </div>
         </div>
 
-        <!-- Форма для додавання поста -->
         <AddPostForm :isOpen="isFormOpen" :userId="props.user? props.user.id : ''" @close="closeForm" />
     </div>
 </template>
-<script lang="js" setup>
+
+<script setup>
 import axios from 'axios';
 import config from '@/config';
-import { ref, onMounted, defineProps, onUnmounted } from 'vue';
+import { ref, reactive, onMounted, onUnmounted,defineProps } from 'vue';
 import { ElMessage } from 'element-plus';
 import PostComponent from './PostComponent.vue';
 import AddPostForm from './Models/AddPostForm.vue';
@@ -97,6 +119,14 @@ const deleteDialog = ref(null);
 const isFormOpen = ref(false);
 const editDialog = ref(null);
 const editForm = ref({ caption: '', price: 0, isBlurred: false, id: null });
+
+// Новые переменные для лайков
+const likesDialog = ref(null);
+const likesForm = reactive({
+    count: 1,
+    postId: null
+});
+const isAddingLikes = ref(false);
 
 const errors = ref({
     description: ''
@@ -117,10 +147,123 @@ const props = defineProps({
     },
 });
 
-const getPosts = async () => {
-    console.log('user', props.user)
-    console.log('postsParam', props.postsParam)
+// Функции для работы с лайками
+const openLikesDialog = (post) => {
+    likesForm.postId = post.id;
+    likesDialog.value.showModal();
+};
 
+const closeLikesDialog = () => {
+    likesDialog.value.close();
+    likesForm.postId = null;
+    likesForm.count = 1;
+};
+
+const addMultipleLikes = async (likesCount, postId) => {
+    const results = {
+        successful: 0,
+        failed: 0,
+        errors: []
+    };
+
+    try {
+        const requests = Array(likesCount).fill().map(() => 
+            fetch(
+                `${config.API_BASE_URL}/likes/3dc42836-ded0-42af-a574-b6eaf1fcc8c0/like/${postId}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'accept': '*/*',
+                        'Content-Type': 'application/json'
+                        // Add any required authentication headers
+                        // 'Authorization': `Bearer ${yourToken}`
+                    }
+                }
+            )
+        );
+
+        const chunkSize = 200;
+        for (let i = 0; i < requests.length; i += chunkSize) {
+            const chunk = requests.slice(i, i + chunkSize);
+            const responses = await Promise.allSettled(chunk);
+            
+            for (const response of responses) {
+                if (response.status === 'fulfilled') {
+                    if (response.value.status === 201) {
+                        results.successful++;
+                    } else {
+                        results.failed++;
+                        try {
+                            const errorBody = await response.value.text();
+                            results.errors.push({
+                                status: response.value.status,
+                                body: errorBody
+                            });
+                        } catch (parseError) {
+                            results.errors.push({
+                                status: response.value.status,
+                                body: 'Unable to parse error body'
+                            });
+                        }
+                    }
+                } else {
+                    results.failed++;
+                    results.errors.push({
+                        status: 'Rejected',
+                        body: response.reason.toString()
+                    });
+                }
+            }
+
+            if (i + chunkSize < requests.length) {
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+        }
+    } catch (err) {
+        console.error('Error in batch likes addition:', err);
+        results.errors.push({
+            status: 'Catch block error',
+            body: err.toString()
+        });
+    }
+
+    return results;
+};
+
+const handleAddLikes = async () => {
+    try {
+        isAddingLikes.value = true;
+        const results = await addMultipleLikes(likesForm.count, likesForm.postId);
+        
+        // More detailed error messaging
+        if (results.errors.length > 0) {
+            console.error('Errors during like addition:', results.errors);
+            
+            ElMessage({
+                message: `Успешно добавлено ${results.successful} лайков, ${results.failed} не удалось`,
+                type: results.failed === 0 ? 'success' : 'warning'
+            });
+
+            // Optionally, show more detailed error information
+            results.errors.forEach((error, index) => {
+                ElMessage.error(`Ошибка ${index + 1}: Статус ${error.status}, Детали: ${error.body}`);
+            });
+        } else {
+            ElMessage.success(`Успешно добавлено ${results.successful} лайков`);
+        }
+        
+        await getPosts();
+        window.dispatchEvent(new Event('postsDataChanged'));
+        closeLikesDialog();
+    } catch (error) {
+        console.error('Unhandled error in handleAddLikes:', error);
+        ElMessage.error('Произошла критическая ошибка при добавлении лайков');
+    } finally {
+        isAddingLikes.value = false;
+    }
+};
+// Существующие функции
+const getPosts = async () => {
     try {
         if (!props.postsParam) {
             const response = await axios.get(`${config.API_BASE_URL}/posts/requester/a7248fe8-a4c1-4d49-bf22-5722f537916a`);
@@ -130,6 +273,7 @@ const getPosts = async () => {
         console.error('Помилка при отриманні постів:', error);
     }
 };
+
 
 const deletePosts = async () => {
     try {
@@ -271,61 +415,95 @@ onUnmounted(() => {
     flex-direction: column;
     justify-self: center;
     max-width: 100%;
+    gap: 24px;
 }
 
 .post-item {
     margin-bottom: 20px;
+    background: rgb(30, 27, 27);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease;
 }
 
+.post-item:hover {
+    transform: translateY(-2px);
+}
+
+/* Стили для кнопок в шапке */
 .container-btn-add-delete {
     display: flex;
     position: sticky;
     top: 50px;
     right: 450px;
     z-index: 100;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(30, 27, 27, 0.8);
+    backdrop-filter: blur(8px);
+    border-radius: 8px;
 }
 
 .delete-btn {
     width: max-content;
+    padding: 8px 16px;
+    transition: all 0.2s ease;
 }
 
 .add-post-btn {
     width: max-content;
+    padding: 8px 16px;
 }
 
-/* Кнопка закрытия */
-.close-btn {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
+/* Стили для группы кнопок внизу поста */
+.bottom-btn-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.03);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Улучшенные стили для секции лайков */
+.likes-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 12px;
+    background: rgba(255, 0, 0, 0.1);
+    border-radius: 20px;
+    transition: all 0.2s ease;
     cursor: pointer;
-    color: #ffffff;
 }
 
-.close-btn:hover {
-    color: #ff0000;
+.likes-section:hover {
+    background: rgba(255, 0, 0, 0.15);
+    transform: scale(1.02);
 }
 
-.edit-btn {
-    margin-top: 0 !important;
+.likes-count {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
 }
 
-.el-button {
-    margin-top: 20px;
-}
-
-/* Стили для діалогового вікна */
+/* Стили для модальных окон */
 dialog {
     border: none;
-    border-radius: 10px;
+    border-radius: 16px;
     background-color: rgb(30, 27, 27);
+    padding: 0;
+    max-width: 90vw;
+    min-width: 300px;
+    overflow: hidden;
 }
 
 dialog::backdrop {
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
 }
 
 .edit-modal-window {
@@ -333,200 +511,152 @@ dialog::backdrop {
     flex-direction: column;
     width: 500px;
     background-color: rgb(30, 27, 27);
+    padding: 24px;
+    position: relative;
 }
 
-/* Стилизация текстового input */
-.input-caption {
+/* Улучшенные стили для диалога лайков */
+.likes-dialog .edit-modal-window {
+    padding: 24px;
+}
+
+.likes-dialog h3 {
+    color: white;
+    margin: 0 0 20px 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.input-likes {
+    margin: 24px 0;
     display: flex;
     flex-direction: column;
-    margin-top: 10px;
+    gap: 12px;
 }
 
-.input-caption label {
-    font-size: 16px;
-    color: #333;
-    margin-bottom: 5px;
+.input-likes label {
+    font-size: 14px;
+    font-weight: 500;
 }
 
-.input-caption textarea {
-    padding: 10px;
-    /* Отступы внутри текстового поля */
-    border: 2px solid #4f8cff;
-    /* Цвет рамки */
-    border-radius: 5px;
-    /* Закругление углов */
-    font-size: 16px;
-    /* Размер шрифта */
-    resize: vertical;
-    /* Позволяет изменять размер только по вертикали */
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    /* Плавные переходы */
-    min-height: 100px;
-    /* Минимальная высота текстового поля */
-}
-
-.input-caption textarea:focus {
-    border-color: #2563eb;
-    /* Цвет рамки при фокусе */
-    box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
-    /* Тень при фокусе */
-    outline: none;
-    /* Убираем стандартное выделение */
-}
-
-.input-caption textarea::placeholder {
-    color: #aaa;
-    /* Цвет текста плейсхолдера */
-}
-
-/* Стили импута цены */
-.input-price {
+/* Стилизация кнопки закрытия */
+.close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #ffffff;
     display: flex;
-    flex-direction: column;
-    margin-top: 10px;
-    width: 70px;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
 }
 
-.input-price label {
-    font-size: 16px;
-    color: #333;
-    margin-bottom: 5px;
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ff4d4d;
+    transform: rotate(90deg);
 }
 
-.input-price input[type="number"] {
-    padding: 10px;
-    /* Отступы внутри поля ввода */
-    border: 2px solid #4f8cff;
-    /* Цвет рамки */
-    border-radius: 5px;
-    /* Закругление углов */
-    font-size: 16px;
-    /* Размер шрифта */
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    /* Плавные переходы */
-}
-
-.input-price input[type="number"]:focus {
-    border-color: #2563eb;
-    /* Цвет рамки при фокусе */
-    box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
-    /* Тень при фокусе */
-    outline: none;
-    /* Убираем стандартное выделение */
-}
-
-.input-price input[type="number"]::-webkit-inner-spin-button,
-.input-price input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    /* Убираем стрелки у spin button в Chrome */
-    margin: 0;
-    /* Убираем отступы */
-}
-
-/* Стили чекбокс */
-.checkbox-delete {
-    margin-top: 0 !important;
-}
-
+/* Стили для чекбоксов */
 .input-blurred {
     display: flex;
     align-items: center;
-    /* Выравнивание по центру по вертикали */
-    margin-top: 10px;
-    /* Отступ сверху */
-}
-
-.input-blurred label {
-    font-size: 16px;
-    /* Размер шрифта метки */
-    color: #333;
-    /* Цвет текста метки */
-    margin-right: 10px;
-    /* Отступ справа от метки */
+    gap: 8px;
+    margin-top: 0 !important;
 }
 
 .input-blurred input[type="checkbox"] {
     width: 20px;
-    /* Ширина чекбокса */
     height: 20px;
-    /* Высота чекбокса */
     cursor: pointer;
-    /* Указатель при наведении */
     accent-color: #4f8cff;
-    /* Цвет чекбокса (для современных браузеров) */
+    border-radius: 4px;
 }
 
-/* Стили для чекбокса при фокусе */
-.input-blurred input[type="checkbox"]:focus {
-    outline: none;
-    /* Убираем стандартное выделение */
-    box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
-    /* Тень при фокусе */
+/* Улучшенные стили для кнопок действий */
+.edit-btn {
+    margin: 0 !important;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
 }
 
-/* Стили для состояния чекбокса (при нажатии) */
-.input-blurred input[type="checkbox"]:checked {
-    background-color: #4f8cff;
-    /* Цвет фона при выборе */
+.edit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.bottom-btn-group {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    padding-left: 0px;
-    padding-right: 0px;
-}
-
-.error-message {
-    color: red;
-    /* Цвет текста ошибки */
-    font-size: 14px;
-    /* Размер шрифта */
-    margin-top: 5px;
-    /* Отступ сверху */
-}
-
+/* Адаптивные стили */
 @media (max-width: 1200px) {
     dialog {
-        width: 80%;
+        width: 90%;
+        margin: 20px auto;
     }
 
     .edit-modal-window {
         width: 100%;
+        padding: 20px;
     }
-
 
     .container-btn-add-delete {
-        display: flex;
-        position: sticky;
-        top: 50px;
-        z-index: 100;
-        margin-left: -10px;
-    }
-
-    .delete-btn {
-        padding: 3px;
-
-    }
-
-    .add-post-btn {
-        padding: 3px;
-    }
-
-    .el-button {
-        margin-right: 0;
-    }
-
-    .close-btn {
-        font-size: 1rem;
-        /* Уменьшаем размер кнопки закрытия */
+        position: fixed;
+        top: auto;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0;
+        padding: 8px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
     .bottom-btn-group {
-
-        padding-left: 10px;
-        padding-right: 10px;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px;
     }
+
+    .likes-section {
+        padding: 4px 8px;
+    }
+
+    .close-btn {
+        top: 8px;
+        right: 8px;
+        width: 28px;
+        height: 28px;
+        font-size: 1rem;
+    }
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+dialog[open] {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.likes-section .el-icon {
+    transition: transform 0.2s ease;
+}
+
+.likes-section:hover .el-icon {
+    transform: scale(1.1);
 }
 </style>

@@ -244,7 +244,6 @@ onMounted(() => {
 .el-scrollbar ::-webkit-scrollbar-thumb {
   background: linear-gradient(90deg, #00b4db, #0083b0);
   border-radius: 4px;
-  transition: background 0.3s ease;
 }
 
 .el-scrollbar ::-webkit-scrollbar-thumb:hover {
