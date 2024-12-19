@@ -73,7 +73,7 @@
 
             </el-tab-pane>
             <el-tab-pane label="Понравилось" name="third">
-              <Likes/>
+              <UserLikes></UserLikes>
             </el-tab-pane>
           </el-tabs>
         </el-container>
@@ -90,7 +90,7 @@ import { ref, computed } from 'vue'
 import FollowingPage from './FollowingPage/FollowingPage.vue';
 import config from '../../config';
 import { useStore } from 'vuex';
-import Likes from './Likes/likes.vue'
+import UserLikes from './Likes/UserLikes.vue';
 
 export default {
   components: {
@@ -98,7 +98,8 @@ export default {
     ListPostCards,
     BellFilled,
     Box,
-    FollowingPage
+    FollowingPage,
+    UserLikes
   },
   data() {
     const store = useStore()
