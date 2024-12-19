@@ -51,10 +51,11 @@
             </div>
           </div>
           <el-button 
-            :type="isUserSubscribed(user.id) ? 'success' : 'primary'" 
-            @click="handleSubscribe(user)"
+            :type="isUserSubscribed(user.id) ? 'success' : 'primary'"
+            @click="handleFreeSubscribe(user.id)"
             class="subscribe-button"
             :size="'small'"
+            :disabled="!userId"
           >
             {{ isUserSubscribed(user.id) ? 'Подписан' : 'Подписаться' }}
           </el-button>
@@ -79,152 +80,174 @@ const users = ref([])
 const subscribedUsers = ref(new Set())
 const userPosts = ref({})
 
+const validateSubscriptionState = (targetUserId) => {
+  if (!userId.value) {
+    ElMessage.error('Необходимо авторизоваться')
+    return false
+  }
+  
+  if (!targetUserId) {
+    ElMessage.error('Ошибка идентификации пользователя')
+    return false
+  }
+  
+  return true
+}
+
+const handleFreeSubscribe = async (targetUserId) => {
+  if (!validateSubscriptionState(targetUserId)) return
+  
+  const isCurrentlySubscribed = subscribedUsers.value.has(targetUserId)
+  const endpoint = isCurrentlySubscribed ? 'unfollow' : 'follow'
+  const method = isCurrentlySubscribed ? 'DELETE' : 'POST'
+  
+  try {
+    const response = await fetch(
+      `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId.value}/${endpoint}/${targetUserId}`,
+      {
+        method,
+        headers: {
+          'accept': '*/*',
+          'Content-Type': 'application/json'
+        },
+        ...(method === 'POST' && { body: JSON.stringify({}) })
+      }
+    )
+    
+    if (!response.ok) {
+      throw new Error(`Failed to ${endpoint}`)
+    }
+    
+    // Update local subscription state
+    if (isCurrentlySubscribed) {
+      subscribedUsers.value.delete(targetUserId)
+    } else {
+      subscribedUsers.value.add(targetUserId)
+    }
+    
+    ElMessage.success(isCurrentlySubscribed ? 'Вы отписались' : 'Вы подписались')
+    await fetchUserSubscriptions()
+  } catch (error) {
+    console.error('Error toggling subscription:', error)
+    ElMessage.error('Ошибка при изменении подписки')
+    await fetchUserSubscriptions()
+  }
+}
+
+const fetchUserSubscriptions = async () => {
+  if (!userId.value) return
+  
+  try {
+    const response = await fetch(
+      `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId.value}/following`,
+      {
+        headers: {
+          'Accept': '*/*'
+        }
+      }
+    )
+
+    if (!response.ok) throw new Error('Failed to fetch subscriptions')
+    
+    const followingList = await response.json()
+    subscribedUsers.value = new Set(followingList.map(user => user.id))
+  } catch (error) {
+    console.error('Error fetching subscriptions:', error)
+  }
+}
+
+// Rest of your existing computed properties and methods
 const filteredUsers = computed(() => {
- if (!searchQuery.value) return users.value
- const query = searchQuery.value.toLowerCase()
- return users.value.filter(user => {
-   const username = (user.username || '').toLowerCase()
-   const email = (user.email || '').toLowerCase()
-   return username.includes(query) || email.includes(query)
- })
+  if (!searchQuery.value) return users.value
+  const query = searchQuery.value.toLowerCase()
+  return users.value.filter(user => {
+    const username = (user.username || '').toLowerCase()
+    const email = (user.email || '').toLowerCase()
+    return username.includes(query) || email.includes(query)
+  })
 })
 
 const getInitials = (text) => {
- if (!text) return '?'
- return text.split(' ')[0][0].toUpperCase()
+  if (!text) return '?'
+  return text.split(' ')[0][0].toUpperCase()
 }
 
 const formatEmail = (email) => {
- return email?.split('@')[0] || 'Пользователь'
+  return email?.split('@')[0] || 'Пользователь'
 }
 
-const isUserSubscribed = (userId) => {
- return subscribedUsers.value.has(userId)
+const isUserSubscribed = (targetUserId) => {
+  return subscribedUsers.value.has(targetUserId)
 }
 
 const getUserPostsCount = (userId) => {
- return userPosts.value[userId]?.length || 0
+  return userPosts.value[userId]?.length || 0
 }
 
 const getUserTotalLikes = (userId) => {
- const posts = userPosts.value[userId] || []
- return posts.reduce((total, post) => total + (post.likes?.length || 0), 0)
+  const posts = userPosts.value[userId] || []
+  return posts.reduce((total, post) => total + (post.likes?.length || 0), 0)
 }
 
 const fetchUsers = async () => {
- isLoading.value = true
- try {
-   const response = await fetch('https://ton-back-e015fa79eb60.herokuapp.com/api/models', {
-     headers: {
-       'accept': '*/*'
-     }
-   })
-   if (!response.ok) throw new Error('Network response was not ok')
-   const data = await response.json()
-   users.value = data
-   await fetchAllUsersPosts()
- } catch (error) {
-   console.error('Error fetching users:', error)
-   ElMessage.error('Ошибка при загрузке пользователей')
- } finally {
-   isLoading.value = false
- }
+  isLoading.value = true
+  try {
+    const response = await fetch('https://ton-back-e015fa79eb60.herokuapp.com/api/models', {
+      headers: {
+        'accept': '*/*'
+      }
+    })
+    if (!response.ok) throw new Error('Network response was not ok')
+    const data = await response.json()
+    users.value = data
+    await fetchAllUsersPosts()
+  } catch (error) {
+    console.error('Error fetching users:', error)
+    ElMessage.error('Ошибка при загрузке пользователей')
+  } finally {
+    isLoading.value = false
+  }
 }
 
 const fetchAllUsersPosts = async () => {
- userPosts.value = {};
- 
- try {
-   const fetchPromises = users.value.map(async (user) => {
-     try {
-       const response = await fetch(
-         `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${user.id}/requester/${userId.value}`,
-         {
-           headers: {
-             'Accept': '*/*'
-           }
-         }
-       );
-       
-       if (!response.ok) {
-         throw new Error(`HTTP error! status: ${response.status}`);
-       }
-       
-       const posts = await response.json();
-       return { userId: user.id, posts };
-     } catch (error) {
-       console.error(`Error fetching posts for user ${user.id}:`, error);
-       return { userId: user.id, posts: [] };
-     }
-   });
+  userPosts.value = {}
+  
+  try {
+    const fetchPromises = users.value.map(async (user) => {
+      try {
+        const response = await fetch(
+          `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${user.id}/requester/${userId.value}`,
+          {
+            headers: {
+              'Accept': '*/*'
+            }
+          }
+        )
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        
+        const posts = await response.json()
+        return { userId: user.id, posts }
+      } catch (error) {
+        console.error(`Error fetching posts for user ${user.id}:`, error)
+        return { userId: user.id, posts: [] }
+      }
+    })
 
-   const results = await Promise.all(fetchPromises);
-   
-   results.forEach(({ userId, posts }) => {
-     userPosts.value[userId] = posts;
-   });
-   
-   console.log('All posts fetched successfully:', userPosts.value);
- } catch (error) {
-   console.error('Error in fetchAllUsersPosts:', error);
- }
-};
-
-const handleSubscribe = async (user) => {
- try {
-   const method = subscribedUsers.value.has(user.id) ? 'DELETE' : 'POST';
-   const response = await fetch(
-     `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions`,
-     {
-       method,
-       headers: {
-         'Content-Type': 'application/json',
-         'Accept': '*/*'
-       },
-       body: JSON.stringify({
-         modelId: user.id,
-         subscriberId: userId.value
-       })
-     }
-   );
-
-   if (!response.ok) throw new Error('Subscription update failed');
-
-   if (subscribedUsers.value.has(user.id)) {
-     subscribedUsers.value.delete(user.id);
-     ElMessage.success('Вы отписались от пользователя');
-   } else {
-     subscribedUsers.value.add(user.id);
-     ElMessage.success('Вы подписались на пользователя');
-   }
- } catch (error) {
-   console.error('Error toggling subscription:', error);
-   ElMessage.error('Ошибка при изменении подписки');
- }
-};
-
-const fetchUserSubscriptions = async () => {
- try {
-   const response = await fetch(
-     `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId.value}/subscriptions`,
-     {
-       headers: {
-         'Accept': '*/*'
-       }
-     }
-   );
-
-   if (!response.ok) throw new Error('Failed to fetch subscriptions');
-   
-   const subscriptions = await response.json();
-   subscribedUsers.value = new Set(subscriptions.map(sub => sub.modelId));
- } catch (error) {
-   console.error('Error fetching subscriptions:', error);
- }
-};
+    const results = await Promise.all(fetchPromises)
+    
+    results.forEach(({ userId, posts }) => {
+      userPosts.value[userId] = posts
+    })
+  } catch (error) {
+    console.error('Error in fetchAllUsersPosts:', error)
+  }
+}
 
 onMounted(async () => {
- await Promise.all([fetchUsers(), fetchUserSubscriptions()]);
+  await Promise.all([fetchUsers(), fetchUserSubscriptions()])
 })
 </script>
 
@@ -233,48 +256,84 @@ onMounted(async () => {
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 24px;
 }
 
 .search-container {
-  margin-bottom: 30px;
+  margin-bottom: 36px;
   text-align: center;
 }
 
 .search-title {
   color: #e6edf3;
-  font-size: 1.5rem;
-  margin-bottom: 15px;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .search-input {
   width: 100%;
   max-width: 500px;
+  margin: 0 auto;
+}
+
+.search-input :deep(.el-input__wrapper) {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 8px 16px;
+  transition: all 0.3s ease;
+}
+
+.search-input :deep(.el-input__wrapper:hover) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.search-input :deep(.el-input__inner) {
+  color: #e6edf3;
+  font-size: 1rem;
+}
+
+.search-input :deep(.el-input__prefix-icon) {
+  color: #8b949e;
+  font-size: 1.2rem;
 }
 
 .users-container {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
 }
 
 .user-card {
-  background: #161b22;
-  border: 1px solid rgba(0, 149, 255, 0.1);
-  border-radius: 12px;
+  background: rgba(22, 27, 34, 0.8);
+  border: 1px solid rgba(99, 179, 237, 0.15);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
 }
+
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 12px;
+  gap: 20px;
+  padding: 20px;
 }
 
 .user-avatar {
-  border: 2px solid rgba(0, 149, 255, 0.3);
-  background: #1f2937;
+  border: 3px solid rgba(99, 179, 237, 0.3);
+  background: linear-gradient(135deg, #1f2937, #111827);
   color: #e6edf3;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.user-card:hover .user-avatar {
+  border-color: rgba(99, 179, 237, 0.5);
+  transform: scale(1.05);
 }
 
 .user-details {
@@ -285,37 +344,88 @@ onMounted(async () => {
 .username {
   color: #e6edf3;
   text-decoration: none;
-  font-weight: 500;
-  font-size: 1rem;
+  font-weight: 600;
+  font-size: 1.1rem;
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
+  transition: color 0.3s ease;
+}
+
+.username:hover {
+  color: #63b3ed;
 }
 
 .stats {
   display: flex;
-  gap: 15px;
+  gap: 20px;
   color: #8b949e;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
 }
 
 .stat-item {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+  transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-1px);
 }
 
 .stat-value {
-  color: #58a6ff;
-  font-weight: 500;
+  color: #63b3ed;
+  font-weight: 600;
 }
 
 .subscribe-button {
-  min-width: 100px;
+  min-width: 120px;
+  height: 36px;
+  border-radius: 10px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.subscribe-button:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 149, 255, 0.2);
+}
+
+.el-button--primary {
+  background: linear-gradient(135deg, #3182ce, #2c5282);
+  border: none;
+}
+
+.el-button--success {
+  background: linear-gradient(135deg, #38a169, #2f855a);
+  border: none;
+}
+
+.el-button--primary:not(:disabled):hover,
+.el-button--success:not(:disabled):hover {
+  opacity: 0.9;
+}
+
+.el-button:disabled {
+  background: #2d3748;
+  border: 1px solid #4a5568;
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 @media (max-width: 480px) {
+  .layout {
+    padding: 16px;
+  }
+
+  .search-title {
+    font-size: 1.5rem;
+  }
+
   .user-info {
     flex-wrap: wrap;
+    gap: 15px;
+    padding: 15px;
   }
   
   .subscribe-button {
@@ -325,7 +435,12 @@ onMounted(async () => {
   
   .stats {
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
+  }
+  
+  .user-avatar {
+    width: 40px;
+    height: 40px;
   }
 }
 </style>
