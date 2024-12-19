@@ -56,7 +56,7 @@
                     <el-input-number 
                         v-model="likesForm.count"
                         :min="1"
-                        :max="1000"
+                        :max="50"
                         controls-position="right"
                     />
                 </div>

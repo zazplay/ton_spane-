@@ -532,7 +532,7 @@ onUnmounted(() => {
                     <el-input-number 
                         v-model="subscribersForm.count"
                         :min="1"
-                        :max="1000"
+                        :max="100"
                         controls-position="right"
                     />
                 </el-form-item>
