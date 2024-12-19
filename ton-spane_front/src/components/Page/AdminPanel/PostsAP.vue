@@ -201,12 +201,19 @@ const handleInputDescription = () => {
 
 const savePostChanges = async () => {
     try {
+        // Создаем новый объект с только нужными полями
+        const postData = {
+            caption: editForm.value.caption,
+            price: editForm.value.price,
+            isBlurred: editForm.value.isBlurred,
+        };
+
         const response = await fetch(`${config.API_BASE_URL}/posts/${editForm.value.id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(editForm.value),
+            body: JSON.stringify(postData), // Отправляем только необходимые данные
         });
 
         if (!response.ok) {

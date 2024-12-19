@@ -1,7 +1,6 @@
 <template>
   <div class="common-layout containet-style">
     <el-container style="padding: 0 !important;">
-      <!-- Заголовок с добавленной иконкой -->
       <el-header class="header-style">
         <div class="header-content">
           <el-text class="site-name">
@@ -27,27 +26,22 @@
         </div>
       </el-header>
 
-      <!-- Основной контент -->
       <el-main class="main-container-content">
         <el-container>
           <el-tabs v-model="activeTab" class="demo-tabs containet-style">
             
             <el-tab-pane label="Для вас" name="first">
-              <!-- Состояние загрузки -->
               <div v-if="!isDataLoaded" class="loading-container">
                 <el-row :gutter="20">
                   <el-col :span="24" v-for="n in 3" :key="n">
                     <el-card class="loading-card">
                       <el-skeleton animated>
                         <template #template>
-                          <!-- Аватар и имя пользователя -->
                           <div style="display: flex; align-items: center; margin-bottom: 20px">
                             <el-skeleton-item variant="circle" style="width: 40px; height: 40px; margin-right: 16px"/>
                             <el-skeleton-item variant="text" style="width: 30%"/>
                           </div>
-                          <!-- Изображение поста -->
                           <el-skeleton-item variant="image" style="width: 100%; height: 240px"/>
-                          <!-- Описание и действия -->
                           <div style="padding: 14px">
                             <el-skeleton-item variant="p" style="width: 90%"/>
                             <el-skeleton-item variant="text" style="width: 60%; margin-top: 16px"/>
@@ -78,7 +72,9 @@
               </keep-alive>
 
             </el-tab-pane>
-            <el-tab-pane label="Понравилось" name="third">Role</el-tab-pane>
+            <el-tab-pane label="Понравилось" name="third">
+              <Likes/>
+            </el-tab-pane>
           </el-tabs>
         </el-container>
       </el-main>
@@ -93,7 +89,8 @@ import AddPostForm from './AdminPanel/Models/AddPostForm.vue';
 import { ref, computed } from 'vue'
 import FollowingPage from './FollowingPage/FollowingPage.vue';
 import config from '../../config';
-import { useStore } from 'vuex'
+import { useStore } from 'vuex';
+import Likes from './Likes/likes.vue'
 
 export default {
   components: {

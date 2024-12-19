@@ -95,7 +95,7 @@ const handleSubmit = async () => {
     formData.append("caption", post.value.caption);
     formData.append("userId", post.value.userId);
     formData.append("price", post.value.price.toString());
-    formData.append("isBlurred", post.value.isBlurred);
+    formData.append("isBlurred", post.value.isBlurred ? "true" : "false");
     formData.append("image", post.value.image);
 
     const response = await axios.post(
