@@ -108,13 +108,25 @@ const subscriptionItems = [
 </script>
   
 <style scoped>
-.subscription-container {
+/* Темная тема - .subscription-container */
+html.dark .subscription-container {
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
   background: linear-gradient(145deg, #1a1e2d, #242936);
   border-radius: 24px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  margin-bottom: 100px; /* Space for fixed button */
+}
+
+/* Светлая тема - .subscription-container */
+html:not(.dark) .subscription-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   margin-bottom: 100px; /* Space for fixed button */
 }
 
@@ -125,7 +137,8 @@ const subscriptionItems = [
   margin-bottom: 3rem;
 }
 
-.back-button {
+/* Темная тема - .back-button */
+html.dark .back-button {
   width: 44px;
   height: 44px;
   border: none;
@@ -139,9 +152,30 @@ const subscriptionItems = [
   color: #fff;
 }
 
-.back-button:hover {
-  transform: translateX(-4px);
+/* Светлая тема - .back-button */
+html:not(.dark) .back-button {
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #1f2937;
+}
+
+/* Темная тема - .back-button:hover */
+html.dark .back-button:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+
+/* Светлая тема - .back-button:hover */
+html:not(.dark) .back-button:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.2);
 }
 
 .profile-section {
@@ -173,7 +207,8 @@ const subscriptionItems = [
   gap: 1rem;
 }
 
-.plan-card {
+/* Темная тема - .plan-card */
+html.dark .plan-card {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
@@ -181,20 +216,47 @@ const subscriptionItems = [
   overflow: hidden;
 }
 
-.plan-card:hover {
+/* Светлая тема - .plan-card */
+html:not(.dark) .plan-card {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+/* Темная тема - .plan-card:hover */
+html.dark .plan-card:hover {
   transform: translateY(-2px);
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(96, 165, 250, 0.3);
 }
 
-.plan-content {
+/* Светлая тема - .plan-card:hover */
+html:not(.dark) .plan-card:hover {
+  transform: translateY(-2px);
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Темная тема - .plan-content */
+html.dark .plan-content {
   display: flex;
   align-items: center;
   gap: 1rem;
   padding: 1.2rem;
 }
 
-.plan-icon {
+/* Светлая тема - .plan-content */
+html:not(.dark) .plan-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem;
+}
+
+/* Темная тема - .plan-icon */
+html.dark .plan-icon {
   width: 32px;
   height: 32px;
   padding: 8px;
@@ -202,9 +264,26 @@ const subscriptionItems = [
   border-radius: 12px;
 }
 
-.plan-text {
+/* Светлая тема - .plan-icon */
+html:not(.dark) .plan-icon {
+  width: 32px;
+  height: 32px;
+  padding: 8px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 12px;
+}
+
+/* Темная тема - .plan-text */
+html.dark .plan-text {
   font-size: 16px;
   color: #fff;
+  font-weight: 500;
+}
+
+/* Светлая тема - .plan-text */
+html:not(.dark) .plan-text {
+  font-size: 16px;
+  color: #1f2937;
   font-weight: 500;
 }
 

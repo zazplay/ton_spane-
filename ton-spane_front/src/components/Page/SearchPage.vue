@@ -253,194 +253,291 @@ onMounted(async () => {
 
 <style scoped>
 .layout {
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 24px;
+ width: 100%;
+ max-width: 800px;
+ margin: 0 auto;
+ padding: 24px;
 }
 
 .search-container {
-  margin-bottom: 36px;
-  text-align: center;
+ margin-bottom: 36px;
+ text-align: center;
 }
 
-.search-title {
-  color: #e6edf3;
-  font-size: 2rem;
-  margin-bottom: 20px;
-  font-weight: 600;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+/* Темная тема */
+html.dark .search-title {
+ color: #e6edf3;
+ font-size: 2rem;
+ margin-bottom: 20px;
+ font-weight: 600;
+ text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Светлая тема */
+html:not(.dark) .search-title {
+ color: #1f2937;
+ font-size: 2rem;
+ margin-bottom: 20px;
+ font-weight: 600;
+ text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .search-input {
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
+ width: 100%;
+ max-width: 500px;
+ margin: 0 auto;
 }
 
-.search-input :deep(.el-input__wrapper) {
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  padding: 8px 16px;
-  transition: all 0.3s ease;
+/* Темная тема - поле поиска */
+html.dark .search-input :deep(.el-input__wrapper) {
+ background: rgba(255, 255, 255, 0.05);
+ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+ border-radius: 12px;
+ padding: 8px 16px;
+ transition: all 0.3s ease;
 }
 
-.search-input :deep(.el-input__wrapper:hover) {
-  background: rgba(255, 255, 255, 0.08);
+html.dark .search-input :deep(.el-input__wrapper:hover) {
+ background: rgba(255, 255, 255, 0.08);
 }
 
-.search-input :deep(.el-input__inner) {
-  color: #e6edf3;
-  font-size: 1rem;
+html.dark .search-input :deep(.el-input__inner) {
+ color: #e6edf3;
+ font-size: 1rem;
 }
 
-.search-input :deep(.el-input__prefix-icon) {
-  color: #8b949e;
-  font-size: 1.2rem;
+html.dark .search-input :deep(.el-input__prefix-icon) {
+ color: #8b949e;
+ font-size: 1.2rem;
+}
+
+/* Светлая тема - поле поиска */
+html:not(.dark) .search-input :deep(.el-input__wrapper) {
+ background: rgba(0, 0, 0, 0.03);
+ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+ border-radius: 12px;
+ padding: 8px 16px;
+ transition: all 0.3s ease;
+}
+
+html:not(.dark) .search-input :deep(.el-input__wrapper:hover) {
+ background: rgba(0, 0, 0, 0.05);
+}
+
+html:not(.dark) .search-input :deep(.el-input__inner) {
+ color: #1f2937;
+ font-size: 1rem;
+}
+
+html:not(.dark) .search-input :deep(.el-input__prefix-icon) {
+ color: #6b7280;
+ font-size: 1.2rem;
 }
 
 .users-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+ display: flex;
+ flex-direction: column;
+ gap: 20px;
 }
 
-.user-card {
-  background: rgba(22, 27, 34, 0.8);
-  border: 1px solid rgba(99, 179, 237, 0.15);
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  overflow: hidden;
+/* Темная тема - карточка пользователя */
+html.dark .user-card {
+ background: rgba(22, 27, 34, 0.8);
+ border: 1px solid rgba(99, 179, 237, 0.15);
+ border-radius: 16px;
+ backdrop-filter: blur(10px);
+ transition: transform 0.3s ease, box-shadow 0.3s ease;
+ overflow: hidden;
 }
 
+/* Светлая тема - карточка пользователя */
+html:not(.dark) .user-card {
+ background: rgba(255, 255, 255, 0.9);
+ border: 1px solid rgba(99, 179, 237, 0.15);
+ border-radius: 16px;
+ backdrop-filter: blur(10px);
+ transition: transform 0.3s ease, box-shadow 0.3s ease;
+ overflow: hidden;
+ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
 
 .user-info {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 20px;
+ display: flex;
+ align-items: center;
+ gap: 20px;
+ padding: 20px;
 }
 
-.user-avatar {
-  border: 3px solid rgba(99, 179, 237, 0.3);
-  background: linear-gradient(135deg, #1f2937, #111827);
-  color: #e6edf3;
-  transition: transform 0.3s ease, border-color 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+/* Темная тема - аватар */
+html.dark .user-avatar {
+ border: 3px solid rgba(99, 179, 237, 0.3);
+ background: linear-gradient(135deg, #1f2937, #111827);
+ color: #e6edf3;
+ transition: transform 0.3s ease, border-color 0.3s ease;
+ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Светлая тема - аватар */
+html:not(.dark) .user-avatar {
+ border: 3px solid rgba(99, 179, 237, 0.3);
+ background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+ color: #1f2937;
+ transition: transform 0.3s ease, border-color 0.3s ease;
+ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .user-card:hover .user-avatar {
-  border-color: rgba(99, 179, 237, 0.5);
-  transform: scale(1.05);
+ border-color: rgba(99, 179, 237, 0.5);
+ transform: scale(1.05);
 }
 
 .user-details {
-  flex: 1;
-  min-width: 0;
+ flex: 1;
+ min-width: 0;
 }
 
-.username {
-  color: #e6edf3;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 1.1rem;
-  display: block;
-  margin-bottom: 8px;
-  transition: color 0.3s ease;
+/* Темная тема - имя пользователя */
+html.dark .username {
+ color: #e6edf3;
+ text-decoration: none;
+ font-weight: 600;
+ font-size: 1.1rem;
+ display: block;
+ margin-bottom: 8px;
+ transition: color 0.3s ease;
 }
 
-.username:hover {
-  color: #63b3ed;
+html.dark .username:hover {
+ color: #63b3ed;
 }
 
-.stats {
-  display: flex;
-  gap: 20px;
-  color: #8b949e;
-  font-size: 0.9rem;
+/* Светлая тема - имя пользователя */
+html:not(.dark) .username {
+ color: #1f2937;
+ text-decoration: none;
+ font-weight: 600;
+ font-size: 1.1rem;
+ display: block;
+ margin-bottom: 8px;
+ transition: color 0.3s ease;
+}
+
+html:not(.dark) .username:hover {
+ color: #3182ce;
+}
+
+/* Темная тема - статистика */
+html.dark .stats {
+ display: flex;
+ gap: 20px;
+ color: #8b949e;
+ font-size: 0.9rem;
+}
+
+/* Светлая тема - статистика */
+html:not(.dark) .stats {
+ display: flex;
+ gap: 20px;
+ color: #6b7280;
+ font-size: 0.9rem;
 }
 
 .stat-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: transform 0.3s ease;
+ display: flex;
+ align-items: center;
+ gap: 6px;
+ transition: transform 0.3s ease;
 }
 
 .stat-item:hover {
-  transform: translateY(-1px);
+ transform: translateY(-1px);
 }
 
-.stat-value {
-  color: #63b3ed;
-  font-weight: 600;
+/* Темная тема - значение статистики */
+html.dark .stat-value {
+ color: #63b3ed;
+ font-weight: 600;
+}
+
+/* Светлая тема - значение статистики */
+html:not(.dark) .stat-value {
+ color: #3182ce;
+ font-weight: 600;
 }
 
 .subscribe-button {
-  min-width: 120px;
-  height: 36px;
-  border-radius: 10px;
-  font-weight: 500;
-  transition: all 0.3s ease;
+ min-width: 120px;
+ height: 36px;
+ border-radius: 10px;
+ font-weight: 500;
+ transition: all 0.3s ease;
 }
 
 .subscribe-button:not(:disabled):hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 149, 255, 0.2);
+ transform: translateY(-1px);
+ box-shadow: 0 4px 12px rgba(0, 149, 255, 0.2);
 }
 
+/* Кнопки для обеих тем */
 .el-button--primary {
-  background: linear-gradient(135deg, #3182ce, #2c5282);
-  border: none;
+ background: linear-gradient(135deg, #3182ce, #2c5282);
+ border: none;
 }
 
 .el-button--success {
-  background: linear-gradient(135deg, #38a169, #2f855a);
-  border: none;
+ background: linear-gradient(135deg, #38a169, #2f855a);
+ border: none;
 }
 
 .el-button--primary:not(:disabled):hover,
 .el-button--success:not(:disabled):hover {
-  opacity: 0.9;
+ opacity: 0.9;
 }
 
-.el-button:disabled {
-  background: #2d3748;
-  border: 1px solid #4a5568;
-  opacity: 0.7;
-  cursor: not-allowed;
+/* Темная тема - отключенная кнопка */
+html.dark .el-button:disabled {
+ background: #2d3748;
+ border: 1px solid #4a5568;
+ opacity: 0.7;
+ cursor: not-allowed;
+}
+
+/* Светлая тема - отключенная кнопка */
+html:not(.dark) .el-button:disabled {
+ background: #e5e7eb;
+ border: 1px solid #d1d5db;
+ opacity: 0.7;
+ cursor: not-allowed;
 }
 
 @media (max-width: 480px) {
-  .layout {
-    padding: 16px;
-  }
+ .layout {
+   padding: 16px;
+ }
 
-  .search-title {
-    font-size: 1.5rem;
-  }
+ .search-title {
+   font-size: 1.5rem;
+ }
 
-  .user-info {
-    flex-wrap: wrap;
-    gap: 15px;
-    padding: 15px;
-  }
-  
-  .subscribe-button {
-    width: 100%;
-    margin-top: 10px;
-  }
-  
-  .stats {
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  
-  .user-avatar {
-    width: 40px;
-    height: 40px;
-  }
+ .user-info {
+   flex-wrap: wrap;
+   gap: 15px;
+   padding: 15px;
+ }
+ 
+ .subscribe-button {
+   width: 100%;
+   margin-top: 10px;
+ }
+ 
+ .stats {
+   flex-wrap: wrap;
+   gap: 12px;
+ }
+ 
+ .user-avatar {
+   width: 40px;
+   height: 40px;
+ }
 }
 </style>

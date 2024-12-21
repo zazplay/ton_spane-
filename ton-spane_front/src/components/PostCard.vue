@@ -312,12 +312,13 @@ console.log('Formatted Image URL:', formattedImageUrl.value)
 </template>
 
 <style scoped>
+
+
+/* Базовые стили карточки */
 .post-card {
   width: auto;
   margin-bottom: 30px;
-  background: #161b22;
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease;
   
   @media (max-width: 480px) {
@@ -331,7 +332,6 @@ console.log('Formatted Image URL:', formattedImageUrl.value)
   align-items: center;
   margin-bottom: 15px;
   padding: 15px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .user-info {
@@ -344,7 +344,6 @@ console.log('Formatted Image URL:', formattedImageUrl.value)
 .username {
   font-size: 20px;
   line-height: 1.2;
-  color: #e6edf3;
   text-decoration: none;
   position: relative;
   cursor: pointer;
@@ -386,7 +385,7 @@ console.log('Formatted Image URL:', formattedImageUrl.value)
 .date {
   font-size: 12px;
   margin-left: -10px;
-  color: #8b949e;
+  
   @media (max-width: 480px) {
     font-size: 12px !important;
   }
@@ -402,7 +401,6 @@ console.log('Formatted Image URL:', formattedImageUrl.value)
   font-weight: 500;
 }
 
-/* Стиль для неподписанного состояния */
 .subBtn.el-button--primary {
   background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%) !important;
   box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
@@ -415,7 +413,6 @@ console.log('Formatted Image URL:', formattedImageUrl.value)
   background: linear-gradient(135deg, #00d2ff 0%, #00b4db 100%) !important;
 }
 
-/* Стиль для подписанного состояния */
 .subBtn.el-button--success {
   background: linear-gradient(135deg, #34d399 0%, #059669 100%) !important;
   box-shadow: 0 4px 15px rgba(52, 211, 153, 0.3);
@@ -428,19 +425,9 @@ console.log('Formatted Image URL:', formattedImageUrl.value)
   background: linear-gradient(135deg, #10b981 0%, #047857 100%) !important;
 }
 
-/* Стиль для активного состояния (при нажатии) */
 .subBtn:active {
   transform: translateY(1px);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-@media (max-width: 480px) {
-  .subBtn {
-    width: 40% !important;
-    height: 30px !important; 
-    font-size: 12px !important;
-    padding: 0 10px !important;
-  }
 }
 
 .avatar {
@@ -457,10 +444,9 @@ console.log('Formatted Image URL:', formattedImageUrl.value)
   min-height: 400px;
   max-height: 800px;
   width: 80%;
-  object-fit: contain; /* This prevents cropping */
+  object-fit: contain;
   object-position: center center;
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   
   @media (max-width: 480px) {
     max-height: 400px;
@@ -471,19 +457,6 @@ console.log('Formatted Image URL:', formattedImageUrl.value)
 
 .blurred {
   filter: blur(30px);
-}
-
-.price-overlay {
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
-  background: rgba(0, 0, 0, 0.7);
-  color: #e6edf3;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: bold;
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .actions {
@@ -514,40 +487,6 @@ console.log('Formatted Image URL:', formattedImageUrl.value)
   border-radius: 8px;
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
-  
-}
-
-.action-tag.heart { 
-  background: rgba(244, 67, 54, 0.1);
-  border: 1px solid rgba(244, 67, 54, 0.3);
-  color: #ff4d4d;
-  
-  &:hover {
-    background: rgba(244, 67, 54, 0.2);
-    transform: translateY(-1px);
-  }
-}
-
-.action-tag.share {
-  background: rgba(255, 152, 0, 0.1);
-  border: 1px solid rgba(255, 152, 0, 0.3);
-  color: #ffa726;
-  
-  &:hover {
-    background: rgba(255, 152, 0, 0.2);
-    transform: translateY(-1px);
-  }
-}
-
-.action-tag.donate {
-  background: rgba(76, 175, 80, 0.1);
-  border: 1px solid rgba(76, 175, 80, 0.3);
-  color: #66bb6a;
-  
-  &:hover {
-    background: rgba(76, 175, 80, 0.2);
-    transform: translateY(-1px);
-  }
 }
 
 .description {
@@ -557,13 +496,10 @@ console.log('Formatted Image URL:', formattedImageUrl.value)
   text-align: center;
   padding: 10px 15px;
   border-radius: 8px;
-  background: rgba(22, 27, 34, 0.8);
-  border: 1px solid rgba(0, 180, 219, 0.2);
   box-shadow: 0 4px 15px rgba(0, 180, 219, 0.1);
   transition: all 0.3s ease;
   margin-left: auto;
   font-size: 16px;
-  color: #e6edf3;
 
   &:hover {
     border-color: rgba(0, 180, 219, 0.4);
@@ -605,14 +541,10 @@ console.log('Formatted Image URL:', formattedImageUrl.value)
 }
 
 .lock-icon {
-  color: #e6edf3;
-  background: rgba(0, 0, 0, 0.7);
   padding: 20px;
   border-radius: 50%;
   backdrop-filter: blur(8px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
   
   &:hover {
     transform: scale(1.05);
@@ -620,18 +552,140 @@ console.log('Formatted Image URL:', formattedImageUrl.value)
 }
 
 .lock-text {
-  color: #e6edf3;
   font-size: 24px;
   font-weight: bold;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  background: rgba(0, 0, 0, 0.7);
   padding: 10px 20px;
   border-radius: 20px;
   backdrop-filter: blur(8px);
+}
+
+/* Темная тема */
+html.dark .post-card {
+  background: #161b22;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+html.dark .header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html.dark .username {
+  color: #e6edf3;
+}
+
+html.dark .date {
+  color: #8b949e;
+}
+
+html.dark .description {
+  background: rgba(22, 27, 34, 0.8);
+  color: #e6edf3;
+  border: 1px solid rgba(0, 180, 219, 0.2);
+}
+
+html.dark .post-image {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+html.dark .action-tag.heart { 
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  color: #ff4d4d;
+}
+
+html.dark .action-tag.share {
+  background: rgba(255, 152, 0, 0.1);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  color: #ffa726;
+}
+
+html.dark .action-tag.donate {
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  color: #66bb6a;
+}
+
+html.dark .lock-icon {
+  color: #e6edf3;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+html.dark .lock-text {
+  color: #e6edf3;
+  background: rgba(0, 0, 0, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Светлая тема */
+html:not(.dark) .post-card {
+  background: #ffffff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+html:not(.dark) .header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+html:not(.dark) .username {
+  color: #1f2937;
+}
+
+html:not(.dark) .date {
+  color: #6b7280;
+}
+
+html:not(.dark) .description {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1f2937;
+  border: 1px solid rgba(0, 180, 219, 0.15);
+}
+
+html:not(.dark) .post-image {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+html:not(.dark) .action-tag.heart { 
+  background: rgba(244, 67, 54, 0.05);
+  border: 1px solid rgba(244, 67, 54, 0.2);
+  color: #ff4d4d;
+}
+
+html:not(.dark) .action-tag.share {
+  background: rgba(255, 152, 0, 0.05);
+  border: 1px solid rgba(255, 152, 0, 0.2);
+  color: #ffa726;
+}
+
+html:not(.dark) .action-tag.donate {
+  background: rgba(76, 175, 80, 0.05);
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  color: #66bb6a;
+}
+
+html:not(.dark) .lock-icon {
+  color: #1f2937;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+html:not(.dark) .lock-text {
+  color: #1f2937;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
 @media (max-width: 480px) {
+  .subBtn {
+    width: 40% !important;
+    height: 30px !important; 
+    font-size: 12px !important;
+    padding: 0 10px !important;
+  }
+  
   .lock-icon {
     font-size: 30px;
     padding: 10px;

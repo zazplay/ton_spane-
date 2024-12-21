@@ -82,10 +82,12 @@
   margin-top: 2rem;
   padding: 0 1rem;
   position: relative;
+
 }
 
 .logout-button {
-  width: 100%;
+  margin-left: 20px;
+  width: 94%;
   height: 48px;
   display: flex;
   align-items: center;

@@ -463,7 +463,7 @@ onUnmounted(() => {
   width: 95%;
   align-self: center;
   margin-left: 10px;
-  background: #0a0f16;
+  background: transparent;
 }
 
 .header {
@@ -487,7 +487,8 @@ onUnmounted(() => {
   width: 100%;
 }
 
-.aside {
+/* Базовые стили для темной темы */
+html.dark .aside {
   width: 100%;
   display: flex;
   align-items: center;
@@ -495,6 +496,17 @@ onUnmounted(() => {
   padding: 20px;
   border-radius: 15px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Стили для светлой темы */
+html:not(.dark) .aside {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background: #f0f4f8; /* Светлый, мягкий фон */
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Более легкая тень */
 }
 
 .profile-image {
@@ -511,7 +523,8 @@ onUnmounted(() => {
   box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
 }
 
-.username {
+/* Базовые стили для темной темы */
+html.dark .username {
   display: inline-flex;
   align-items: center;
   font-weight: 600;
@@ -523,7 +536,21 @@ onUnmounted(() => {
   text-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
 }
 
-.stat-badge {
+/* Стили для светлой темы */
+html:not(.dark) .username {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin: 0;
+  padding: 0;
+  width: 43%;
+  color: #1f2937; /* Темный цвет текста для светлой темы */
+  text-shadow: 0 0 10px rgba(99, 102, 241, 0.1); /* Более мягкая тень */
+}
+
+/* Темная тема - .stat-badge */
+html.dark .stat-badge {
   text-align: center;
   color: rgba(255, 255, 255, 0.95);
   text-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
@@ -546,7 +573,7 @@ onUnmounted(() => {
   transition: all 0.4s ease;
 }
 
-.stat-badge:hover {
+html.dark .stat-badge:hover {
   background: linear-gradient(
     135deg,
     rgba(99, 102, 241, 0.2) 0%,
@@ -560,7 +587,46 @@ onUnmounted(() => {
     0 0 15px rgba(99, 102, 241, 0.3);
 }
 
-.stat-badgeLikes {
+/* Светлая тема - .stat-badge */
+html:not(.dark) .stat-badge {
+  text-align: center;
+  color: #1f2937; /* Темный цвет текста */
+  text-shadow: 0 2px 4px rgba(99, 102, 241, 0.1);
+  font-weight: 500;
+  border-radius: 15px;
+  padding: 12px 20px;
+  width: auto;
+  margin-left: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.05) 0%,
+    rgba(79, 70, 229, 0.1) 50%,
+    rgba(99, 102, 241, 0.05) 100%
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5);
+  transition: all 0.4s ease;
+}
+
+html:not(.dark) .stat-badge:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.1) 0%,
+    rgba(79, 70, 229, 0.2) 50%,
+    rgba(99, 102, 241, 0.1) 100%
+  );
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 12px rgba(0, 0, 0, 0.2),
+    inset 0 2px 4px rgba(255, 255, 255, 0.6),
+    0 0 15px rgba(99, 102, 241, 0.2);
+}
+
+/* Темная тема - .stat-badgeLikes */
+html.dark .stat-badgeLikes {
   text-align: center;
   color: rgba(255, 255, 255, 0.95);
   text-shadow: 0 2px 4px rgba(244, 63, 94, 0.5);
@@ -584,7 +650,7 @@ onUnmounted(() => {
   transition: all 0.4s ease;
 }
 
-.stat-badgeLikes:hover {
+html.dark .stat-badgeLikes:hover {
   background: linear-gradient(
     135deg,
     rgba(244, 63, 94, 0.3) 0%,
@@ -598,7 +664,47 @@ onUnmounted(() => {
     0 0 20px rgba(244, 63, 94, 0.4);
 }
 
-.stat-badgeSubs {
+/* Светлая тема - .stat-badgeLikes */
+html:not(.dark) .stat-badgeLikes {
+  text-align: center;
+  color: #831843; /* Темный цвет текста для лайков */
+  text-shadow: 0 2px 4px rgba(244, 63, 94, 0.1);
+  font-weight: 500;
+  border-radius: 15px;
+  padding: 12px 20px;
+  width: auto;
+  margin-left: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(244, 63, 94, 0.05) 0%,
+    rgba(225, 29, 72, 0.1) 50%, 
+    rgba(244, 63, 94, 0.05) 100%
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(244, 63, 94, 0.1);
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5),
+    0 0 15px rgba(244, 63, 94, 0.1);
+  transition: all 0.4s ease;
+}
+
+html:not(.dark) .stat-badgeLikes:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(244, 63, 94, 0.1) 0%,
+    rgba(225, 29, 72, 0.2) 50%,
+    rgba(244, 63, 94, 0.1) 100%
+  );
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 12px rgba(0, 0, 0, 0.2),
+    inset 0 2px 4px rgba(255, 255, 255, 0.6),
+    0 0 20px rgba(244, 63, 94, 0.2);
+}
+
+/* Темная тема - .stat-badgeSubs */
+html.dark .stat-badgeSubs {
   text-align: center;
   color: rgba(255, 255, 255, 0.95);
   text-shadow: 0 2px 4px rgba(139, 92, 246, 0.5);
@@ -622,7 +728,7 @@ onUnmounted(() => {
   transition: all 0.4s ease;
 }
 
-.stat-badgeSubs:hover {
+html.dark .stat-badgeSubs:hover {
   background: linear-gradient(
     135deg,
     rgba(139, 92, 246, 0.3) 0%,
@@ -635,6 +741,45 @@ onUnmounted(() => {
     inset 0 2px 4px rgba(255, 255, 255, 0.3),
     0 0 20px rgba(139, 92, 246, 0.4);
 }
+
+/* Светлая тема - .stat-badgeSubs */
+html:not(.dark) .stat-badgeSubs {
+  text-align: center;
+  color: #5b21b6; /* Темный цвет текста для подписок */
+  text-shadow: 0 2px 4px rgba(139, 92, 246, 0.1);
+  font-weight: 500;
+  border-radius: 15px;
+  padding: 12px 20px;
+  width: auto;
+  margin-left: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.05) 0%,
+    rgba(124, 58, 237, 0.1) 50%,
+    rgba(139, 92, 246, 0.05) 100%
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5),
+    0 0 15px rgba(139, 92, 246, 0.1);
+  transition: all 0.4s ease;
+}
+
+html:not(.dark) .stat-badgeSubs:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.1) 0%,
+    rgba(124, 58, 237, 0.2) 50%,
+    rgba(139, 92, 246, 0.1) 100%
+  );
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 12px rgba(0, 0, 0, 0.2),
+    inset 0 2px 4px rgba(255, 255, 255, 0.6),
+    0 0 20px rgba(139, 92, 246, 0.2);
+}
 .main {
   display: flex;
   flex-direction: column;
@@ -645,7 +790,8 @@ onUnmounted(() => {
   margin-bottom: 0px;
 }
 
-.about-section {
+/* Темная тема - .about-section */
+html.dark .about-section {
   width: 99%;
   min-height: 150px;
   margin: 1.5% 0 0 5px;
@@ -658,18 +804,48 @@ onUnmounted(() => {
   backdrop-filter: blur(10px);
 }
 
-.about-section :deep(.el-card__header) {
+/* Светлая тема - .about-section */
+html:not(.dark) .about-section {
+  width: 99%;
+  min-height: 150px;
+  margin: 1.5% 0 0 5px;
+  background: linear-gradient(145deg, rgba(241, 245, 249, 0.95), rgba(241, 245, 249, 0.85));
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  border-radius: 12px;
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.1),
+    inset 0 0 60px rgba(99, 102, 241, 0.02);
+  backdrop-filter: blur(10px);
+}
+
+/* Темная тема - .about-section :deep(.el-card__header) */
+html.dark .about-section :deep(.el-card__header) {
   padding: 18px 24px;
   background: transparent;
   border-bottom: 1px solid rgba(99, 102, 241, 0.15);
 }
 
-.about-section :deep(.el-card__body) {
+/* Светлая тема - .about-section :deep(.el-card__header) */
+html:not(.dark) .about-section :deep(.el-card__header) {
+  padding: 18px 24px;
+  background: transparent;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+/* Темная тема - .about-section :deep(.el-card__body) */
+html.dark .about-section :deep(.el-card__body) {
   padding: 20px 24px;
   color: rgba(255, 255, 255, 0.95);
 }
 
-.about-header .title {
+/* Светлая тема - .about-section :deep(.el-card__body) */
+html:not(.dark) .about-section :deep(.el-card__body) {
+  padding: 20px 24px;
+  color: #1f2937;
+}
+
+/* Темная тема - .about-header .title */
+html.dark .about-header .title {
   font-size: 1.1rem;
   font-weight: 600;
   color: #818cf8;
@@ -677,7 +853,17 @@ onUnmounted(() => {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.about-content {
+/* Светлая тема - .about-header .title */
+html:not(.dark) .about-header .title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #4338ca;
+  letter-spacing: 0.3px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Темная тема - .about-content */
+html.dark .about-content {
   font-size: 1rem;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.95);
@@ -685,15 +871,40 @@ onUnmounted(() => {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.about-section :deep(.el-card) {
+/* Светлая тема - .about-content */
+html:not(.dark) .about-content {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #1f2937;
+  letter-spacing: 0.2px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Темная тема - .about-section :deep(.el-card) */
+html.dark .about-section :deep(.el-card) {
   background: transparent;
   border: none;
   color: white;
 }
 
-.about-content:empty::before,
-.about-content:contains('Описание не добавлено') {
+/* Светлая тема - .about-section :deep(.el-card) */
+html:not(.dark) .about-section :deep(.el-card) {
+  background: transparent;
+  border: none;
+  color: #1f2937;
+}
+
+/* Темная тема - .about-content:empty и .about-content:contains('Описание не добавлено') */
+html.dark .about-content:empty::before,
+html.dark .about-content:contains('Описание не добавлено') {
   color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+/* Светлая тема - .about-content:empty и .about-content:contains('Описание не добавлено') */
+html:not(.dark) .about-content:empty::before,
+html:not(.dark) .about-content:contains('Описание не добавлено') {
+  color: rgba(0, 0, 0, 0.5);
   font-style: italic;
 }
 
@@ -822,27 +1033,69 @@ onUnmounted(() => {
   }
 }
 
-.loading-container {
+/* Темная тема - .loading-container */
+html.dark .loading-container {
   padding: 20px;
   background: #0a0f16;
   min-height: 100vh;
 }
 
-.loading-card {
+/* Светлая тема - .loading-container */
+html:not(.dark) .loading-container {
+  padding: 20px;
+  background: #f0f4f8;
+  min-height: 100vh;
+}
+
+/* Темная тема - .loading-card */
+html.dark .loading-card {
   background: #131925;
   border: none;
   border-radius: 16px;
   overflow: hidden;
 }
 
-.loading-card :deep(.el-card__body) {
+/* Светлая тема - .loading-card */
+html:not(.dark) .loading-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Темная тема - .loading-card :deep(.el-card__body) */
+html.dark .loading-card :deep(.el-card__body) {
   padding: 0;
 }
 
-.loading-card :deep(.el-skeleton__item) {
+/* Светлая тема - .loading-card :deep(.el-card__body) */
+html:not(.dark) .loading-card :deep(.el-card__body) {
+  padding: 0;
+}
+
+/* Темная тема - .loading-card :deep(.el-skeleton__item) */
+html.dark .loading-card :deep(.el-skeleton__item) {
   background: linear-gradient(90deg, #1a2332 25%, #2d3748 50%, #1a2332 75%);
   background-size: 400% 100%;
   animation: skeleton-loading 1.4s ease infinite;
+}
+
+/* Светлая тема - .loading-card :deep(.el-skeleton__item) */
+html:not(.dark) .loading-card :deep(.el-skeleton__item) {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.4s ease infinite;
+}
+
+/* Анимация остается одинаковой для обеих тем */
+@keyframes skeleton-loading {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
 }
 
 @keyframes skeleton-loading {

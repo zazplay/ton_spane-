@@ -16,7 +16,7 @@
                 </el-container>
             </el-aside>
             <el-main class="info-container-profile">
-                <span style="color: aliceblue;">{{ userData?.email || 'Loading...' }}</span>
+                <span class="info-container-profileEmail">{{ userData?.email || 'Loading...' }}</span>
                 <router-link 
                     :to="`/app/myPage/${userId}`" 
                     class="link-style"
@@ -95,7 +95,8 @@ onMounted(() => {
   max-width: 1200px;
 }
 
-.container-profile {
+/* Темная тема - .container-profile */
+html.dark .container-profile {
   background: linear-gradient(
     145deg, 
     rgba(32, 40, 62, 0.8) 0%,
@@ -111,15 +112,43 @@ onMounted(() => {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-
 }
 
-.container-profile:hover {
+/* Светлая тема - .container-profile */
+html:not(.dark) .container-profile {
+  background: linear-gradient(
+    145deg, 
+    rgba(240, 244, 248, 0.8) 0%,
+    rgba(230, 234, 238, 0.9) 100%
+  );
+  border-radius: 16px;
+  height: 88px;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.05),
+    0 8px 16px rgba(0, 0, 0, 0.05),
+    inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Темная тема - .container-profile:hover */
+html.dark .container-profile:hover {
   transform: translateY(-2px);
   box-shadow: 
     0 6px 24px rgba(0, 0, 0, 0.15),
     0 12px 20px rgba(0, 0, 0, 0.12),
     inset 0 2px 4px rgba(255, 255, 255, 0.15);
+}
+
+/* Светлая тема - .container-profile:hover */
+html:not(.dark) .container-profile:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 24px rgba(0, 0, 0, 0.08),
+    0 12px 20px rgba(0, 0, 0, 0.06),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .container-img {
@@ -147,7 +176,8 @@ onMounted(() => {
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-.info-container-profile {
+/* Темная тема - .info-container-profile */
+html.dark .info-container-profile {
   display: flex;
   flex-direction: column;
   justify-content: space-around;
@@ -156,14 +186,34 @@ onMounted(() => {
   gap: 4px;
 }
 
-.info-container-profile :deep(.el-text) {
+/* Светлая тема - .info-container-profile */
+html:not(.dark) .info-container-profile {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  text-align: start;
+  padding: 12px 16px;
+  gap: 4px;
+}
+
+/* Темная тема - .info-container-profile :deep(.el-text) */
+html.dark .info-container-profile :deep(.el-text) {
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   transition: color 0.2s ease;
 }
 
-.link-style {
+/* Светлая тема - .info-container-profile :deep(.el-text) */
+html:not(.dark) .info-container-profile :deep(.el-text) {
+  font-weight: 500;
+  color: rgba(31, 41, 55, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: color 0.2s ease;
+}
+
+/* Темная тема - .link-style */
+html.dark .link-style {
   justify-content: start;
   color: #94a3b8;
   text-decoration: none;
@@ -174,13 +224,34 @@ onMounted(() => {
   position: relative;
 }
 
-.link-style:hover {
+/* Светлая тема - .link-style */
+html:not(.dark) .link-style {
+  justify-content: start;
+  color: #4a5568;
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  position: relative;
+}
+
+/* Темная тема - .link-style:hover */
+html.dark .link-style:hover {
   color: #f8fafc;
   background: rgba(255, 255, 255, 0.1);
   transform: translateX(4px);
 }
 
-.link-style::after {
+/* Светлая тема - .link-style:hover */
+html:not(.dark) .link-style:hover {
+  color: #1f2937;
+  background: rgba(0, 0, 0, 0.05);
+  transform: translateX(4px);
+}
+
+/* Темная тема - .link-style::after */
+html.dark .link-style::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -191,7 +262,25 @@ onMounted(() => {
   transition: width 0.3s ease;
 }
 
-.link-style:hover::after {
+/* Светлая тема - .link-style::after */
+html:not(.dark) .link-style::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 8px;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  transition: width 0.3s ease;
+}
+
+/* Темная тема - .link-style:hover::after */
+html.dark .link-style:hover::after {
+  width: calc(100% - 16px);
+}
+
+/* Светлая тема - .link-style:hover::after */
+html:not(.dark) .link-style:hover::after {
   width: calc(100% - 16px);
 }
 
@@ -311,5 +400,38 @@ onMounted(() => {
 .info-container-profile,
 .demo-basic {
   animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Темная тема - .info-container-profileEmail */
+html.dark .info-container-profileEmail {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #ffffff;
+  gap: 6px;
+  transition: color 0.3s ease;
+  margin-left: 10px;
+}
+
+/* Светлая тема - .info-container-profileEmail */
+html:not(.dark) .info-container-profileEmail {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #4a5568;
+  gap: 6px;
+  transition: color 0.3s ease;
+    margin-left: 10px;
+
+}
+
+/* Темная тема - .info-container-profileEmail:hover */
+html.dark .info-container-profileEmail:hover {
+  color: #e2e8f0;
+}
+
+/* Светлая тема - .info-container-profileEmail:hover */
+html:not(.dark) .info-container-profileEmail:hover {
+  color: #1f2937;
 }
 </style>

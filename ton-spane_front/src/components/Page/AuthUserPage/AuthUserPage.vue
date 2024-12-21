@@ -360,7 +360,7 @@ onMounted(fetchUserData)
   width: 95%;
   align-self: center;
   margin-left: 10px;
-  background: #0a0d14;
+  background: transparent;
 }
 
 .header {
@@ -543,7 +543,8 @@ onMounted(fetchUserData)
   margin-bottom: 20px;
 }
 
-.about-section {
+/* Темная тема - .about-section */
+html.dark .about-section {
   width: 99%;
   min-height: 150px;
   margin: 1.5% 0 0 5px;
@@ -555,23 +556,61 @@ onMounted(fetchUserData)
   color: white !important;
 }
 
-.about-section :deep(.el-collapse-item__header) {
+/* Светлая тема - .about-section */
+html:not(.dark) .about-section {
+  width: 99%;
+  min-height: 150px;
+  margin: 1.5% 0 0 5px;
+  background: linear-gradient(135deg, rgba(240, 244, 248, 0.9) 0%, rgba(230, 234, 238, 0.9) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  color: #1f2937 !important;
+}
+
+/* Темная тема - .about-section :deep(.el-collapse-item__header) */
+html.dark .about-section :deep(.el-collapse-item__header) {
   padding: 0.4rem 0.6rem;
   background: transparent;
   border-bottom: 1px solid rgba(56, 189, 248, 0.15);
   color: #f8fafc;
 }
 
-.about-section :deep(.el-collapse-item__content) {
+/* Светлая тема - .about-section :deep(.el-collapse-item__header) */
+html:not(.dark) .about-section :deep(.el-collapse-item__header) {
+  padding: 0.4rem 0.6rem;
+  background: transparent;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+  color: #1f2937;
+}
+
+/* Темная тема - .about-section :deep(.el-collapse-item__content) */
+html.dark .about-section :deep(.el-collapse-item__content) {
   padding: 0.4rem 0.6rem;
   width: 95%;
   color: #ffffff !important;
 }
 
-.collapse-header .title {
+/* Светлая тема - .about-section :deep(.el-collapse-item__content) */
+html:not(.dark) .about-section :deep(.el-collapse-item__content) {
+  padding: 0.4rem 0.6rem;
+  width: 95%;
+  color: #1f2937 !important;
+}
+
+/* Темная тема - .collapse-header .title */
+html.dark .collapse-header .title {
   font-size: 0.95rem;
   font-weight: 500;
   color: #38bdf8;
+}
+
+/* Светлая тема - .collapse-header .title */
+html:not(.dark) .collapse-header .title {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #0284c7;
 }
 
 .collapse-content {

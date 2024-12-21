@@ -145,249 +145,364 @@ export default {
 <style scoped>
 /* Существующие стили */
 .logo-container img {
-    height: 50px;
-    margin-left: 70px;
+   height: 50px;
+   margin-left: 70px;
 }
 
 .demo-tabs>.el-tabs__content {
-  color: #6b778c;
-  font-size: 32px;
-  font-weight: 600;
+ color: #6b778c;
+ font-size: 32px;
+ font-weight: 600;
 }
 
 .containet-style {
-  width: 100%;
+ width: 100%;
 }
 
 .icon-style {
-  font-size: 1.5em;
-  cursor: pointer;
-  color: #E5EAF3;
-  padding: 0.3em;
-  transition: transform 0.3s ease;
+ font-size: 1.5em;
+ cursor: pointer;
+ color: #E5EAF3;
+ padding: 0.3em;
+ transition: transform 0.3s ease;
 }
 
 .icon-style:hover {
-  transform: scale(1.2);
-  color: #8D9095;
+ transform: scale(1.2);
+ color: #8D9095;
 }
 
 .header-style {
-  color: #E5EAF3;
-  height: max-content;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 !important;
+ color: #E5EAF3;
+ height: max-content;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ padding: 0 !important;
 }
 
 .header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  padding: 0 !important;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ width: 100%;
+ padding: 0 !important;
 }
 
 .site-name {
-  font-size: 16px;
-  font-weight: bold;
-  text-align: center;
-  flex: 1;
+ font-size: 16px;
+ font-weight: bold;
+ text-align: center;
+ flex: 1;
 }
 
 .icon-container {
-  display: flex;
-  padding-right: 20px !important;
+ display: flex;
+ padding-right: 20px !important;
 }
 
 /* Стили для состояния загрузки */
 .loading-container {
-  padding: 20px;
+ padding: 20px;
 }
 
-.loading-card {
-  margin-bottom: 20px;
-  background: #161b22;
-  border: none;
-  border-radius: 16px;
-  overflow: hidden;
+/* Темная тема */
+html.dark .loading-card {
+ margin-bottom: 20px;
+ background: #161b22;
+ border: none;
+ border-radius: 16px;
+ overflow: hidden;
 }
 
-/* Новые стили для пустого состояния */
+html.dark .loading-card :deep(.el-skeleton__item) {
+ background: linear-gradient(90deg, #1c2128 25%, #2d333b 50%, #1c2128 75%);
+ background-size: 400% 100%;
+ animation: skeleton-loading 1.4s ease infinite;
+}
+
+/* Светлая тема */
+html:not(.dark) .loading-card {
+ margin-bottom: 20px;
+ background: #ffffff;
+ border: none;
+ border-radius: 16px;
+ overflow: hidden;
+ box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+html:not(.dark) .loading-card :deep(.el-skeleton__item) {
+ background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+ background-size: 400% 100%;
+ animation: skeleton-loading 1.4s ease infinite;
+}
+
+/* Темная тема - пустое состояние */
+html.dark .empty-card {
+ width: 100%;
+ max-width: 500px;
+ background: #161b22;
+ border: 1px solid rgba(0, 149, 255, 0.1);
+ border-radius: 15px;
+ overflow: hidden;
+ box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+ transition: all 0.3s ease;
+}
+
+html.dark .empty-card:hover {
+ border-color: rgba(0, 149, 255, 0.3);
+ transform: translateY(-2px);
+ box-shadow: 
+   0 8px 25px rgba(0, 0, 0, 0.3),
+   0 0 20px rgba(0, 149, 255, 0.1);
+}
+
+html.dark .empty-content {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ padding: 40px 20px;
+ text-align: center;
+ background: linear-gradient(
+   135deg,
+   rgba(0, 149, 255, 0.1) 0%,
+   rgba(0, 89, 255, 0.2) 50%,
+   rgba(0, 149, 255, 0.1) 100%
+ );
+}
+
+html.dark .empty-icon {
+ font-size: 64px;
+ margin-bottom: 20px;
+ color: #58a6ff;
+ opacity: 0.8;
+}
+
+html.dark .empty-title {
+ font-size: 1.25rem;
+ font-weight: 600;
+ color: #e6edf3;
+ margin-bottom: 10px;
+ margin: 0;
+}
+
+html.dark .empty-description {
+ color: #8b949e;
+ margin: 10px 0 0 0;
+}
+
+/* Светлая тема - пустое состояние */
+html:not(.dark) .empty-card {
+ width: 100%;
+ max-width: 500px;
+ background: #ffffff;
+ border: 1px solid rgba(0, 149, 255, 0.1);
+ border-radius: 15px;
+ overflow: hidden;
+ box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+ transition: all 0.3s ease;
+}
+
+html:not(.dark) .empty-card:hover {
+ border-color: rgba(0, 149, 255, 0.2);
+ transform: translateY(-2px);
+ box-shadow: 
+   0 8px 20px rgba(0, 0, 0, 0.12),
+   0 0 15px rgba(0, 149, 255, 0.08);
+}
+
+html:not(.dark) .empty-content {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ padding: 40px 20px;
+ text-align: center;
+ background: linear-gradient(
+   135deg,
+   rgba(0, 149, 255, 0.05) 0%,
+   rgba(0, 89, 255, 0.1) 50%,
+   rgba(0, 149, 255, 0.05) 100%
+ );
+}
+
+html:not(.dark) .empty-icon {
+ font-size: 64px;
+ margin-bottom: 20px;
+ color: #0284c7;
+ opacity: 0.9;
+}
+
+html:not(.dark) .empty-title {
+ font-size: 1.25rem;
+ font-weight: 600;
+ color: #1f2937;
+ margin-bottom: 10px;
+ margin: 0;
+}
+
+html:not(.dark) .empty-description {
+ color: #6b7280;
+ margin: 10px 0 0 0;
+}
+
 .empty-state {
-  padding: 40px 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 300px;
-}
-
-.empty-card {
-  width: 100%;
-  max-width: 500px;
-  background: #161b22;
-  border: 1px solid rgba(0, 149, 255, 0.1);
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
-}
-
-.empty-card:hover {
-  border-color: rgba(0, 149, 255, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 
-    0 8px 25px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(0, 149, 255, 0.1);
-}
-
-.empty-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px 20px;
-  text-align: center;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 149, 255, 0.1) 0%,
-    rgba(0, 89, 255, 0.2) 50%,
-    rgba(0, 149, 255, 0.1) 100%
-  );
-}
-
-.empty-icon {
-  font-size: 64px;
-  margin-bottom: 20px;
-  color: #58a6ff;
-  opacity: 0.8;
-}
-
-.empty-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #e6edf3;
-  margin-bottom: 10px;
-  margin: 0;
-}
-
-.empty-description {
-  color: #8b949e;
-  margin: 10px 0 0 0;
-}
-
-/* Остальные существующие стили */
-.loading-card :deep(.el-card__body) {
-  padding: 20px;
-}
-
-.loading-card :deep(.el-skeleton__item) {
-  background: linear-gradient(90deg, #1c2128 25%, #2d333b 50%, #1c2128 75%);
-  background-size: 400% 100%;
-  animation: skeleton-loading 1.4s ease infinite;
+ padding: 40px 20px;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ min-height: 300px;
 }
 
 @keyframes skeleton-loading {
-  0% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0 50%;
-  }
+ 0% {
+   background-position: 100% 50%;
+ }
+ 100% {
+   background-position: 0 50%;
+ }
+}
+
+/* Скроллбар */
+.el-scrollbar ::-webkit-scrollbar {
+ height: 8px;
+ background: rgba(0, 0, 0, 0.1);
+}
+
+html.dark .el-scrollbar ::-webkit-scrollbar-track {
+ background: rgba(17, 24, 39, 0.2);
+ border-radius: 4px;
+}
+
+html:not(.dark) .el-scrollbar ::-webkit-scrollbar-track {
+ background: rgba(0, 0, 0, 0.05);
+ border-radius: 4px;
+}
+
+.el-scrollbar ::-webkit-scrollbar-thumb {
+ background: linear-gradient(90deg, #00b4db, #0083b0);
+ border-radius: 4px;
+ transition: background 0.3s ease;
+}
+
+.el-scrollbar ::-webkit-scrollbar-thumb:hover {
+ background: linear-gradient(90deg, #0083b0, #00b4db);
 }
 
 /* Медиа-запросы */
 @media (max-width: 1200px) {
-  .containet-style {
-    width: 100% !important;
-    padding: 0 !important;
-  }
+ .containet-style {
+   width: 100% !important;
+   padding: 0 !important;
+ }
 
-  .main-container-content {
-    padding: 5px !important;
-    padding-top: 0 !important;
-  }
+ .main-container-content {
+   padding: 5px !important;
+   padding-top: 0 !important;
+ }
 
-  .loading-container {
-    padding: 10px;
-  }
+ .loading-container {
+   padding: 10px;
+ }
 
-  .loading-card {
-    margin-bottom: 10px;
-  }
+ .loading-card {
+   margin-bottom: 10px;
+ }
 
-  .empty-state {
-    padding: 20px 10px;
-  }
+ .empty-state {
+   padding: 20px 10px;
+ }
 
-  .empty-card {
-    max-width: 100%;
-  }
+ .empty-card {
+   max-width: 100%;
+ }
 
-  .empty-content {
-    padding: 30px 15px;
-  }
+ .empty-content {
+   padding: 30px 15px;
+ }
 
-  .empty-icon {
-    font-size: 48px;
-  }
+ .empty-icon {
+   font-size: 48px;
+ }
 
-  .empty-title {
-    font-size: 1rem;
-  }
+ .empty-title {
+   font-size: 1rem;
+ }
 }
 
 @media screen and (max-width: 768px) {
-    .logo-container img {
-        height: 40px;
-        margin-left: 40px;
-    }
+   .logo-container img {
+       height: 40px;
+       margin-left: 40px;
+   }
 }
 
 @media screen and (max-width: 480px) {
-    .logo-container img {
-        margin-left: 25px;
-    }
+   .logo-container img {
+       margin-left: 25px;
+   }
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap');
 
 .logo-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Comfortaa', cursive;
-  border-radius: 8px;
-  padding-top: 10px;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-family: 'Comfortaa', cursive;
+ border-radius: 8px;
+ padding-top: 10px;
 }
 
 .logo-icon {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(45deg, #007bff, #00bfff);
-  border-radius: 50%;
-  margin-right: 12px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+ width: 48px;
+ height: 48px;
+ background: linear-gradient(45deg, #007bff, #00bfff);
+ border-radius: 50%;
+ margin-right: 12px;
+ display: flex;
+ justify-content: center;
+ align-items: center;
 }
 
 .logo-icon svg {
-  width: 28px; 
-  height: 28px;
-  fill: white;
+ width: 28px; 
+ height: 28px;
+ fill: white;
 }
 
 .logo-text {
-  font-size: 28px;
-  background: linear-gradient(45deg, #007bff, #00bfff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+ font-size: 28px;
+ background: linear-gradient(45deg, #007bff, #00bfff);
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
 }
 
 .text-gradient {
-  background: linear-gradient(45deg, #ffffff, #f0f8ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+ background: linear-gradient(45deg, #ffffff, #f0f8ff);
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+}
+
+/* Header light/dark theme */
+html.dark .icon-style {
+ color: #E5EAF3;
+}
+
+html.dark .icon-style:hover {
+ color: #8D9095;
+}
+
+html:not(.dark) .icon-style {
+ color: #1f2937;
+}
+
+html:not(.dark) .icon-style:hover {
+ color: #4B5563;
+}
+
+html:not(.dark) .text-gradient {
+ background: linear-gradient(45deg, #1f2937, #4B5563);
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
 }
 </style>

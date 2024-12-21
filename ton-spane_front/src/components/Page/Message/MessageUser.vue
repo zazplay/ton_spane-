@@ -10,7 +10,7 @@
             </el-container>
         </el-aside>
         <el-main class="info-container-profile">
-            <span style="color: aliceblue;">Имя</span>
+            <span style="color: aliceblue;" >Имя</span>
             <span>Текст сообщения</span>
         </el-main>
     </el-container>
@@ -34,7 +34,7 @@ const url = 'https://www.ifoto.ai/blog/wp-content/uploads/ai-swimsuit-models.jpg
 </script>
 
 <style scoped>
-.container-profile {
+html.dark .container-profile {
     flex: none !important;
     width: 80% !important;
     margin: 0 auto;
@@ -49,11 +49,36 @@ const url = 'https://www.ifoto.ai/blog/wp-content/uploads/ai-swimsuit-models.jpg
     transition: all 0.3s ease;
 }
 
-.container-profile:hover {
+/* Светлая тема - .container-profile */
+html:not(.dark) .container-profile {
+    flex: none !important;
+    width: 80% !important;
+    margin: 0 auto;
+    background: linear-gradient(145deg, #f0f4f8, #e6e9f0);
+    border-radius: 16px;
+    height: 80px;
+    overflow: hidden;
+    box-shadow: 
+        0 8px 20px rgba(0, 0, 0, 0.1),
+        inset 0 1px 1px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+/* Темная тема - .container-profile:hover */
+html.dark .container-profile:hover {
     transform: translateY(-2px);
     box-shadow: 
         0 12px 25px rgba(0, 0, 0, 0.2),
         inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+/* Светлая тема - .container-profile:hover */
+html:not(.dark) .container-profile:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 12px 25px rgba(0, 0, 0, 0.15),
+        inset 0 1px 1px rgba(0, 0, 0, 0.1);
 }
 
 .container-img {
@@ -72,13 +97,24 @@ const url = 'https://www.ifoto.ai/blog/wp-content/uploads/ai-swimsuit-models.jpg
     transform: scale(1.05);
 }
 
-.info-container-profile {
+/* Темная тема - .info-container-profile */
+html.dark .info-container-profile {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
     text-align: start;
     padding: 10px 15px;
     color: #e2e8f0;
+}
+
+/* Светлая тема - .info-container-profile */
+html:not(.dark) .info-container-profile {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    text-align: start;
+    padding: 10px 15px;
+    color: #1f2937;
 }
 
 .demo-basic {

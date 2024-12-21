@@ -104,13 +104,19 @@ onMounted(() => {
   <el-scrollbar v-if="followingList.length > 0">
     <div class="scrollbar-flex-content">
       <p v-for="item in followingList" :key="item.id" class="scrollbar-demo-item">
-        <el-card style="max-width: 150px">
+        <el-card style="max-width: 150px; cursor: pointer;">  
           <template #header>{{ item.username }}</template>
+          <router-link 
+          :to="`/app/user/${item.id}`" 
+          style="text-decoration: none; color: inherit; display: block;"
+        >
           <img
             :src="item.profilePicture"
             style="width: 100%; margin: 0px;"
+            alt="User profile"
           />
-        </el-card>
+        </router-link>
+      </el-card>
       </p>
     </div>
   </el-scrollbar>
@@ -139,80 +145,69 @@ onMounted(() => {
 
 <style scoped>
 .title {
- font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
- font-size: 24px;
- font-weight: 700;
- margin: 5px 0;
- padding: 0 5px;
- letter-spacing: 0.5px;
- position: relative;
- display: inline-block;
- background: linear-gradient(135deg, #9bbdff 0%, #3568c7 100%);
- -webkit-background-clip: text;
- -webkit-text-fill-color: transparent;
- text-shadow: 2px 2px 4px rgba(79, 140, 255, 0.3);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 5px 0;
+  padding: 0 5px;
+  letter-spacing: 0.5px;
+  position: relative;
+  display: inline-block;
+  background: linear-gradient(135deg, #9bbdff 0%, #3568c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 2px 2px 4px rgba(79, 140, 255, 0.3);
 }
 
 .title::after {
- content: '';
- position: absolute;
- bottom: -2px;
- left: 0;
- width: 100%;
- height: 2px;
- background: linear-gradient(90deg, transparent, #80aaff, transparent);
- opacity: 0.7;
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #80aaff, transparent);
+  opacity: 0.7;
 }
 
-
 @keyframes glow {
- 0%, 100% {
-   filter: drop-shadow(0 0 2px rgba(128, 170, 255, 0.4));
- }
- 50% {
-   filter: drop-shadow(0 0 5px rgba(79, 140, 255, 0.6));
- }
+  0%, 100% {
+    filter: drop-shadow(0 0 2px rgba(128, 170, 255, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 5px rgba(79, 140, 255, 0.6));
+  }
 }
 
 .el-card {
   width: auto;
-  margin-bottom: 10px;
-  background: linear-gradient(165deg, #1f2937, #111827);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25),
-              0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin: 0 10px 20px;
+  border-radius: 20px;
+  transition: all 0.4s cubic-bezier(0.2, 0, 0.2, 1);
   overflow: hidden;
-  margin-left: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  height: 200px !important;
 }
 
 .el-card:hover {
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-  border-color: rgba(0, 180, 219, 0.3);
+  transform: translateY(-2px);
 }
 
 .el-card__header {
-  padding: 15px;
-  border-bottom: 1px solid rgba(0, 180, 219, 0.2);
-  background: linear-gradient(to right, #1f2937, #111827);
-  color: #ffffff;
+  padding: 18px 20px;
   font-size: 18px;
-  font-weight: 500;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.el-card__body {
-  padding: 0px !important;
-  background: rgba(17, 24, 39, 0.98);
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .el-card img {
-  width: 100%;
-  height: auto;
+  width: 100px !important;
+  height: 100px !important;
   object-fit: cover;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  filter: contrast(1.05) brightness(1.05);
+  transition: transform 0.5s cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+.el-card img:hover {
+  transform: scale(1.03);
 }
 
 .scrollbar-flex-content {
@@ -231,19 +226,91 @@ onMounted(() => {
   width: auto;
 }
 
+/* Темная тема */
+html.dark .el-card {
+  background: linear-gradient(165deg, #243447, #1a2736);
+  box-shadow: 0 12px 36px rgba(26, 39, 54, 0.15),
+              0 4px 12px rgba(26, 39, 54, 0.1);
+  border: 1px solid rgba(78, 110, 142, 0.15);
+}
+
+html.dark .el-card:hover {
+  box-shadow: 0 16px 48px rgba(26, 39, 54, 0.2),
+              0 8px 16px rgba(26, 39, 54, 0.15);
+  border-color: rgba(78, 110, 142, 0.25);
+}
+
+html.dark .el-card__header {
+  border-bottom: 1px solid rgba(78, 110, 142, 0.15);
+  background: linear-gradient(120deg, #243447, #1a2736);
+  color: #e5e9f0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+html.dark .el-card__body {
+  background: rgba(26, 39, 54, 0.98);
+}
+
+html.dark .el-card img {
+  filter: contrast(1.05) brightness(1.05);
+}
+
+html.dark .el-card img:hover {
+  filter: contrast(1.08) brightness(1.08);
+}
+
+/* Светлая тема */
+html:not(.dark) .el-card {
+  background: linear-gradient(165deg, #ffffff, #f8fafc);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08),
+              0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+html:not(.dark) .el-card:hover {
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12),
+              0 8px 16px rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+html:not(.dark) .el-card__header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background: linear-gradient(120deg, #ffffff, #f8fafc);
+  color: #1f2937;
+}
+
+html:not(.dark) .el-card__body {
+  background: rgba(255, 255, 255, 0.98);
+}
+
+html:not(.dark) .el-card img {
+  filter: contrast(1.02) brightness(1.02);
+}
+
+html:not(.dark) .el-card img:hover {
+  filter: contrast(1.04) brightness(1.04);
+}
+
+/* Скроллбар */
 .el-scrollbar ::-webkit-scrollbar {
   height: 8px;
   background: rgba(0, 0, 0, 0.1);
 }
 
-.el-scrollbar ::-webkit-scrollbar-track {
+html.dark .el-scrollbar ::-webkit-scrollbar-track {
   background: rgba(17, 24, 39, 0.2);
+  border-radius: 4px;
+}
+
+html:not(.dark) .el-scrollbar ::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
   border-radius: 4px;
 }
 
 .el-scrollbar ::-webkit-scrollbar-thumb {
   background: linear-gradient(90deg, #00b4db, #0083b0);
   border-radius: 4px;
+  transition: background 0.3s ease;
 }
 
 .el-scrollbar ::-webkit-scrollbar-thumb:hover {
