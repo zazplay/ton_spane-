@@ -1,7 +1,14 @@
 <template>
   <Teleport to="body">
     <div v-if="dialogVisible" class="modal-overlay" @click.self="closeDialog">
-      <div class="modal-dialog payment-modal">
+      <div v-loading="loading"
+          :element-loading-svg="svg"
+          class="custom-loading-svg"
+          element-loading-svg-view-box="-10, -10, 50, 50"
+          element-loading-text="Обработака платежа, пожалуйста не закрывайте данное окно..."
+          v-loading.fullscreen.lock=true
+          >
+      <div class="modal-dialog payment-modal" >
         <button class="close-button" @click="closeDialog">×</button>
         <div class="payment-container">
           <div class="payment-header">
@@ -99,9 +106,13 @@
               Оплатить
             </button>
           </div>
+
+
+          
         </div>
       </div>
     </div>
+  </div>
   </Teleport>
 </template>
 
@@ -111,6 +122,18 @@ import { ref, reactive, defineExpose, watch,defineEmits } from 'vue'
 import { ElMessage } from 'element-plus'
 
 const dialogVisible = ref(false)
+const loading = ref(false) 
+
+const svg = `
+        <path class="path" d="
+          M 30 15
+          L 28 17
+          M 25.61 25.61
+          A 15 15, 0, 0, 1, 15 30
+          A 15 15, 0, 1, 1, 27.99 7.5
+          L 15 15
+        " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)"/>
+      `
 
 const emit = defineEmits(['paymentSuccess', 'paymentError'])
 
@@ -182,10 +205,15 @@ const submitForm = async () => {
 
   try {
     if (form.paymentMethod === 'card') {
-      ElMessage.error('Ошибка обработки платежа. Попробуйте позже или используйте другой способ оплаты.')
-      return
-    }
+      loading.value = true  // Используем существующую переменную
     
+    setTimeout(() => {
+        ElMessage.error('Ошибка обработки платежа. Попробуйте позже или используйте другой способ оплаты.')
+        loading.value = false
+    }, 5000) // 5000 миллисекунд = 5 секунд
+    
+    return
+}
     ElMessage.success('Оплата прошла успешно!')
     dialogVisible.value = false
     
