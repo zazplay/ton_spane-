@@ -1,16 +1,14 @@
 <template>
   <Teleport to="body">
     <div v-if="dialogVisible" class="modal-overlay" @click.self="closeDialog">
-      <div v-loading="loading"
-          :element-loading-svg="svg"
-          class="custom-loading-svg"
-          element-loading-svg-view-box="-10, -10, 50, 50"
-          element-loading-text="Обработака платежа, пожалуйста не закрывайте данное окно..."
-          v-loading.fullscreen.lock=true
-          >
-      <div class="modal-dialog payment-modal" >
+      <div class="modal-dialog payment-modal custom-loading-svg" 
+           v-loading="loading"
+           :element-loading-svg="svg"
+           element-loading-svg-view-box="-10, -10, 50, 50"
+           element-loading-text="Обработка платежа, пожалуйста не закрывайте данное окно...">
         <button class="close-button" @click="closeDialog">×</button>
         <div class="payment-container">
+          <!-- Остальное содержимое модального окна остается без изменений -->
           <div class="payment-header">
             <h2 class="payment-title">Оформление подписки</h2>
             <p class="payment-subtitle">Выберите способ оплаты</p>
@@ -24,8 +22,8 @@
             >
               <div class="method-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="5" width="20" height="14" rx="2"></rect>
-                  <line x1="2" y1="10" x2="22" y2="10"></line>
+                  <rect x="2" y="5" width="20" height="14" rx="2" />
+                  <line x1="2" y1="10" x2="22" y2="10" />
                 </svg>
               </div>
               <div class="method-info">
@@ -41,9 +39,9 @@
             >
               <div class="method-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="8"></circle>
-                  <line x1="12" y1="8" x2="12" y2="16"></line>
-                  <line x1="8" y1="12" x2="16" y2="12"></line>
+                  <circle cx="12" cy="12" r="8" />
+                  <line x1="12" y1="8" x2="12" y2="16" />
+                  <line x1="8" y1="12" x2="16" y2="12" />
                 </svg>
               </div>
               <div class="method-info">
@@ -90,8 +88,8 @@
             <div class="message-content">
               <div class="lock-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                 </svg>
               </div>
               <span>Оплата криптовалютой скоро будет доступна</span>
@@ -106,34 +104,29 @@
               Оплатить
             </button>
           </div>
-
-
-          
         </div>
       </div>
     </div>
-  </div>
   </Teleport>
 </template>
-
 <script setup>
 /* eslint-disable no-unused-vars */
-import { ref, reactive, defineExpose, watch,defineEmits } from 'vue'
+import { ref, reactive, defineExpose, watch, defineEmits } from 'vue'
 import { ElMessage } from 'element-plus'
 
 const dialogVisible = ref(false)
-const loading = ref(false) 
+const loading = ref(false)
 
 const svg = `
-        <path class="path" d="
-          M 30 15
-          L 28 17
-          M 25.61 25.61
-          A 15 15, 0, 0, 1, 15 30
-          A 15 15, 0, 1, 1, 27.99 7.5
-          L 15 15
-        " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)"/>
-      `
+         <path class="path" d="
+           M 30 15
+           L 28 17
+           M 25.61 25.61
+           A 15 15, 0, 0, 1, 15 30
+           A 15 15, 0, 1, 1, 27.99 7.5
+           L 15 15
+         " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)"/>
+       `
 
 const emit = defineEmits(['paymentSuccess', 'paymentError'])
 
@@ -147,7 +140,12 @@ const form = reactive({
 })
 
 const closeDialog = () => {
-  dialogVisible.value = false
+  loading.value = false  // Сначала сбрасываем загрузку
+  dialogVisible.value = false  // Потом закрываем диалог
+  // Очистка формы при закрытии
+  form.cardNumber = ''
+  form.expiryDate = ''
+  form.cvv = ''
 }
 
 const toggleScrollLock = (isLocked) => {
@@ -199,22 +197,28 @@ const validateForm = () => {
   return true
 }
 
-// Отправка формы
 const submitForm = async () => {
   if (!validateForm()) return
 
   try {
     if (form.paymentMethod === 'card') {
-      loading.value = true  // Используем существующую переменную
-    
-    setTimeout(() => {
-        ElMessage.error('Ошибка обработки платежа. Попробуйте позже или используйте другой способ оплаты.')
+      loading.value = true
+      
+      setTimeout(() => {
         loading.value = false
-    }, 5000) // 5000 миллисекунд = 5 секунд
+        ElMessage.error('Ошибка обработки платежа. Попробуйте позже или используйте другой способ оплаты.')
+        dialogVisible.value = false // Закрываем окно
+        // Очистка формы
+        form.cardNumber = ''
+        form.expiryDate = ''
+        form.cvv = ''
+      }, 5000)
+      
+      return
+    }
     
-    return
-}
     ElMessage.success('Оплата прошла успешно!')
+    loading.value = false
     dialogVisible.value = false
     
     // Очистка формы
@@ -222,6 +226,7 @@ const submitForm = async () => {
     form.expiryDate = ''
     form.cvv = ''
   } catch (error) {
+    loading.value = false
     ElMessage.error('Произошла ошибка при обработке платежа')
   }
 }
@@ -237,8 +242,6 @@ defineExpose({
 </script>
 
 <style scoped>
-
-
 .modal-overlay {
   position: fixed;
   top: 0;
