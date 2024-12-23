@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
-import ListPostCards from '../../ListPostCards.vue' // Assuming this is the correct path
+import ListPostCards from '../../ListPostCards.vue'
 
 const store = useStore()
 const followingList = ref([])
@@ -11,7 +11,19 @@ const loading = ref(true)
 const CurrUserId = computed(() => store.getters.getSub)
 
 // Format image URL if needed
-const formatImageUrl = (url) => url // Add any URL formatting logic if needed
+const formatImageUrl = (url) => url
+
+// Handle post updates (new method)
+const handlePostUpdate = async () => {
+  try {
+    // Clear current posts and refresh data
+    allPosts.value = []
+    await fetchAllModelPosts()
+  } catch (error) {
+    console.error('Error updating posts:', error)
+    ElMessage.error('Ошибка при обновлении постов')
+  }
+}
 
 // Fetch posts for a single model
 const fetchModelPosts = async (modelId, modelData) => {
@@ -60,6 +72,8 @@ const fetchModelPosts = async (modelId, modelData) => {
 // Fetch following list and their posts
 const fetchAllModelPosts = async () => {
   try {
+    loading.value = true
+    
     // Fetch following list
     const response = await fetch(
       `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${CurrUserId.value}/following`,
@@ -85,7 +99,7 @@ const fetchAllModelPosts = async () => {
     allPosts.value = allModelPosts
       .flat()
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      
+    
     loading.value = false
   } catch (error) {
     console.error('Error fetching all model posts:', error)
@@ -104,19 +118,19 @@ onMounted(() => {
   <el-scrollbar v-if="followingList.length > 0">
     <div class="scrollbar-flex-content">
       <p v-for="item in followingList" :key="item.id" class="scrollbar-demo-item">
-        <el-card style="max-width: 150px; cursor: pointer;">  
+        <el-card style="max-width: 150px; cursor: pointer;">
           <template #header>{{ item.username }}</template>
           <router-link 
-          :to="`/app/user/${item.id}`" 
-          style="text-decoration: none; color: inherit; display: block;"
-        >
-          <img
-            :src="item.profilePicture"
-            style="width: 100%; margin: 0px;"
-            alt="User profile"
-          />
-        </router-link>
-      </el-card>
+            :to="`/app/user/${item.id}`"
+            style="text-decoration: none; color: inherit; display: block;"
+          >
+            <img
+              :src="item.profilePicture"
+              style="width: 100%; margin: 0px;"
+              alt="User profile"
+            />
+          </router-link>
+        </el-card>
       </p>
     </div>
   </el-scrollbar>
@@ -131,9 +145,10 @@ onMounted(() => {
     <el-loading />
   </div>
   <ListPostCards 
-    v-else-if="allPosts.length > 0" 
-    :posts="allPosts" 
+    v-else-if="allPosts.length > 0"
+    :posts="allPosts"
     style="margin-top: 20px;"
+    @updatePosts="handlePostUpdate"
   />
   <el-empty
     v-else

@@ -54,7 +54,7 @@
             <el-text class="stat-text">{{ userLikes }} лайков</el-text>
           </el-text>
           <el-text class="stat-badgeSubs" type="primary">
-            <el-text class="stat-text">{{userSubscription}} подпиcчиков</el-text>
+            <el-text class="stat-text">{{ userSubscription }} подпиcчиков</el-text>
           </el-text>
         </el-aside>
       </el-container>
@@ -103,6 +103,7 @@
       v-if="isLoaded && userData.posts && userData.posts.length > 0"
       :posts="userData.posts"
       :user="userData"
+      @updatePosts="handlePostUpdate"
     />
     <div v-else-if="isLoaded && (!userData.posts || userData.posts.length === 0)" class="no-posts">
       <el-empty
@@ -114,7 +115,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import ListPostCards from '../../ListPostCards.vue'
 import {
@@ -134,10 +135,9 @@ import {
 import { useStore } from 'vuex'
 
 const store = useStore()
-const CurrUserId = computed(() => store.getters.getSub)
-
 const router = useRouter()
 const route = useRoute()
+const CurrUserId = computed(() => store.getters.getSub)
 const userId = route.params.id
 
 const DEFAULT_HEADER = 'https://placehold.co/600x200'
@@ -177,6 +177,33 @@ const preparePostsData = (posts = []) => {
   }))
 }
 
+const handlePostUpdate = async () => {
+  try {
+    // Очищаем текущие посты
+    userData.value.posts = []
+    await nextTick()
+    
+    // Загружаем обновленные данные
+    const [postsData] = await Promise.all([
+      fetchUserPosts(),
+      fetchUserSubs()
+    ])
+    
+    // Обновляем данные в userData
+    userData.value = {
+      ...userData.value,
+      posts: postsData
+    }
+    
+    // Обновляем количество лайков
+    userLikes.value = postsData.reduce((total, post) => total + (post.likes?.length || 0), 0)
+    
+  } catch (error) {
+    console.error('Error updating posts:', error)
+    ElMessage.error('Ошибка при обновлении постов')
+  }
+}
+
 const checkSubscriptionStatus = async () => {
   try {
     const response = await fetch(
@@ -198,47 +225,47 @@ const checkSubscriptionStatus = async () => {
 }
 
 const fetchUserData = async () => {
- try {
-   const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/models/${route.params.id}`, {
-     signal: abortController.signal,
-     headers: {
-       'accept': '*/*' 
-     }
-   })
+  try {
+    const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/models/${route.params.id}`, {
+      signal: abortController.signal,
+      headers: {
+        'accept': '*/*'
+      }
+    })
 
-   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-   
-   const data = await response.json()
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    
+    const data = await response.json()
 
-   if (!data) {
-     throw new Error('No user data received')
-   }
+    if (!data) {
+      throw new Error('No user data received')
+    }
 
-   userData.value = {
-     ...data,
-     profilePicture: formatImageUrl(data.profilePicture) || DEFAULT_AVATAR,
-     profileHeader: formatImageUrl(data.profileHeader) || DEFAULT_HEADER,
-     posts: preparePostsData(data.posts || []),
-     followers: data.followers || [],
-     profileDescription: data.profileDescription || ''
-   }
+    userData.value = {
+      ...data,
+      profilePicture: formatImageUrl(data.profilePicture) || DEFAULT_AVATAR,
+      profileHeader: formatImageUrl(data.profileHeader) || DEFAULT_HEADER,
+      posts: preparePostsData(data.posts || []),
+      followers: data.followers || [],
+      profileDescription: data.profileDescription || ''
+    }
 
- } catch (err) {
-   if (err.name === 'AbortError') return
-   
-   console.error('Error fetching user data:', err)
-   ElMessage.error('Ошибка при загрузке данных пользователя')
-   
-   userData.value = {
-     id: route.params.id,
-     username: 'Пользователь',
-     profilePicture: DEFAULT_AVATAR,
-     profileHeader: DEFAULT_HEADER,
-     posts: [],
-     followers: [],
-     profileDescription: ''
-   }
- }
+  } catch (err) {
+    if (err.name === 'AbortError') return
+    
+    console.error('Error fetching user data:', err)
+    ElMessage.error('Ошибка при загрузке данных пользователя')
+    
+    userData.value = {
+      id: route.params.id,
+      username: 'Пользователь',
+      profilePicture: DEFAULT_AVATAR,
+      profileHeader: DEFAULT_HEADER,
+      posts: [],
+      followers: [],
+      profileDescription: ''
+    }
+  }
 }
 
 const fetchUserPosts = async () => {
@@ -256,7 +283,7 @@ const fetchUserPosts = async () => {
       return []
     }
     
-    const formattedPosts = data.map(post => ({
+    return data.map(post => ({
       ...post,
       id: post.id,
       imageUrl: formatImageUrl(post.imageUrl),
@@ -275,15 +302,8 @@ const fetchUserPosts = async () => {
       initialDonated: false,
       initialSubscribed: isSubscribed.value
     }))
-
-    if (formattedPosts.length > 0) {
-      userData.value.posts = formattedPosts
-      userLikes.value = formattedPosts.reduce((total, post) => total + (post.likes?.length || 0), 0)
-    }
-
-    return formattedPosts
   } catch (err) {
-    if (err.name === 'AbortError') return
+    if (err.name === 'AbortError') return []
     console.error('Error fetching user posts:', err)
     ElMessage.error('Ошибка при загрузке постов пользователя')
     return []
@@ -292,7 +312,6 @@ const fetchUserPosts = async () => {
 
 const fetchUserSubs = async () => {
   try {
-    // Clear any existing error state
     userSubscription.value = 0
 
     const response = await fetch(
@@ -311,47 +330,34 @@ const fetchUserSubs = async () => {
 
     const followers = await response.json()
 
-    // Validate that we received an array
     if (!Array.isArray(followers)) {
       console.error('Received invalid followers data:', followers)
       ElMessage.error('Ошибка при загрузке данных подписчиков')
       return
     }
 
-    // Update subscription count
     userSubscription.value = followers.length
 
-    // Check if current user is among followers
     if (CurrUserId.value) {
       isSubscribed.value = followers.some(follower => follower.id === CurrUserId.value)
     }
 
-    // Store followers data if needed for other features
-    const followersData = followers.map(follower => ({
+    return followers.map(follower => ({
       id: follower.id,
       username: follower.username || 'Пользователь',
       profilePicture: follower.profilePicture,
       createdAt: follower.createdAt
     }))
 
-    return followersData
-
   } catch (err) {
-    if (err.name === 'AbortError') {
-      // Request was aborted, no need to show error
-      return
-    }
-
+    if (err.name === 'AbortError') return
     console.error('Error fetching user subscriptions:', err)
     ElMessage.error('Ошибка при загрузке подписчиков')
-    
-    // Reset subscription count on error
     userSubscription.value = 0
     return []
   }
 }
 
-// Helper function to validate subscription state
 const validateSubscriptionState = () => {
   if (!CurrUserId.value) {
     ElMessage.error('Необходимо авторизоваться')
@@ -366,7 +372,6 @@ const validateSubscriptionState = () => {
   return true
 }
 
-// Updated subscription toggle handler
 const handleFreeSubscribe = async () => {
   if (!validateSubscriptionState()) return
 
@@ -390,27 +395,35 @@ const handleFreeSubscribe = async () => {
       throw new Error(`Failed to ${endpoint}`)
     }
 
-    // Update local state
     isSubscribed.value = !isSubscribed.value
     userSubscription.value += isSubscribed.value ? 1 : -1
 
-    // Show success message
     ElMessage.success(isSubscribed.value ? 'Вы подписались' : 'Вы отписались')
 
-    // Refresh subscription data to ensure accuracy
+    // Update subscription status
     await fetchUserSubs()
+
+    // Refresh posts data to update their states
+    const updatedPosts = await fetchUserPosts()
+    userData.value = {
+      ...userData.value,
+      posts: updatedPosts.map(post => ({
+        ...post,
+        initialSubscribed: isSubscribed.value
+      }))
+    }
+    
+    // Trigger ListPostCards component update
+    await handlePostUpdate()
 
   } catch (error) {
     console.error(`Error during ${isSubscribed.value ? 'unsubscribe' : 'subscribe'}:`, error)
     ElMessage.error('Ошибка при изменении подписки')
-    
-    // Refresh subscription data to ensure correct state
     await fetchUserSubs()
   }
 }
 
-const handleImageError = (type) => {
-  if (type === 'header') {
+const handleImageError = (type) => {if (type === 'header') {
     userData.value.profileHeader = DEFAULT_HEADER
   } else if (type === 'avatar') {
     userData.value.profilePicture = DEFAULT_AVATAR
@@ -429,15 +442,21 @@ const initializeUserData = async () => {
   try {
     isLoaded.value = false
     
-    // Сначала загружаем данные пользователя
+    // Сначала загружаем основные данные пользователя
     await fetchUserData()
     
-    // Затем параллельно загружаем остальные данные
-    await Promise.all([
+    // Затем параллельно загружаем посты и подписки
+    const [postsData] = await Promise.all([
       fetchUserPosts(),
       fetchUserSubs(),
       checkSubscriptionStatus()
     ])
+    
+    // Обновляем данные пользователя с полученными постами
+    userData.value = {
+      ...userData.value,
+      posts: postsData
+    }
     
     isLoaded.value = true
   } catch (error) {

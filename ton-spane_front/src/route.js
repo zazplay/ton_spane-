@@ -31,15 +31,11 @@ const routes = [
       { path: 'tape', component: () => import('./components/Page/TapePage.vue') },
       { path: 'notifications', component: () => import('./components/Page/NotificationsPage.vue') },
       { path: 'clips', component: () => import('./components/Page/ClipsPage.vue') },
-      { path: 'message', component: () => import('./components/Page/Message/MessagePage.vue') },
+      { path: 'message', component: () => import('./components/Page/Chats/ChatsPage.vue') },
       { path: 'search', component: () => import('./components/Page/SearchPage.vue') },
       { path: 'purchased', component: () => import('./components/Page/PurchasedPage.vue') },
       { path: 'more', component: () => import('./components/Page/More/MorePage.vue') },
-      {
-        path: 'user-chat/:id',
-        name: 'UserChat',
-        component: () => import('./components/Page/Message/UserChat.vue'),
-      },
+      
       {
         path: 'user/:id',
         component: () => import('./components/Page/UserPage/UserPage.vue'),

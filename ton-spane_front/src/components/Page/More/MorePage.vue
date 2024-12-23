@@ -57,5 +57,14 @@ export default {
   font-size: 15px;
   border-radius: 10px;
   margin-top: 25px;
+  
+}
+
+
+@media (max-width: 580px) {
+    .languageButton {
+  margin-left: 10px !important;
+  width: 95%;
+}
 }
 </style>

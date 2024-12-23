@@ -58,4 +58,11 @@ function toggleTheme() {
 .button-text {
   margin-left: 8px;
 }
+
+@media (max-width: 580px) {
+    .theme-button {
+  margin-left: 10px !important;
+  width: 95% !important;
+}
+}
 </style>

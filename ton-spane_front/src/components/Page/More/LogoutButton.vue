@@ -268,6 +268,10 @@
   .logout-button {
     height: 44px;
     font-size: 0.9em;
+    margin-left: 3px;
+    width: 100% !important;
+    height: 45px;
+    margin-top: -5px !important;
   }
 
   :deep(.el-dialog) {
