@@ -13,24 +13,44 @@ const toggleTheme = () => {
 <template>
   <div class="theme-switcher">
     <el-button
-      :icon="isDark ? Moon : Sunny"
       @click="toggleTheme"
-      circle
       class="theme-button"
-    />
+    >
+      <el-icon class="theme-icon">
+        <component :is="isDark ? Moon : Sunny" />
+      </el-icon>
+      <span class="button-text">{{ isDark ? 'Сменить тему на светлую' : 'Сменить тему на темную' }}</span>
+    </el-button>
   </div>
 </template>
 
 <style scoped>
 .theme-switcher {
-  position: fixed;
+  display: flex;
   top: 20px;
   right: 20px;
-  z-index: 1000;
+  width: 100% !important;
 }
 
-
 .theme-button {
+  font-size: 16px;
+  width: 90% !important;
+  margin-left: 38px;
+  margin-top: 25px;
+  margin-bottom: 0px;
+  height: 50px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.theme-icon {
   font-size: 20px;
+}
+
+.button-text {
+  margin-left: 8px;
 }
 </style>

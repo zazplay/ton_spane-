@@ -1,0 +1,21 @@
+{
+  "profile": {
+    "goToProfile": "Перейти к профилю >",
+    "loading": "Загрузка..."
+  },
+  "logout": {
+    "buttonText": "Выйти из профиля",
+    "dialogTitle": "Подтверждение выхода",
+    "dialogMessage": "Вы действительно хотите выйти?",
+    "cancelButton": "Отмена",
+    "confirmButton": "Выйти",
+    "errorMessage": "Произошла ошибка при выходе"
+  },
+  "more": {
+    "title": "Еще",
+    "language": {
+      "en": "English",
+      "ru": "Русский"
+    }
+  }
+}

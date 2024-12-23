@@ -14,6 +14,7 @@
       <el-main>
         <GoToProfile/>
         <ThemeSwitcher/>
+        <el-button class="languageButton">English</el-button>
         <LogoutButton />
       </el-main>
     </el-container>
@@ -48,5 +49,13 @@ export default {
   width: 100%;
   margin-top: 1em;
   font-size: x-large;
+}
+.languageButton{
+  margin-left: 37px;
+  width: 90%;
+  height: 50px;
+  font-size: 15px;
+  border-radius: 10px;
+  margin-top: 25px;
 }
 </style>

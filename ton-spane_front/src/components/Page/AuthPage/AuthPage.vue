@@ -1,59 +1,97 @@
 <template>
-  <div class="auth-container">
-    <div class="logo-container">
-  <div class="logo-icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path d="M17.516 3c2.382 0 4.487 1.564 4.487 4.712 0 4.963-6.528 8.297-10.003 11.935-3.475-3.638-10.002-6.971-10.002-11.934 0-3.055 2.008-4.713 4.487-4.713 3.18 0 4.846 3.644 5.515 5.312.667-1.666 2.333-5.312 5.516-5.312zm0-2c-2.174 0-4.346 1.062-5.516 3.419-1.17-2.357-3.342-3.419-5.515-3.419-3.403 0-6.484 2.39-6.484 6.689 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-4.586-3.414-6.689-6.484-6.689z" />
-    </svg>
-  </div>
-  <div class="logo-text">
-    <span class="text-gradient">Dream</span>scape
-  </div> 
-</div>
-    <div class="form-card">
-      <div class="header">
-        <div class="button-group">
-          <button @click="showLogin = true" :class="['header-btn', showLogin && 'active']">Вход</button>
-          <button @click="showLogin = false" :class="['header-btn', !showLogin && 'active']">Регистрация</button>
+  <div class="page-wrapper">
+    <!-- Размытый фон -->
+    <div class="background-container">
+      <div class="background-overlay"></div>
+    </div>
+    
+    <!-- Контент авторизации -->
+    <div class="auth-container">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M17.516 3c2.382 0 4.487 1.564 4.487 4.712 0 4.963-6.528 8.297-10.003 11.935-3.475-3.638-10.002-6.971-10.002-11.934 0-3.055 2.008-4.713 4.487-4.713 3.18 0 4.846 3.644 5.515 5.312.667-1.666 2.333-5.312 5.516-5.312zm0-2c-2.174 0-4.346 1.062-5.516 3.419-1.17-2.357-3.342-3.419-5.515-3.419-3.403 0-6.484 2.39-6.484 6.689 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-4.586-3.414-6.689-6.484-6.689z" />
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="text-gradient">Dream</span>scape
         </div>
       </div>
-      <div v-if="showLogin">
-        <h1 class="title">Войдите в аккаунт</h1>
 
-        <form @submit.prevent="submitForm" class="auth-form">
-          <div class="form-item">
-            <label for="email" class="label-style">Эл. почта</label>
-            <input v-model="ruleForm.email" type="email" id="email" placeholder="example@email.com" required />
-            <p v-if="errors.email" class="error-text">{{ errors.email }}</p>
+      <div class="form-card">
+        <div class="header">
+          <div class="button-group">
+            <button @click="showLogin = true" :class="['header-btn', showLogin && 'active']">
+              Вход
+            </button>
+            <button @click="showLogin = false" :class="['header-btn', !showLogin && 'active']">
+              Регистрация
+            </button>
           </div>
+        </div>
 
-          <div class="form-item">
-            <label for="pass" class="label-style">Пароль</label>
-            <div class="password-wrapper">
-              <input v-model="ruleForm.pass" :type="showPassword ? 'text' : 'password'" id="pass"
-                placeholder="Введите пароль" required />
-              <button type="button" class="toggle-password" @click="togglePasswordVisibility">
-                <i :class="showPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+        <div v-if="showLogin">
+          <h1 class="title">Войдите в аккаунт</h1>
+
+          <form @submit.prevent="submitForm" class="auth-form">
+            <div class="form-item">
+              <label for="email" class="label-style">Эл. почта</label>
+              <input 
+                v-model="ruleForm.email" 
+                type="email" 
+                id="email" 
+                placeholder="example@email.com" 
+                required 
+              />
+              <p v-if="errors.email" class="error-text">{{ errors.email }}</p>
+            </div>
+
+            <div class="form-item">
+              <label for="pass" class="label-style">Пароль</label>
+              <div class="password-wrapper">
+                <input 
+                  v-model="ruleForm.pass" 
+                  :type="showPassword ? 'text' : 'password'" 
+                  id="pass"
+                  placeholder="Введите пароль" 
+                  required 
+                />
+                <button 
+                  type="button" 
+                  class="toggle-password" 
+                  @click="togglePasswordVisibility"
+                >
+                  <i :class="showPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+                </button>
+              </div>
+              <p v-if="errors.pass" class="error-text">{{ errors.pass }}</p>
+            </div>
+
+            <div class="form-actions">
+              <button 
+                class="red-btn" 
+                type="button" 
+                @click="resetForm" 
+                :disabled="isLoading"
+              >
+                Очистить
+              </button>
+              <button 
+                type="submit" 
+                class="submit-btn blue-btn" 
+                :disabled="isLoading"
+              >
+                <span v-if="!isLoading">Войти</span>
+                <div v-else class="loading-spinner">
+                  <div class="spinner"></div>
+                </div>
               </button>
             </div>
-            <p v-if="errors.pass" class="error-text">{{ errors.pass }}</p>
-          </div>
-
-          <div class="form-actions">
-            <button class="red-btn" type="button" @click="resetForm" :disabled="isLoading">
-              Очистить
-            </button>
-            <button type="submit" class="submit-btn blue-btn" :disabled="isLoading">
-              <span v-if="!isLoading">Войти</span>
-              <div v-else class="loading-spinner">
-                <div class="spinner"></div>
-              </div>
-            </button>
-          </div>
-        </form>
-      </div>
-      <div v-else>
-        <RegisterForm />
+          </form>
+        </div>
+        <div v-else>
+          <RegisterForm />
+        </div>
       </div>
     </div>
   </div>
@@ -152,7 +190,109 @@ export default {
 </script>
 
 <style scoped>
-/* DreamScape Logo Styles */
+.page-wrapper {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.background-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.background-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%) scale(1.1);
+  background-image: url('@/assets/2MdY.gif');
+  background-size: cover;
+  background-position: center;
+  filter: blur(100px);
+  opacity: 0.8;
+}
+
+.background-overlay::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.auth-container {
+  position: relative;
+  z-index: 1;
+  width: 87%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  margin-top: -80px;
+}
+
+/* Обновленные стили для формы */
+.form-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Dark theme specific styles */
+html.dark .form-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Дополнительные стили для улучшения контраста */
+html.dark .title,
+html.dark .label-style,
+html.dark input::placeholder {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+html.dark .form-item input {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Hover эффекты для тёмной темы */
+html.dark .form-item input:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+html.dark .form-item input:focus {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* Анимация появления компонентов */
+.auth-container {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap');
 
 .logo-container {
@@ -163,7 +303,8 @@ export default {
   border-radius: 10px;
 }
 
-.logo-icon {
+/* Dark theme logo */
+html.dark .logo-icon {
   width: 60px;
   height: 60px;
   background: linear-gradient(45deg, #007bff, #00bfff);
@@ -172,6 +313,20 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+/* Light theme logo */
+html:not(.dark) .logo-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(45deg, #0057b7, #0098cc);
+  border-radius: 50%;
+  margin-right: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 15px rgba(0, 87, 183, 0.2);
 }
 
 .logo-icon svg {
@@ -180,17 +335,34 @@ export default {
   fill: white;
 }
 
-.logo-text {
+/* Dark theme logo text */
+html.dark .logo-text {
   font-size: 36px;
   background: linear-gradient(45deg, #007bff, #00bfff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.text-gradient {
+/* Light theme logo text */
+html:not(.dark) .logo-text {
+  font-size: 36px;
+  background: linear-gradient(45deg, #0057b7, #0098cc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Dark theme text gradient */
+html.dark .text-gradient {
   background: linear-gradient(45deg, #ffffff, #f0f8ff);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;  
+  -webkit-text-fill-color: transparent;
+}
+
+/* Light theme text gradient */
+html:not(.dark) .text-gradient {
+  background: linear-gradient(45deg, #1a1a1a, #4a4a4a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* Header Styles */
@@ -205,7 +377,8 @@ export default {
   gap: 10px;
 }
 
-.header-btn {
+/* Dark theme header button */
+html.dark .header-btn {
   padding: 10px 20px;
   font-size: 16px;
   font-weight: bold;
@@ -217,17 +390,47 @@ export default {
   cursor: pointer;
 }
 
-.header-btn:hover {
+/* Light theme header button */
+html:not(.dark) .header-btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  border: 2px solid rgba(81, 119, 255, 0.15);
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #4a5568;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+/* Dark theme header button hover */
+html.dark .header-btn:hover {
   background-color: rgba(79, 140, 255, 0.1);
   border-color: #4f8cff;
   color: #4f8cff;
 }
 
-.header-btn.active {
+/* Light theme header button hover */
+html:not(.dark) .header-btn:hover {
+  background-color: rgba(79, 140, 255, 0.05);
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+/* Dark theme active header button */
+html.dark .header-btn.active {
   background: linear-gradient(135deg, #4f8cff 0%, #2563eb 100%);
   color: white;
   border-color: transparent;
   box-shadow: 0 4px 12px rgba(79, 140, 255, 0.3);
+}
+
+/* Light theme active header button */
+html:not(.dark) .header-btn.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
 /* Container Styles */
@@ -239,7 +442,8 @@ export default {
   min-height: 80vh;
 }
 
-.form-card {
+/* Dark theme form card */
+html.dark .form-card {
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0 8px 32px rgba(0, 8, 78, 0.3);
@@ -251,8 +455,21 @@ export default {
   animation: fadeIn 0.5s ease-out;
 }
 
-/* Form Styles */
-.title {
+/* Light theme form card */
+html:not(.dark) .form-card {
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 8, 78, 0.15);
+  width: 100%;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(81, 119, 255, 0.1);
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Dark theme title */
+html.dark .title {
   text-align: center;
   font-size: 28px;
   margin-bottom: 30px;
@@ -260,6 +477,16 @@ export default {
   text-shadow: 0 0 10px rgba(79, 140, 255, 0.5);
 }
 
+/* Light theme title */
+html:not(.dark) .title {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 30px;
+  color: #1f2937;
+  text-shadow: 0 0 10px rgba(79, 140, 255, 0.2);
+}
+
+/* Form Styles */
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -270,10 +497,21 @@ export default {
   position: relative;
 }
 
-.form-item label {
+/* Dark theme form labels */
+html.dark .form-item label {
   font-size: 16px;
   font-weight: 500;
   color: #89a4d1;
+  margin-bottom: 8px;
+  display: block;
+  transition: color 0.3s ease;
+}
+
+/* Light theme form labels */
+html:not(.dark) .form-item label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #4a5568;
   margin-bottom: 8px;
   display: block;
   transition: color 0.3s ease;
@@ -283,7 +521,8 @@ export default {
   padding-left: 5px;
 }
 
-.form-item input {
+/* Dark theme form inputs */
+html.dark .form-item input {
   width: 100%;
   margin-top: 8px;
   padding: 12px 16px;
@@ -296,9 +535,31 @@ export default {
   box-sizing: border-box;
 }
 
-.form-item input:focus {
+/* Light theme form inputs */
+html:not(.dark) .form-item input {
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 2px solid rgba(81, 119, 255, 0.15);
+  border-radius: 8px;
+  color: #1f2937;
+  background-color: rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+/* Dark theme input focus */
+html.dark .form-item input:focus {
   border-color: #4f8cff;
   box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.2);
+  outline: none;
+}
+
+/* Light theme input focus */
+html:not(.dark) .form-item input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
   outline: none;
 }
 
@@ -326,26 +587,56 @@ form button[type="button"] {
   position: relative;
 }
 
-.red-btn {
+/* Dark theme red button */
+html.dark .red-btn {
   background: linear-gradient(135deg, #ff4b6e 0%, #d61f3d 100%);
   color: white;
 }
 
-.red-btn:hover {
+/* Light theme red button */
+html:not(.dark) .red-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+/* Dark theme red button hover */
+html.dark .red-btn:hover {
   background: linear-gradient(135deg, #ff3357 0%, #c01834 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(255, 75, 110, 0.3);
 }
 
-.blue-btn {
+/* Light theme red button hover */
+html:not(.dark) .red-btn:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+/* Dark theme blue button */
+html.dark .blue-btn {
   background: linear-gradient(135deg, #4f8cff 0%, #2563eb 100%);
   color: white;
 }
 
-.blue-btn:hover {
+/* Light theme blue button */
+html:not(.dark) .blue-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+/* Dark theme blue button hover */
+html.dark .blue-btn:hover {
   background: linear-gradient(135deg, #3b7dff 0%, #1654dc 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(79, 140, 255, 0.3);
+}
+
+/* Light theme blue button hover */
+html:not(.dark) .blue-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
 /* Password Field Styles */
@@ -359,7 +650,8 @@ form button[type="button"] {
   padding-right: 45px;
 }
 
-.toggle-password {
+/* Dark theme toggle password */
+html.dark .toggle-password {
   position: absolute;
   right: 5px;
   top: 57%;
@@ -373,8 +665,29 @@ form button[type="button"] {
   padding: 5px;
 }
 
-.toggle-password:hover {
+/* Light theme toggle password */
+html:not(.dark) .toggle-password {
+  position: absolute;
+  right: 5px;
+  top: 57%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #4a5568;
+  font-size: 18px;
+  transition: color 0.3s ease;
+  padding: 5px;
+}
+
+/* Dark theme toggle password hover */
+html.dark .toggle-password:hover {
   color: #4f8cff;
+}
+
+/* Light theme toggle password hover */
+html:not(.dark) .toggle-password:hover {
+  color: #3b82f6;
 }
 
 .toggle-password:focus {
@@ -402,7 +715,8 @@ form button[type="button"] {
   height: 24px;
 }
 
-.spinner {
+/* Dark theme spinner */
+html.dark .spinner {
   width: 24px;
   height: 24px;
   border: 3px solid rgba(255, 255, 255, 0.3);
@@ -411,13 +725,35 @@ form button[type="button"] {
   animation: spin 0.8s linear infinite;
 }
 
+/* Light theme spinner */
+html:not(.dark) .spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(59, 130, 246, 0.3);
+  border-radius: 50%;
+  border-top-color: #3b82f6;
+  animation: spin 0.8s linear infinite;
+}
+
 /* Button States */
-.submit-btn:disabled,
-.red-btn:disabled {
+/* Dark theme disabled buttons */
+html.dark .submit-btn:disabled,
+html.dark .red-btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+  background: linear-gradient(135deg, #4f8cff80 0%, #2563eb80 100%);
+}
+
+/* Light theme disabled buttons */
+html:not(.dark) .submit-btn:disabled,
+html:not(.dark) .red-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  background: linear-gradient(135deg, #3b82f680 0%, #2563eb80 100%);
 }
 
 .submit-btn span {
@@ -430,12 +766,22 @@ form button[type="button"] {
 }
 
 /* Hover Effects */
-.form-item:hover label {
+/* Dark theme hover effects */
+html.dark .form-item:hover label {
   color: #4f8cff;
 }
 
-.form-item input:focus + label {
+html.dark .form-item input:focus + label {
   color: #4f8cff;
+}
+
+/* Light theme hover effects */
+html:not(.dark) .form-item:hover label {
+  color: #3b82f6;
+}
+
+html:not(.dark) .form-item input:focus + label {
+  color: #3b82f6;
 }
 
 /* Animations */
@@ -463,17 +809,6 @@ form button[type="button"] {
   100% {
     transform: translateY(-20px);
     opacity: 0;
-  }
-}
-
-/* Dark Theme */
-@media (prefers-color-scheme: dark) {
-  .form-card {
-    background: rgba(17, 24, 39, 0.95);
-  }
-  /* Dark Theme Continued */
-  .form-item input {
-    background-color: rgba(17, 24, 39, 0.8);
   }
 }
 
@@ -528,30 +863,51 @@ form button[type="button"] {
   }
 }
 
-/* Additional hover effects for form elements */
-.form-item input:hover {
+/* Additional hover effects */
+/* Dark theme hover effects */
+html.dark .form-item input:hover {
   border-color: rgba(81, 119, 255, 0.4);
+}
+
+html.dark .form-card:hover {
+  border-color: rgba(81, 119, 255, 0.2);
+  box-shadow: 0 10px 40px rgba(0, 8, 78, 0.35);
+}
+
+/* Light theme hover effects */
+html:not(.dark) .form-item input:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+html:not(.dark) .form-card:hover {
+  border-color: rgba(59, 130, 246, 0.15);
+  box-shadow: 0 10px 40px rgba(0, 8, 78, 0.15);
 }
 
 .toggle-password:active {
   transform: translateY(-50%) scale(0.95);
 }
 
-.form-card:hover {
-  border-color: rgba(81, 119, 255, 0.2);
-  box-shadow: 0 10px 40px rgba(0, 8, 78, 0.35);
-}
-
 /* Enhanced focus states for accessibility */
-.header-btn:focus,
-.submit-btn:focus,
-.red-btn:focus,
-.toggle-password:focus {
+/* Dark theme focus states */
+html.dark .header-btn:focus,
+html.dark .submit-btn:focus,
+html.dark .red-btn:focus,
+html.dark .toggle-password:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.4);
 }
 
-/* Smooth transitions for interactive elements */
+/* Light theme focus states */
+html:not(.dark) .header-btn:focus,
+html:not(.dark) .submit-btn:focus,
+html:not(.dark) .red-btn:focus,
+html:not(.dark) .toggle-password:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* Smooth transitions */
 .form-card,
 .header-btn,
 .submit-btn,

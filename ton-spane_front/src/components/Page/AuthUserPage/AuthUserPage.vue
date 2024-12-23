@@ -375,12 +375,23 @@ onMounted(fetchUserData)
   width: 100%;
 }
 
-.header-image {
+/* Dark theme header image */
+html.dark .header-image {
   width: 100%;
   max-height: 300px !important;
   border-radius: 20px;
   margin-bottom: 10px;
   box-shadow: 0 8px 32px rgba(56, 189, 248, 0.2);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light theme header image */
+html:not(.dark) .header-image {
+  width: 100%;
+  max-height: 300px !important;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  box-shadow: 0 8px 32px rgba(56, 189, 248, 0.15);
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -414,7 +425,8 @@ onMounted(fetchUserData)
   opacity: 1;
 }
 
-.aside {
+/* Dark theme aside */
+html.dark .aside {
   width: 100%;
   display: flex;
   align-items: flex-start;
@@ -424,16 +436,38 @@ onMounted(fetchUserData)
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
+/* Light theme aside */
+html:not(.dark) .aside {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  background: linear-gradient(135deg, #f0f4f8 0%, #e6eaee 100%);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
 .profile-image {
   width: 15%;
   margin-right: 20px;
   position: relative;
 }
 
-.profile-image :deep(.el-image) {
+/* Dark theme profile image */
+html.dark .profile-image :deep(.el-image) {
   border-radius: 20px;
   border: 2px solid rgba(56, 189, 248, 0.4);
   box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+  width: 100%;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light theme profile image */
+html:not(.dark) .profile-image :deep(.el-image) {
+  border-radius: 20px;
+  border: 2px solid rgba(56, 189, 248, 0.3);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
   width: 100%;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
               box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -444,8 +478,23 @@ onMounted(fetchUserData)
   box-shadow: 0 10px 25px rgba(56, 189, 248, 0.35);
 }
 
-.upload-button {
+/* Dark theme upload button */
+html.dark .upload-button {
   background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light theme upload button */
+html:not(.dark) .upload-button {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
   color: white;
   padding: 8px 16px;
   border-radius: 8px;
@@ -474,15 +523,29 @@ onMounted(fetchUserData)
   gap: 10px;
 }
 
-.username {
+/* Dark theme username and email */
+html.dark .username {
   font-weight: 600;
   font-size: 1.25rem;
   color: #f8fafc;
   text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
 }
 
-.email {
+html.dark .email {
   color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+/* Light theme username and email */
+html:not(.dark) .username {
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #1f2937;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+html:not(.dark) .email {
+  color: #6b7280;
   font-size: 0.9rem;
 }
 
@@ -493,7 +556,8 @@ onMounted(fetchUserData)
   margin-left: auto;
 }
 
-.stat-badge {
+/* Dark theme stat badge */
+html.dark .stat-badge {
   color: rgba(255, 255, 255, 0.95);
   text-shadow: 0 2px 4px rgba(56, 189, 248, 0.3);
   font-weight: 500;
@@ -513,7 +577,29 @@ onMounted(fetchUserData)
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.stat-badge:hover {
+/* Light theme stat badge */
+html:not(.dark) .stat-badge {
+  color: #1f2937;
+  text-shadow: 0 2px 4px rgba(56, 189, 248, 0.2);
+  font-weight: 500;
+  border-radius: 15px;
+  padding: 12px 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(56, 189, 248, 0.1) 0%,
+    rgba(2, 132, 199, 0.2) 50%,
+    rgba(56, 189, 248, 0.1) 100%
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark theme stat badge hover */
+html.dark .stat-badge:hover {
   background: linear-gradient(
     135deg,
     rgba(56, 189, 248, 0.25) 0%,
@@ -527,8 +613,31 @@ onMounted(fetchUserData)
     0 0 20px rgba(56, 189, 248, 0.4);
 }
 
-.stat-date {
+/* Light theme stat badge hover */
+html:not(.dark) .stat-badge:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(56, 189, 248, 0.2) 0%,
+    rgba(2, 132, 199, 0.3) 50%,
+    rgba(56, 189, 248, 0.2) 100%
+  );
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 12px rgba(0, 0, 0, 0.15),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3),
+    0 0 20px rgba(56, 189, 248, 0.3);
+}
+
+/* Dark theme stat date */
+html.dark .stat-date {
   color: #94a3b8;
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+/* Light theme stat date */
+html:not(.dark) .stat-date {
+  color: #6b7280;
   font-size: 0.9rem;
   text-align: right;
 }
@@ -543,7 +652,7 @@ onMounted(fetchUserData)
   margin-bottom: 20px;
 }
 
-/* Темная тема - .about-section */
+/* Dark theme about section */
 html.dark .about-section {
   width: 99%;
   min-height: 150px;
@@ -556,7 +665,7 @@ html.dark .about-section {
   color: white !important;
 }
 
-/* Светлая тема - .about-section */
+/* Light theme about section */
 html:not(.dark) .about-section {
   width: 99%;
   min-height: 150px;
@@ -569,7 +678,7 @@ html:not(.dark) .about-section {
   color: #1f2937 !important;
 }
 
-/* Темная тема - .about-section :deep(.el-collapse-item__header) */
+/* Dark theme collapse header */
 html.dark .about-section :deep(.el-collapse-item__header) {
   padding: 0.4rem 0.6rem;
   background: transparent;
@@ -577,7 +686,7 @@ html.dark .about-section :deep(.el-collapse-item__header) {
   color: #f8fafc;
 }
 
-/* Светлая тема - .about-section :deep(.el-collapse-item__header) */
+/* Light theme collapse header */
 html:not(.dark) .about-section :deep(.el-collapse-item__header) {
   padding: 0.4rem 0.6rem;
   background: transparent;
@@ -585,38 +694,46 @@ html:not(.dark) .about-section :deep(.el-collapse-item__header) {
   color: #1f2937;
 }
 
-/* Темная тема - .about-section :deep(.el-collapse-item__content) */
+/* Dark theme collapse content */
 html.dark .about-section :deep(.el-collapse-item__content) {
   padding: 0.4rem 0.6rem;
   width: 95%;
   color: #ffffff !important;
 }
 
-/* Светлая тема - .about-section :deep(.el-collapse-item__content) */
+/* Light theme collapse content */
 html:not(.dark) .about-section :deep(.el-collapse-item__content) {
   padding: 0.4rem 0.6rem;
   width: 95%;
   color: #1f2937 !important;
 }
 
-/* Темная тема - .collapse-header .title */
+/* Dark theme title */
 html.dark .collapse-header .title {
   font-size: 0.95rem;
   font-weight: 500;
   color: #38bdf8;
 }
 
-/* Светлая тема - .collapse-header .title */
+/* Light theme title */
 html:not(.dark) .collapse-header .title {
   font-size: 0.95rem;
   font-weight: 500;
   color: #0284c7;
 }
 
-.collapse-content {
+/* Dark theme collapse content */
+html.dark .collapse-content {
   font-size: 0.875rem;
   line-height: 1.4;
   color: #ffffff;
+}
+
+/* Light theme collapse content */
+html:not(.dark) .collapse-content {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #1f2937;
 }
 
 .edit-form {
@@ -628,25 +745,48 @@ html:not(.dark) .collapse-header .title {
   margin-bottom: 15px;
 }
 
-.edit-form :deep(.el-form-item__label) {
+/* Dark theme form styles */
+html.dark .edit-form :deep(.el-form-item__label) {
   color: #f8fafc;
   font-size: 0.9rem;
 }
 
-.edit-form :deep(.el-input__inner) {
+html.dark .edit-form :deep(.el-input__inner) {
   background: #1e293b;
   border-color: rgba(56, 189, 248, 0.25);
   color: #f8fafc;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.edit-form :deep(.el-input__inner):focus {
+html.dark .edit-form :deep(.el-input__inner):focus {
   border-color: #38bdf8;
   box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
 }
 
-.edit-form :deep(.el-form-item__error) {
+html.dark .edit-form :deep(.el-form-item__error) {
   color: #fb7185;
+}
+
+/* Light theme form styles */
+html:not(.dark) .edit-form :deep(.el-form-item__label) {
+  color: #1f2937;
+  font-size: 0.9rem;
+}
+
+html:not(.dark) .edit-form :deep(.el-input__inner) {
+  background: #ffffff;
+  border-color: rgba(56, 189, 248, 0.2);
+  color: #1f2937;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html:not(.dark) .edit-form :deep(.el-input__inner):focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.15);
+}
+
+html:not(.dark) .edit-form :deep(.el-form-item__error) {
+  color: #ef4444;
 }
 
 .actions {
