@@ -7,29 +7,29 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import router from './route.js'
 import store from './store'
 
-// Функция для определения темы по времени суток
-function getThemeByTime() {
+// Функция для определения начальной темы
+function getInitialTheme() {
+  // Проверяем, есть ли сохраненная тема
+  const savedTheme = localStorage.getItem('theme')
+  if (savedTheme) {
+    return savedTheme
+  }
+  
+  // Если темы нет, определяем по времени суток
   const hours = new Date().getHours()
-  // Считаем дневное время с 6 утра до 18 вечера
   return hours >= 6 && hours < 16 ? 'light' : 'dark'
 }
 
-// Устанавливаем тему из localStorage или определяем по времени
-const savedTheme = localStorage.getItem('theme') || getThemeByTime()
-document.documentElement.className = savedTheme
+// Устанавливаем начальную тему
+const initialTheme = getInitialTheme()
+document.documentElement.className = initialTheme
+localStorage.setItem('theme', initialTheme)
 
-// Функция для обновления темы
-function updateTheme() {
-  const newTheme = getThemeByTime()
+// Экспортируем функцию для использования в других компонентах
+export function setTheme(newTheme) {
   document.documentElement.className = newTheme
   localStorage.setItem('theme', newTheme)
 }
-
-// Обновляем тему каждый час
-setInterval(updateTheme, 3600000) // 3600000 мс = 1 час
-
-// Вызываем updateTheme сразу при загрузке
-updateTheme()
 
 const app = createApp(App)
 
@@ -37,16 +37,14 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
 
-// eslint-disable-next-line no-unused-vars
-app.config.errorHandler = (err, vm, info) => {
+app.config.errorHandler = (err) => {
   if (err.message === 'Script error.') {
     return
   }
   console.error(err)
 }
 
-// eslint-disable-next-line no-unused-vars
-window.onerror = function(msg, url, lineNo, columnNo, error) {
+window.onerror = function(msg) {
   if (msg === 'Script error.') {
     return false
   }

@@ -1,12 +1,17 @@
 <script lang="js" setup>
 import { ref } from 'vue'
 import { Moon, Sunny } from '@element-plus/icons-vue'
+import { setTheme } from '@/main.js'
 
 const isDark = ref(document.documentElement.className === 'dark')
 
-const toggleTheme = () => {
-  isDark.value = !isDark.value
-  document.documentElement.className = isDark.value ? 'dark' : ''
+
+
+
+function toggleTheme() {
+  const currentTheme = document.documentElement.className
+  const newTheme = currentTheme === 'light' ? 'dark' : 'light'
+  setTheme(newTheme)
 }
 </script>
 
