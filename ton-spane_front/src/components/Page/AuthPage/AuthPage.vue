@@ -360,7 +360,7 @@ html.dark .text-gradient {
 
 /* Light theme text gradient */
 html:not(.dark) .text-gradient {
-  background: linear-gradient(45deg, #1a1a1a, #4a4a4a);
+  background: linear-gradient(45deg, #ffffff, #d27bdb);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
