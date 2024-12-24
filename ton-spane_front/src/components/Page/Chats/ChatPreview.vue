@@ -115,6 +115,8 @@ const openChatModal = () => {
   border-radius: 16px !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid transparent;
+  height: 100px;
+  padding-top: 0px !important;
 }
 
 /* Темная тема */
@@ -168,7 +170,7 @@ html:not(.dark) .message-preview {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 14px 18px;
+  padding: 0px 20px;
 }
 
 .avatar-container {
