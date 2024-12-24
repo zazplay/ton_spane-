@@ -1,116 +1,222 @@
 <template>
-    <el-card 
-      class="chat-preview" 
-      shadow="never" 
-      @click="openChat"
-    >
-      <div class="preview-container">
-        <el-avatar 
-          :size="48" 
-          src="" 
+  <el-card
+    class="chat-preview"
+    shadow="never"
+    @click="openChatModal"
+  >
+    <div class="preview-container">
+      <div class="avatar-container">
+        <el-avatar
+          :size="52"
+          :src="avatarUrl"
           class="avatar-wrapper"
         >
           <template #default>
             <el-icon><User /></el-icon>
           </template>
         </el-avatar>
-        <div class="status-indicator" :class="{ 'online': isOnline }"></div>
         
-        <div class="chat-content">
-          <div class="chat-header">
-            <el-text class="username" size="large">John Doe</el-text>
-            <el-text class="timestamp" type="info" size="small">14:32</el-text>
+      </div>
+      
+      <div class="chat-content">
+        <div class="chat-header">
+          <div class="name-container">
+            <el-text class="username" size="large">{{ username }}</el-text>
+            <el-icon 
+              v-if="isPinned" 
+              class="pinned-icon" 
+              :size="16"
+            >
+              <Position />
+            </el-icon>
           </div>
+          <el-text class="timestamp" type="info" size="small">{{ timestamp }}</el-text>
+        </div>
+        
+        <div class="chat-footer">
+          <el-text class="message-preview" truncated>
+            {{ lastMessage }}
+          </el-text>
           
-          <div class="chat-footer">
-            <el-text class="message-preview" truncated>
-              The last message preview goes here...
-            </el-text>
-            
-            <div class="indicators">
-              <el-badge 
-                v-if="unreadCount" 
-                :value="unreadCount" 
-                class="unread-badge" 
-                type="primary"
-              />
-              <el-icon v-if="isPinned" class="pinned-icon" :size="16">
-                <Position />
-              </el-icon>
-            </div>
-          </div>
+          <el-badge
+            v-if="unreadCount"
+            :value="unreadCount"
+            class="unread-badge"
+            type="primary"
+          />
         </div>
       </div>
-    </el-card>
-  </template>
-  
-  <script setup>
-  /* eslint-disable */
-  // Only import the icons we need
-  import { User, Position } from '@element-plus/icons-vue'
-  
-  // defineProps is automatically available in <script setup>
-  const props = defineProps({
-    isOnline: {
-      type: Boolean,
-      default: true
-    },
-    unreadCount: {
-      type: Number,
-      default: 3
-    },
-    isPinned: {
-      type: Boolean,
-      default: true
-    }
-  })
-  
-  // Add eslint-disable-next-line for unused props
-  // eslint-disable-next-line no-unused-vars
-  const openChat = () => {
-    console.log('Opening chat...')
+    </div>
+  </el-card>
+
+  <UsersChat
+    v-if="showChat"
+    :show="showChat"
+    :chat-id="chatId"
+    :username="username"
+    :avatar-url="avatarUrl"
+    :is-online="isOnline"
+    @update:show="showChat = $event"
+  />
+</template>
+
+<script setup>
+import { ref, defineProps } from 'vue'
+import { User, Position } from '@element-plus/icons-vue'
+import UsersChat from './UsersChat.vue'
+
+defineProps({
+  chatId: {
+    type: String,
+    required: true
+  },
+  username: {
+    type: String,
+    required: true
+  },
+  avatarUrl: {
+    type: String,
+    default: ''
+  },
+  isOnline: {
+    type: Boolean,
+    default: true
+  },
+  lastMessage: {
+    type: String,
+    default: ''
+  },
+  timestamp: {
+    type: String,
+    required: true
+  },
+  unreadCount: {
+    type: Number,
+    default: 0
+  },
+  isPinned: {
+    type: Boolean,
+    default: false
   }
-  </script>
-  
-  <style scoped>
-  .chat-preview {
-  width: 92%;
-  margin: 20px 0 0 30px;
+})
+
+const showChat = ref(false)
+
+const openChatModal = () => {
+  showChat.value = true
+}
+</script>
+
+<style scoped>
+.chat-preview {
+  width: 94%;
+  margin: 16px auto;
   cursor: pointer;
-  border-radius: 20px !important;
-  background-color: var(--el-bg-color-page);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 16px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
 }
 
-.chat-preview:hover {
-  background-color: var(--el-bg-color-overlay);
+/* Темная тема */
+html.dark .chat-preview {
+  background: linear-gradient(145deg, #1a1f25, #161b22);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
 }
 
+html.dark .chat-preview:hover {
+  background: linear-gradient(145deg, #1c2128, #1a1f25);
+  transform: translateY(-2px) scale(1.01);
+  border-color: rgba(99, 102, 241, 0.1);
+}
+
+html.dark .username {
+  color: #f3f4f6;
+}
+
+html.dark .timestamp,
+html.dark .message-preview {
+  color: #9ca3af;
+}
+
+html.dark .status-indicator {
+  border: 2px solid #161b22;
+}
+
+/* Светлая тема */
+html:not(.dark) .chat-preview {
+  background: linear-gradient(145deg, #ffffff, #f8fafc);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+}
+
+html:not(.dark) .chat-preview:hover {
+  background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+  transform: translateY(-2px) scale(1.01);
+  border-color: rgba(99, 102, 241, 0.1);
+}
+
+html:not(.dark) .username {
+  color: #111827;
+}
+
+html:not(.dark) .timestamp,
+html:not(.dark) .message-preview {
+  color: #6b7280;
+}
+
+/* Общие стили */
 .preview-container {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
+  padding: 14px 18px;
 }
 
-.avatar-wrapper {
+.avatar-container {
   position: relative;
   flex-shrink: 0;
 }
 
+.avatar-wrapper {
+  background: linear-gradient(145deg, #6366f1, #4f46e5);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.avatar-wrapper:hover {
+  transform: scale(1.05);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
 .status-indicator {
   position: absolute;
-  left: 48px;
-  top: 36px;
-  width: 12px;
-  height: 12px;
+  right: 0;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background-color: var(--el-text-color-disabled);
-  border: 2px solid var(--el-bg-color-page);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .status-indicator.online {
-  background-color: var(--el-color-success);
+  background: linear-gradient(145deg, #34d399, #059669);
+  box-shadow: 0 2px 4px rgba(52, 211, 153, 0.3);
+}
+
+.status-indicator.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(52, 211, 153, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
+  }
 }
 
 .chat-content {
@@ -122,54 +228,114 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+}
+
+.name-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .username {
   font-weight: 600;
-  margin-right: 8px;
-  color: var(--el-text-color-primary);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.username::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background: linear-gradient(90deg, #6366f1, #4f46e5);
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+
+.chat-preview:hover .username::after {
+  width: 100%;
+}
+
+.pinned-icon {
+  color: #6366f1;
+  transition: all 0.3s ease;
+  opacity: 0.8;
+}
+
+.chat-preview:hover .pinned-icon {
+  transform: rotate(45deg);
+  opacity: 1;
 }
 
 .timestamp {
-  white-space: nowrap;
-  color: var(--el-text-color-secondary);
-  font-size: 0.9em;
+  font-size: 0.85em;
+  font-weight: 500;
+  transition: color 0.3s ease;
 }
 
 .chat-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
 }
 
 .message-preview {
   flex: 1;
-  margin-right: 8px;
-  color: var(--el-text-color-secondary);
+  font-size: 0.95em;
+  transition: color 0.3s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.indicators {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.unread-badge {
+  :deep(.el-badge__content) {
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    font-size: 0.85em;
+    font-weight: 600;
+    background: linear-gradient(145deg, #6366f1, #4f46e5);
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+    transition: all 0.3s ease;
+  }
 }
 
-.unread-badge :deep(.el-badge__content) {
-  min-width: 20px;
+.unread-badge:hover :deep(.el-badge__content) {
+  transform: scale(1.1);
 }
 
-.pinned-icon {
-  color: var(--el-text-color-disabled);
-}
-
-:deep(.el-card__body) {
-  padding: 12px 16px;
-}
 @media (max-width: 580px) {
-    .chat-preview {
-  margin-left: 10px;
-  width: 93%;
+  .chat-preview {
+    width: 96%;
+    margin: 12px auto;
+  }
+  
+  .preview-container {
+    padding: 12px 14px;
+  }
+  
+  .avatar-wrapper {
+    width: 46px;
+    height: 46px;
+  }
+  
+  .status-indicator {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .username {
+    font-size: 0.95em;
+  }
+  
+  .timestamp,
+  .message-preview {
+    font-size: 0.85em;
+  }
 }
-}
-  </style>
+</style>
