@@ -130,6 +130,9 @@ const handleLike = async () => {
   try {
     const endpoint = isLiked.value ? 'unlike' : 'like'
     const method = isLiked.value ? 'DELETE' : 'POST'
+    isLiked.value = !isLiked.value
+    likes.value = isLiked.value ? likes.value + 1 : likes.value - 1
+
     
     const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/likes/${userId.value}/${endpoint}/${props.id}`, {
       method: method,
@@ -143,8 +146,6 @@ const handleLike = async () => {
       throw new Error('Failed to update like')
     }
 
-    isLiked.value = !isLiked.value
-    likes.value = isLiked.value ? likes.value + 1 : likes.value - 1
     
     emit('like', isLiked.value)
 
@@ -153,38 +154,74 @@ const handleLike = async () => {
   }
 }
 
+const checkSubscriptionStatus = async () => {
+  try {
+    const response = await fetch(
+      `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId.value}/following`,
+      {
+        method: 'GET',
+        headers: {
+          'accept': '*/*'
+        }
+      }
+    );
+
+    if (response.ok) {
+      const followingList = await response.json();
+      return followingList.some(user => user.id === props.user.id);
+    }
+    return false;
+  } catch (error) {
+    console.error('Error checking subscription status:', error);
+    return false;
+  }
+};
+
 const handleSubscribe = async () => {
   try {
-    if (isSubscribed.value) {
-      // Отписка
-      await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId.value}/unfollow/${props.user.id}`, {
-        method: 'DELETE',
-        headers: {
-          'accept': '*/*',
-          'Content-Type': 'application/json'
-        }
-      });
-      isSubscribed.value = !isSubscribed.value;
+    // Сразу меняем визуальное состояние
+    isSubscribed.value = !isSubscribed.value;
+    
+    // Отправляем событие для обновления UI
+    emit('subscribe', isSubscribed.value);
 
+    // Проверяем текущий статус подписки
+    const currentStatus = await checkSubscriptionStatus();
+    
+    if (currentStatus) {
+      // Отписка
+      await fetch(
+        `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId.value}/unfollow/${props.user.id}`, 
+        {
+          method: 'DELETE',
+          headers: {
+            'accept': '*/*',
+            'Content-Type': 'application/json'
+          }
+        }
+      );
     } else {
       // Подписка
-      await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId.value}/follow/${props.user.id}`, {
-        method: 'POST',
-        headers: {
-          'accept': '*/*',
-          'Content-Type': 'application/json'
-        },
-        body: '' 
-      });
-      isSubscribed.value = !isSubscribed.value;
+      await fetch(
+        `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId.value}/follow/${props.user.id}`, 
+        {
+          method: 'POST',
+          headers: {
+            'accept': '*/*',
+            'Content-Type': 'application/json'
+          },
+          body: ''
+        }
+      );
     }
     
-    // Обновляем флажок и уведомляем родительский компонент
-    emit('subscribe', isSubscribed.value);
   } catch (error) {
     console.error('Error while subscribing/unsubscribing:', error);
+    // В случае ошибки возвращаем предыдущее состояние
+    isSubscribed.value = !isSubscribed.value;
+    emit('subscribe', isSubscribed.value);
   }
-}
+};
 
 const handleShare = () => {
   isShared.value = !isShared.value
