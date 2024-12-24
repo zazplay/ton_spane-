@@ -73,7 +73,9 @@
           </el-card>
         </el-main>
       </el-container>
-
+      <el-button type="success" class="action-Chat" plain @click="openDonateYearPage">
+        Написать
+      </el-button>
       <el-button 
         :type="isSubscribed ? 'success' : 'primary'"
         class="action-buttonFreeSubscribe" 
@@ -97,6 +99,8 @@
       <el-button type="success" class="action-buttonYearSub" plain @click="openDonateYearPage">
         Купить годовую подписку за 150$
       </el-button>
+
+      
     </el-container>
     
     <ListPostCards
@@ -438,32 +442,38 @@ const openDonateYearPage = () => {
   router.push(`/app/userSubscribeDonateYear/${userId}`)
 }
 
+// В функции initializeUserData добавим расчет лайков
 const initializeUserData = async () => {
   try {
-    isLoaded.value = false
+    isLoaded.value = false;
     
-    // Сначала загружаем основные данные пользователя
-    await fetchUserData()
+    // Загружаем основные данные пользователя
+    await fetchUserData();
     
-    // Затем параллельно загружаем посты и подписки
+    // Параллельно загружаем посты и подписки
     const [postsData] = await Promise.all([
       fetchUserPosts(),
       fetchUserSubs(),
       checkSubscriptionStatus()
-    ])
+    ]);
     
     // Обновляем данные пользователя с полученными постами
     userData.value = {
       ...userData.value,
       posts: postsData
-    }
+    };
+
+    // Рассчитываем общее количество лайков из всех постов
+    userLikes.value = postsData.reduce((total, post) => {
+      return total + (Array.isArray(post.likes) ? post.likes.length : 0);
+    }, 0);
     
-    isLoaded.value = true
+    isLoaded.value = true;
   } catch (error) {
-    if (error.name === 'AbortError') return
-    console.error('Error initializing data:', error)
-    ElMessage.error('Ошибка при загрузке данных')
-    isLoaded.value = true
+    if (error.name === 'AbortError') return;
+    console.error('Error initializing data:', error);
+    ElMessage.error('Ошибка при загрузке данных');
+    isLoaded.value = true;
   }
 }
 
@@ -927,6 +937,8 @@ html:not(.dark) .about-content:contains('Описание не добавлен�
   font-style: italic;
 }
 
+
+
 /* Стили кнопок подписки */
 .action-buttonFreeSubscribe,
 .action-buttonYearSub,
@@ -1049,6 +1061,77 @@ html:not(.dark) .about-content:contains('Описание не добавлен�
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Enhanced Chat Button Styles */
+.action-Chat {
+  width: 99%;
+  height: auto !important;
+  align-self: center;
+  font-weight: bold;
+  padding: 15px 20px;
+  margin: 10px 0;
+  border: 2px solid #67c23a !important;
+  border-radius: 12px;
+  color: #67c23a !important;
+  font-size: 1.25rem !important;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Icon styles */
+.action-Chat::before {
+  content: "✏️";
+  font-size: 1.2rem;
+  margin-right: 4px;
+  transition: transform 0.3s ease;
+}
+
+/* Underline animation */
+.action-Chat::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #67c23a, #95d475, #67c23a);
+  background-size: 200% 100%;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+/* Hover effects */
+.action-Chat:hover {
+  background-color: rgba(103, 194, 58, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(103, 194, 58, 0.2);
+}
+
+.action-Chat:hover::before {
+  transform: rotate(-10deg);
+}
+
+.action-Chat:hover::after {
+  transform: scaleX(1);
+  animation: shimmer 2s infinite linear;
+}
+
+/* Shimmer animation for underline */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }
 
