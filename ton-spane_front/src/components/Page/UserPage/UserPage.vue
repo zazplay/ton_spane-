@@ -73,7 +73,7 @@
           </el-card>
         </el-main>
       </el-container>
-      <el-button type="success" class="action-Chat" plain @click="openDonateYearPage">
+      <el-button type="success" class="action-Chat" plain @click="openChatsPage">
         Написать
       </el-button>
       <el-button 
@@ -272,6 +272,50 @@ const fetchUserData = async () => {
   }
 }
 
+const createChat = async (route, userId) => {
+  const abortController = new AbortController();
+  
+  try {
+    const response = await fetch(
+      'https://ton-back-e015fa79eb60.herokuapp.com/api/chats',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: userId,
+          modelId: route.params.id
+        }),
+        signal: abortController.signal
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    return {
+      ...data,
+      userId: userId,
+      modelId: route.params.id,
+      // Добавьте дополнительные поля если они нужны в ответе
+    };
+
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      return null;
+    }
+    console.error('Error creating chat:', err);
+    ElMessage.error('Ошибка при создании чата');
+    return null;
+  } finally {
+    abortController.abort();
+  }
+};
+
 const fetchUserPosts = async () => {
   try {
     const response = await fetch(
@@ -441,6 +485,18 @@ const openDonatePage = () => {
 const openDonateYearPage = () => {
   router.push(`/app/userSubscribeDonateYear/${userId}`)
 }
+
+const openChatsPage = async () => {
+  try {
+    const chatData = await createChat(route, CurrUserId.value);
+    if (chatData) {
+      router.push(`/app/message`);
+    }
+  } catch (error) {
+    console.error('Error opening chat:', error);
+    ElMessage.error('Ошибка при создании чата');
+  }
+};
 
 // В функции initializeUserData добавим расчет лайков
 const initializeUserData = async () => {

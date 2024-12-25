@@ -33,19 +33,39 @@
         <div v-if="showLogin">
           <h1 class="title">Войдите в аккаунт</h1>
 
+          <!-- Переключатель метода входа -->
+          <div class="auth-method-switch">
+            <button 
+              @click="loginMethod = 'email'" 
+              :class="['switch-btn', loginMethod === 'email' && 'active']"
+            >
+              По email
+            </button>
+            <button 
+              @click="loginMethod = 'username'" 
+              :class="['switch-btn', loginMethod === 'username' && 'active']"
+            >
+              По нику
+            </button>
+          </div>
+
           <form @submit.prevent="submitForm" class="auth-form">
+            <!-- Поле для email/username -->
             <div class="form-item">
-              <label for="email" class="label-style">Эл. почта</label>
+              <label :for="loginMethod" class="label-style">
+                {{ loginMethod === 'email' ? 'Эл. почта' : 'Никнейм' }}
+              </label>
               <input 
-                v-model="ruleForm.email" 
-                type="email" 
-                id="email" 
-                placeholder="example@email.com" 
+                v-model="ruleForm[loginMethod]" 
+                :type="loginMethod === 'email' ? 'email' : 'text'"
+                :id="loginMethod"
+                :placeholder="loginMethod === 'email' ? 'example@email.com' : 'Введите никнейм'" 
                 required 
               />
-              <p v-if="errors.email" class="error-text">{{ errors.email }}</p>
+              <p v-if="errors[loginMethod]" class="error-text">{{ errors[loginMethod] }}</p>
             </div>
 
+            <!-- Поле для пароля -->
             <div class="form-item">
               <label for="pass" class="label-style">Пароль</label>
               <div class="password-wrapper">
@@ -67,6 +87,7 @@
               <p v-if="errors.pass" class="error-text">{{ errors.pass }}</p>
             </div>
 
+            <!-- Кнопки действий -->
             <div class="form-actions">
               <button 
                 class="red-btn" 
@@ -111,12 +132,15 @@ export default {
     return {
       ruleForm: {
         email: "",
+        username: "",
         pass: "",
       },
       errors: {
         email: "",
+        username: "",
         pass: "",
       },
+      loginMethod: "email",
       showPassword: false,
       showLogin: true,
       isLoading: false,
@@ -125,11 +149,18 @@ export default {
   methods: {
     validateForm() {
       const errors = {};
-      const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!this.ruleForm.email) {
-        errors.email = "Пожалуйста, введите email";
-      } else if (!emailPattern.test(this.ruleForm.email)) {
-        errors.email = "Пожалуйста, введите корректный email";
+      
+      if (this.loginMethod === 'email') {
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!this.ruleForm.email) {
+          errors.email = "Пожалуйста, введите email";
+        } else if (!emailPattern.test(this.ruleForm.email)) {
+          errors.email = "Пожалуйста, введите корректный email";
+        }
+      } else {
+        if (!this.ruleForm.username) {
+          errors.username = "Пожалуйста, введите никнейм";
+        }
       }
 
       const { pass } = this.ruleForm;
@@ -146,16 +177,19 @@ export default {
       this.errors = errors;
       return Object.keys(errors).length === 0;
     },
+
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
     },
+
     async submitForm() {
       if (this.validateForm()) {
         this.isLoading = true;
         try {
           const apiUrl = `${config.API_BASE_URL}/auth/login/`;
           const payload = {
-            email: this.ruleForm.email,
+            // Используем email как поле для обоих случаев
+            email: this.loginMethod === 'email' ? this.ruleForm.email : this.ruleForm.username,
             password: this.ruleForm.pass,
           };
 
@@ -180,12 +214,22 @@ export default {
         console.log("Ошибка валидации формы!");
       }
     },
+
     resetForm() {
       this.ruleForm.email = "";
+      this.ruleForm.username = "";
       this.ruleForm.pass = "";
       this.errors = {};
     },
   },
+  
+  watch: {
+    loginMethod() {
+      this.errors = {};
+      this.ruleForm.email = "";
+      this.ruleForm.username = "";
+    }
+  }
 };
 </script>
 
@@ -915,5 +959,89 @@ html:not(.dark) .toggle-password:focus {
 .form-item input,
 .toggle-password {
   will-change: transform, box-shadow, border-color;
+}
+
+/* Новые стили для переключателя метода входа */
+.auth-method-switch {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 0 10px;
+}
+
+/* Dark theme switch button */
+html.dark .switch-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 2px solid rgba(81, 119, 255, 0.2);
+  border-radius: 6px;
+  background-color: rgba(30, 41, 59, 0.8);
+  color: #89a4d1;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+/* Light theme switch button */
+html:not(.dark) .switch-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 2px solid rgba(81, 119, 255, 0.15);
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #4a5568;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+/* Dark theme active switch button */
+html.dark .switch-btn.active {
+  background: linear-gradient(135deg, #4f8cff 0%, #2563eb 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(79, 140, 255, 0.3);
+}
+
+/* Light theme active switch button */
+html:not(.dark) .switch-btn.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+/* Dark theme hover effects */
+html.dark .switch-btn:hover:not(.active) {
+  background-color: rgba(79, 140, 255, 0.1);
+  border-color: #4f8cff;
+  color: #4f8cff;
+}
+
+/* Light theme hover effects */
+html:not(.dark) .switch-btn:hover:not(.active) {
+  background-color: rgba(59, 130, 246, 0.05);
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+/* Focus states for accessibility */
+.switch-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* Responsive styles for switch buttons */
+@media screen and (max-width: 480px) {
+  .auth-method-switch {
+    flex-direction: row;
+    width: 100%;
+  }
+  
+  .switch-btn {
+    flex: 1;
+    text-align: center;
+  }
 }
 </style>

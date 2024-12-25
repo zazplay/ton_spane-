@@ -56,10 +56,11 @@ export default {
     const store = useStore();
     const userId = computed(() => store.getters.getSub);
     const chats = ref([]);
+    console.log(userId.value);
 
     const fetchChats = async () => {
       try {
-        const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/chats/user/${userId.value}`);
+        const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/chats/model/${userId.value}`);
         const data = await response.json();
         chats.value = data;
       } catch (error) {
