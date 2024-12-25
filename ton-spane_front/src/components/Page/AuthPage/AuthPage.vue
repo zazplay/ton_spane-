@@ -193,6 +193,13 @@ export default {
             password: this.ruleForm.pass,
           };
 
+          if(this.loginMethod === 'email'){
+            sessionStorage.setItem("userType", "user");
+          }
+          else{
+            sessionStorage.setItem("userType", "model");
+          }
+
           const response = await axios.post(apiUrl, payload);
 
           if (response.data.accessToken) {

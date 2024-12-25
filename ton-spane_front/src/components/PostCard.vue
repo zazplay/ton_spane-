@@ -78,10 +78,10 @@ const props = defineProps({
 const emit = defineEmits(['like', 'share', 'donate', 'subscribe'])
 
 onMounted(() => {
-  console.log('Card props:', {
-    id: props.id,
-    isLikedByCurrentUser: props.isLikedByCurrentUser
-  })
+  // console.log('Card props:', {
+  //   id: props.id,
+  //   isLikedByCurrentUser: props.isLikedByCurrentUser
+  // })
 })
 
 const subscriptionModalRef = ref(null)
@@ -127,6 +127,8 @@ const formatDate = (dateString) => {
 }
 
 const handleLike = async () => {
+  if (sessionStorage.getItem("userType").toString() == "user"){
+
   try {
     const endpoint = isLiked.value ? 'unlike' : 'like'
     const method = isLiked.value ? 'DELETE' : 'POST'
@@ -153,8 +155,11 @@ const handleLike = async () => {
     console.error('Error updating like:', error)
   }
 }
+}
 
 const checkSubscriptionStatus = async () => {
+  if (sessionStorage.getItem("userType").toString() == "user"){
+
   try {
     const response = await fetch(
       `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId.value}/following`,
@@ -175,9 +180,12 @@ const checkSubscriptionStatus = async () => {
     console.error('Error checking subscription status:', error);
     return false;
   }
+}
 };
 
 const handleSubscribe = async () => {
+  if (sessionStorage.getItem("userType").toString() == "user"){
+
   try {
     // Сразу меняем визуальное состояние
     isSubscribed.value = !isSubscribed.value;
@@ -221,6 +229,7 @@ const handleSubscribe = async () => {
     isSubscribed.value = !isSubscribed.value;
     emit('subscribe', isSubscribed.value);
   }
+}
 };
 
 const handleShare = () => {
@@ -235,8 +244,8 @@ const handleDonate = () => {
   emit('donate', isDonated.value)
 }
 
-console.log('Original Image URL:', props.imageUrl)
-console.log('Formatted Image URL:', formattedImageUrl.value)
+// console.log('Original Image URL:', props.imageUrl)
+// console.log('Formatted Image URL:', formattedImageUrl.value)
 </script>
 
 <template>

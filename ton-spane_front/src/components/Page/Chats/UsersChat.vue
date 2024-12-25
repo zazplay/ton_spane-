@@ -35,7 +35,10 @@
             <div v-for="message in messages" 
                  :key="message.id" 
                  class="message" 
-                 :class="{ 'message-sent': message.sender === username, 'message-received': message.sender !== username }">
+                 :class="{ 
+                   'message-sent': isSentByMe(message), 
+                   'message-received': !isSentByMe(message) 
+                 }">
               <div class="message-content">
                 <p class="message-text">{{ message.text }}</p>
                 <span class="message-time">{{ formatTime(message.timestamp) }}</span>
@@ -66,7 +69,6 @@ import { ElAvatar, ElInput } from 'element-plus'
 import { io } from 'socket.io-client'
 import axios from 'axios'
 
-// Определяем реактивные переменные
 const socket = ref(null)
 const messageText = ref('')
 const messages = ref([])
@@ -110,16 +112,21 @@ const scrollToBottom = async () => {
   }
 }
 
+const isSentByMe = (message) => {
+  return message.senderType === sessionStorage.getItem("userType");
+}
 const handleMessage = (message) => {
   if (message && message.content) {
     messages.value.push({
       id: Date.now(),
       text: message.content,
       sender: message.senderId,
+      senderType: message.senderType,
       timestamp: new Date().toISOString()
     })
-    scrollToBottom()
-  }
+    setTimeout(() => {
+        scrollToBottom()
+      }, 100)  }
 }
 
 const sendMessage = () => {
@@ -127,14 +134,12 @@ const sendMessage = () => {
     const messageData = {
       chatId: props.chatId,
       senderId: props.username,
-      senderType: "user",
+      senderType: sessionStorage.getItem("userType").toString() == "user" ? "user" : "model",
       content: messageText.value.trim()
     }
     
-    // Отправляем сообщение через сокет
     socket.value.emit('sendMessage', messageData)
     
-    // Очищаем поле ввода
     messageText.value = ''
   }
 }
@@ -144,7 +149,6 @@ const handleClose = () => {
   emit('close')
 }
 
-// Загрузка истории сообщений
 const loadChatHistory = async () => {
   try {
     isLoading.value = true
@@ -154,11 +158,13 @@ const loadChatHistory = async () => {
       messages.value = response.data.map(msg => ({
         id: msg.id || Date.now(),
         text: msg.content,
-        sender: msg.senderId,
+        sender: msg.senderType === 'model' ? 'model' : msg.senderId, // Различаем сообщения от модели
+        senderType: msg.senderType || 'user', // Добавляем тип отправителя
         timestamp: msg.timestamp || new Date().toISOString()
       }))
-      scrollToBottom()
-    }
+      setTimeout(() => {
+        scrollToBottom()
+      }, 100)    }
   } catch (error) {
     console.error('Error loading chat history:', error)
   } finally {
@@ -235,6 +241,54 @@ onUnmounted(() => {
   border-radius: 30px;
   transform: translateY(0);
   animation: slideUp 0.3s ease;
+}
+
+/* Стилизация скроллбара */
+.chat-messages::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+/* Темная тема */
+html.dark .chat-messages::-webkit-scrollbar-track {
+  background: rgba(17, 24, 39, 0.2);
+  border-radius: 4px;
+}
+
+html.dark .chat-messages::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #00db12 0%, #0083b0 100%);
+  border-radius: 4px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+html.dark .chat-messages::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #00b041 0%, #00b4db 100%);
+  border: 2px solid rgba(0, 0, 0, 0.3);
+}
+
+/* Светлая тема */
+html:not(.dark) .chat-messages::-webkit-scrollbar-track {
+  background: rgba(243, 244, 246, 0.5);
+  border-radius: 4px;
+}
+
+html:not(.dark) .chat-messages::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #00db16 0%, #0083b0 100%);
+  border-radius: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+html:not(.dark) .chat-messages::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #03b000 0%, #00b4db 100%);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Плавная прокрутка */
+.chat-messages {
+  background: linear-gradient(135deg, #03b000 0%, #00b4db 100%);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  scrollbar-width: thin;
+  scrollbar-color: #00c8ff transparent;
 }
 
 @keyframes fadeIn {
@@ -497,7 +551,7 @@ html:not(.dark) textarea:focus {
 .message-received {
   align-self: flex-start;
   margin-right: auto; /* Добавляем для гарантии позиционирования слева */
-
+  
 }
 
 .message-content {
@@ -516,13 +570,13 @@ html:not(.dark) textarea:focus {
 
 .message-received .message-content {
   background: #f0f0f0;
-  color: #1f2937;
+  color: #1e3658;
   border-bottom-left-radius: 4px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 html.dark .message-received .message-content {
-  background: #1f2937;
+  background:linear-gradient(135deg, #224047 0%, #54014a 100%);
   color: #e6edf3;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }

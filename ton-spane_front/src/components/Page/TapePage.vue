@@ -105,6 +105,8 @@ export default {
     const store = useStore()
     const userId = computed(() => store.getters.getSub)
     
+
+
     return {
       isFormOpen: false,
       activeTab: 'first',
@@ -135,6 +137,7 @@ export default {
     this.posts = [];
   }
 }
+
   },
   mounted() {
     this.fetchPosts()

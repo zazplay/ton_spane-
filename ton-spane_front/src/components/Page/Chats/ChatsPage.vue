@@ -8,27 +8,31 @@
           </el-icon>
           <el-text style="font-size: 25px; align-self: center;">Чаты</el-text>
           <el-icon>
-            <Edit />
+            <!-- <Edit /> -->
           </el-icon>
         </el-container>
       </el-header>
 
       <el-main>
         <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-          <el-tab-pane label="Все" name="all" style="color: white;"></el-tab-pane>
-          <el-tab-pane label="Онлайн" name="Onlin"></el-tab-pane>
-          <ChatPrev 
-            v-for="chat in chats" 
-            :key="chat.id"
-            :chat-id="chat.id"
-            :username="chat.model.username"
-            :avatar-url="chat.model.profilePicture"
-            :timestamp="formatDate(chat.createdAt)"
-            last-message="Начните общение"
-            :is-online="true"
-            :unread-count="0"
-            :is-pinned="false">
-          </ChatPrev>
+          <el-tab-pane label="Все" name="all" style="color: white;">
+            <ChatPrev 
+              v-for="chat in chats" 
+              :key="chat.id" 
+              :chat-id="chat.id"
+              :username="userType === 'model' ? 
+                (chat.user.username || chat.user.email) : 
+                (chat.model.username || 'Пользователь')"
+              :avatar-url="userType === 'model' ? 
+                (chat.user.profilePicture || '/default-avatar.png') : 
+                (chat.model.profilePicture || '/default-avatar.png')"
+              :timestamp="formatDate(chat.createdAt)"
+              last-message="Начните общение"
+              :is-online="true"
+              :unread-count="0"
+              :is-pinned="false"
+            />
+          </el-tab-pane>
         </el-tabs>
       </el-main>
     </el-container>
@@ -42,25 +46,29 @@
 import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import ChatPrev from './ChatPreview.vue';
-import { ArrowLeftBold, Edit } from '@element-plus/icons-vue';
+import { ArrowLeftBold } from '@element-plus/icons-vue';
+
 
 export default {
   name: 'ChatView',
   components: {
     ChatPrev,
-    
     ArrowLeftBold,
-    Edit
+    // Edit
   },
   setup() {
     const store = useStore();
     const userId = computed(() => store.getters.getSub);
     const chats = ref([]);
-    console.log(userId.value);
+    const userType = ref(sessionStorage.getItem('userType') || '');
 
     const fetchChats = async () => {
       try {
-        const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/chats/model/${userId.value}`);
+        const endpoint = userType.value === "user" 
+          ? `https://ton-back-e015fa79eb60.herokuapp.com/api/chats/user/${userId.value}`
+          : `https://ton-back-e015fa79eb60.herokuapp.com/api/chats/model/${userId.value}`;
+
+        const response = await fetch(endpoint);
         const data = await response.json();
         chats.value = data;
       } catch (error) {
@@ -69,6 +77,7 @@ export default {
     };
 
     onMounted(() => {
+      userType.value = sessionStorage.getItem('userType');
       fetchChats();
     });
 
@@ -77,7 +86,11 @@ export default {
       return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
     };
 
-    return { chats, formatDate };
+    return { 
+      chats, 
+      formatDate,
+      userType // Возвращаем userType чтобы использовать в template
+    };
   },
   data() {
     return {

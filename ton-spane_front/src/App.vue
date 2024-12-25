@@ -1,27 +1,41 @@
 <script>
-// import MainPage from './components/Page/MainPage.vue';
-import { computed } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
 export default {
- name: 'App',
-//  components: {
-//    MainPage,
-//  },
- setup() {
-   const route = useRoute();
-   const isAuthPage = computed(() => route.path === '/auth');
+  name: 'App',
+  setup() {
+    const route = useRoute();
+    const isAuthPage = computed(() => route.path === '/auth');
 
-   return {
-     isAuthPage
-   };
- }
+    // Безопасное получение userType
+    const userType = ref(sessionStorage.getItem("userType") || '');
+
+    // Обновление при монтировании
+    onMounted(() => {
+      const storedType = sessionStorage.getItem("userType");
+      userType.value = storedType || '';
+      console.log('Current user type:', userType.value);
+    })
+
+    // Следим за изменениями в sessionStorage
+    window.addEventListener('storage', () => {
+      userType.value = sessionStorage.getItem("userType") || '';
+    });
+
+    return {
+      isAuthPage,
+      userType // Возвращаем userType чтобы использовать в шаблоне
+    };
+  }
 }
 </script>
 
 <template>
- <!-- <MainPage v-if="!isAuthPage" /> -->
- <router-view  />
+  <router-view />
+  <div class="statusModelMessage" v-if="userType === 'model'">
+    Аккаунт модели
+  </div>
 </template>
 
 <style scoped>
@@ -31,6 +45,16 @@ export default {
  /* text-align: center; */
  color: #2c3e50;
  width: 100%;
+}
+
+.statusModelMessage{
+  position: fixed;
+  right: 0;
+  top:0;
+  background: red;
+  padding: 10px;
+  border-radius: 10px;
+  margin: 10px;
 }
 
 .floating-theme-switcher {

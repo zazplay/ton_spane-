@@ -27,6 +27,7 @@ const handlePostUpdate = async () => {
 
 // Fetch posts for a single model
 const fetchModelPosts = async (modelId, modelData) => {
+  
   try {
     const response = await fetch(
       `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${modelId}/requester/${CurrUserId.value}`
@@ -71,6 +72,9 @@ const fetchModelPosts = async (modelId, modelData) => {
 
 // Fetch following list and their posts
 const fetchAllModelPosts = async () => {
+  const userType =  sessionStorage.getItem("userType");
+  console.log(userType.toString);
+  if (userType.toString() === "user"){
   try {
     loading.value = true
     
@@ -105,7 +109,7 @@ const fetchAllModelPosts = async () => {
     console.error('Error fetching all model posts:', error)
     ElMessage.error('Ошибка при загрузке постов')
     loading.value = false
-  }
+  }}
 }
 
 onMounted(() => {

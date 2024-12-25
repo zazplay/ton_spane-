@@ -44,7 +44,6 @@ watch(
       :likes="post.likes"
       :isLikedByCurrentUser="post.isLikedByCurrentUser"
       :isSubscribed="post.isSubscribed"
-      @subscribe="handleSubscription"
     />
   </div>
 </template>

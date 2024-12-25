@@ -57,8 +57,11 @@ const fetchModelPosts = async (modelId, modelData) => {
   }
 }
 
+
 // Fetch following list and their posts
 const fetchAllModelPosts = async () => {
+  if (sessionStorage.getItem("userType").toString() == "user"){
+
   try {
     // Fetch following list
     const response = await fetch(
@@ -92,6 +95,7 @@ const fetchAllModelPosts = async () => {
     ElMessage.error('Ошибка при загрузке постов')
     loading.value = false
   }
+}
 }
 
 onMounted(() => {

@@ -8,7 +8,7 @@ const profilesListRef = ref(null);
 
 const handleUserSelect = (userId) => {
     selectedUser.value = userId;
-    console.log("Выбранный пользователь", selectedUser.value);
+    // console.log("Выбранный пользователь", selectedUser.value);
 };
 
 const handleUserCreated = async (newUserId) => {
