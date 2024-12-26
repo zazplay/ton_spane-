@@ -128,14 +128,11 @@ const formatDate = (dateString) => {
 
 const handleLike = async () => {
   if (sessionStorage.getItem("userType").toString() == "user"){
-
   try {
     const endpoint = isLiked.value ? 'unlike' : 'like'
     const method = isLiked.value ? 'DELETE' : 'POST'
     isLiked.value = !isLiked.value
     likes.value = isLiked.value ? likes.value + 1 : likes.value - 1
-
-    
     const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/likes/${userId.value}/${endpoint}/${props.id}`, {
       method: method,
       headers: {
@@ -143,14 +140,10 @@ const handleLike = async () => {
         'accept': '*/*'
       }
     })
-
     if (!response.ok) {
       throw new Error('Failed to update like')
     }
-
-    
     emit('like', isLiked.value)
-
   } catch (error) {
     console.error('Error updating like:', error)
   }
@@ -366,6 +359,7 @@ const handleDonate = () => {
   margin-bottom: 30px;
   border-radius: 16px;
   transition: transform 0.3s ease;
+  
   
   @media (max-width: 480px) {
     width: 95%;

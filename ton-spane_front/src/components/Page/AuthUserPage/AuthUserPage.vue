@@ -73,9 +73,7 @@ const uploadImage = async (file, type) => {
   try {
     loadingState.value = true
     
-    // Используем правильный путь в зависимости от типа пользователя
-    const pathSegment = userType.value === "model" ? "models" : "users";
-    const response = await fetch(`${Config.API_BASE_URL}/${pathSegment}/${userId}/${endpoint}`, {
+    const response = await fetch(`${Config.API_BASE_URL}/users/${userId}/${endpoint}`, {
       method: 'PATCH',
       body: formData
     })
@@ -114,49 +112,6 @@ const uploadImage = async (file, type) => {
     })
   } finally {
     loadingState.value = false
-  }
-}
-
-const saveChanges = async () => {
-  try {
-    isSubmitting.value = true
-
-    const updateData = {}
-    if (editableData.value.username) updateData.username = editableData.value.username
-    if (editableData.value.profileDescription) updateData.profileDescription = editableData.value.profileDescription
-
-    // Используем правильный путь в зависимости от типа пользователя
-    const pathSegment = userType.value === "model" ? "models" : "users";
-    const response = await fetch(`${Config.API_BASE_URL}/${pathSegment}/${userId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updateData)
-    })
-    
-    if (!response.ok) throw new Error('Failed to update profile')
-    
-    userData.value = {
-      ...userData.value,
-      username: editableData.value.username || userData.value.username,
-      profileDescription: editableData.value.profileDescription || userData.value.profileDescription
-    }
-
-    ElMessage({
-      message: 'Профиль успешно обновлен',
-      type: 'success'
-    })
-
-    isEditing.value = false
-  } catch (error) {
-    console.error('Error updating profile:', error)
-    ElMessage({
-      message: 'Ошибка при обновлении профиля',
-      type: 'error'
-    })
-  } finally {
-    isSubmitting.value = false
   }
 }
 
@@ -200,7 +155,46 @@ const cancelEditing = () => {
   }
 }
 
+const saveChanges = async () => {
+  try {
+    isSubmitting.value = true
 
+    const updateData = {}
+    if (editableData.value.username) updateData.username = editableData.value.username
+    if (editableData.value.profileDescription) updateData.profileDescription = editableData.value.profileDescription
+
+    const response = await fetch(`${Config.API_BASE_URL}/users/${userId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updateData)
+    })
+    
+    if (!response.ok) throw new Error('Failed to update profile')
+    
+    userData.value = {
+      ...userData.value,
+      username: editableData.value.username || userData.value.username,
+      profileDescription: editableData.value.profileDescription || userData.value.profileDescription
+    }
+
+    ElMessage({
+      message: 'Профиль успешно обновлен',
+      type: 'success'
+    })
+
+    isEditing.value = false
+  } catch (error) {
+    console.error('Error updating profile:', error)
+    ElMessage({
+      message: 'Ошибка при обновлении профиля',
+      type: 'error'
+    })
+  } finally {
+    isSubmitting.value = false
+  }
+}
 
 const fetchUserData = async () => {
   try {
