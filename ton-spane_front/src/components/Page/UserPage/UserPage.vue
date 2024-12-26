@@ -879,7 +879,8 @@ html:not(.dark) .stat-badgeSubs:hover {
 html.dark .about-section {
   width: 99%;
   min-height: 150px;
-  margin: 1.5% 0 0 5px;
+  margin:  0 0 5px;
+  margin-top: 15px;
   background: linear-gradient(145deg, rgba(19, 25, 37, 0.95), rgba(19, 25, 37, 0.85));
   border: 1px solid rgba(99, 102, 241, 0.15);
   border-radius: 12px;
@@ -1266,6 +1267,14 @@ html:not(.dark) .loading-card :deep(.el-skeleton__item) {
 }
 
 @media (max-width: 480px) {
+
+  .action-Chat {
+    width: 100% !important;
+    font-size: 17px !important;
+    height: 40px !important;
+
+  }
+
   .content-container {
     flex-direction: column !important;
     width: 98%;
@@ -1309,8 +1318,8 @@ html:not(.dark) .loading-card :deep(.el-skeleton__item) {
   .stat-badge,
   .stat-badgeLikes, 
   .stat-badgeSubs {
-    width: 70.6% !important;
-    padding: 10px;
+    width: 60.6% !important;
+    padding: 5px;
     margin: 5px;
     margin-top: 15px;
   }
@@ -1322,9 +1331,9 @@ html:not(.dark) .loading-card :deep(.el-skeleton__item) {
   }
   
   .about-section {
-    width: 105%;
+    width: 103% !important;
     margin: 0px 0;
-    margin-left: -10px;
+    margin-left: -10px !important;
     margin-top: 10px;
   }
   
