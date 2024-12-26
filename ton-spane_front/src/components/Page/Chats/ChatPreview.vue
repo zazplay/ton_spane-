@@ -1,5 +1,6 @@
 <template>
   <el-card
+    v-if="isVisible"
     class="chat-preview"
     shadow="never"
     @click="openChatModal"
@@ -15,7 +16,6 @@
             <el-icon><User /></el-icon>
           </template>
         </el-avatar>
-        
       </div>
       
       <div class="chat-content">
@@ -30,7 +30,22 @@
               <Position />
             </el-icon>
           </div>
-          <el-text class="timestamp" type="info" size="small">{{ timestamp }}</el-text>
+          <div class="header-actions">
+            <el-text class="timestamp" type="info" size="small">{{ timestamp }}</el-text>
+            <div @click.stop>
+              <el-dropdown trigger="click" @command="handleCommand"  >
+                <el-icon class="more-icon" :size="20"><MoreFilled /></el-icon>
+                <template #dropdown >
+                  <el-dropdown-menu >
+                    <el-dropdown-item command="delete" class="delete-option">
+                      <el-icon><Delete /></el-icon>
+                      <span>Delete chat</span>
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
+          </div>
         </div>
         
         <div class="chat-footer">
@@ -61,11 +76,15 @@
 </template>
 
 <script setup>
-import { ref, defineProps } from 'vue'
-import { User, Position } from '@element-plus/icons-vue'
+/* eslint-disable */
+import { ref, defineProps, defineEmits } from 'vue'
+import { User, Position, MoreFilled, Delete } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import UsersChat from './UsersChat.vue'
 
-defineProps({
+const emit = defineEmits(['delete'])
+
+const props = defineProps({
   chatId: {
     type: String,
     required: true
@@ -101,9 +120,54 @@ defineProps({
 })
 
 const showChat = ref(false)
+const isVisible = ref(true)
 
 const openChatModal = () => {
   showChat.value = true
+}
+
+const handleCommand = async (command) => {
+  if (command === 'delete') {
+    try {
+      await ElMessageBox.confirm(
+        'Вы точно хотите удалить чат?',
+        'Внимание',
+        {
+          confirmButtonText: 'Удалить',
+          cancelButtonText: 'Отмена',
+          type: 'warning',
+        }
+      )
+      
+      try {
+        const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/chats/${props.chatId}`, {
+          method: 'DELETE',
+          headers: {
+            'accept': '*/*'
+          }
+        })
+        
+        if (!response.ok) {
+          throw new Error('Network response was not ok')
+        }
+        
+        ElMessage({
+          type: 'success',
+          message: 'Чат успешно удален',
+        })
+        
+        // Скрываем компонент
+        isVisible.value = false
+      } catch (error) {
+        ElMessage({
+          type: 'error',
+          message: 'Не удалось удалить чат',
+        })
+      }
+    } catch {
+      // User cancelled the deletion
+    }
+  }
 }
 </script>
 
@@ -242,7 +306,8 @@ html:not(.dark) .message-preview {
 .username {
   font-weight: 600;
   position: relative;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease;  margin-top: -15px;  
+
 }
 
 .username::after {
@@ -272,10 +337,59 @@ html:not(.dark) .message-preview {
   opacity: 1;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.more-icon {
+  display: flex;
+  position:relative;
+  margin-top: 5px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  color: #6b7280;
+  width: 32px;
+  height: 32px;
+  left: 30px;
+}
+
+.more-icon:hover {
+  background-color: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+}
+
+html.dark .more-icon {
+  color: #9ca3af;
+}
+
+html.dark .more-icon:hover {
+  background-color: rgba(99, 102, 241, 0.2);
+  color: #818cf8;
+}
+
+.delete-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ef4444;
+}
+
+.delete-option:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
 .timestamp {
-  font-size: 0.85em;
+  margin-top: 0px;
+  font-size: 0.95em;
   font-weight: 500;
   transition: color 0.3s ease;
+  margin-top: 5px;
+
+  
 }
 
 .chat-footer {
@@ -286,7 +400,8 @@ html:not(.dark) .message-preview {
 }
 
 .message-preview {
-  flex: 1;
+
+  margin-top: -25px;  
   font-size: 0.95em;
   transition: color 0.3s ease;
   overflow: hidden;

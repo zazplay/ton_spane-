@@ -146,7 +146,6 @@ onMounted(() => {
   
   <div class="title">Последние действия:</div>
   <div v-if="loading" class="loading">
-    <el-loading />
   </div>
   <ListPostCards 
     v-else-if="allPosts.length > 0"

@@ -30,7 +30,7 @@
         <el-container>
           <el-tabs v-model="activeTab" class="demo-tabs containet-style">
             
-            <el-tab-pane label="Для вас" name="first">
+            <el-tab-pane class = "forYou" label="Для вас" name="first" >
               <div v-if="!isDataLoaded" class="loading-container">
                 <el-row :gutter="20">
                   <el-col :span="24" v-for="n in 3" :key="n">
@@ -105,8 +105,6 @@ export default {
     const store = useStore()
     const userId = computed(() => store.getters.getSub)
     
-
-
     return {
       isFormOpen: false,
       activeTab: 'first',
@@ -156,6 +154,8 @@ export default {
  color: #6b778c;
  font-size: 32px;
  font-weight: 600;
+ margin-left: 10px;
+ 
 }
 
 .containet-style {
@@ -174,6 +174,7 @@ export default {
  transform: scale(1.2);
  color: #8D9095;
 }
+
 
 .header-style {
  color: #E5EAF3;
@@ -401,6 +402,8 @@ html:not(.dark) .el-scrollbar ::-webkit-scrollbar-track {
  .main-container-content {
    padding: 5px !important;
    padding-top: 0 !important;
+   margin-left: 0px;
+
  }
 
  .loading-container {
@@ -443,6 +446,7 @@ html:not(.dark) .el-scrollbar ::-webkit-scrollbar-track {
    .logo-container img {
        margin-left: 25px;
    }
+   
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap');
