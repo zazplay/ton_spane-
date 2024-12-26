@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted,computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
@@ -73,7 +73,9 @@ const uploadImage = async (file, type) => {
   try {
     loadingState.value = true
     
-    const response = await fetch(`${Config.API_BASE_URL}/users/${userId}/${endpoint}`, {
+    // Используем правильный путь в зависимости от типа пользователя
+    const pathSegment = userType.value === "model" ? "models" : "users";
+    const response = await fetch(`${Config.API_BASE_URL}/${pathSegment}/${userId}/${endpoint}`, {
       method: 'PATCH',
       body: formData
     })
@@ -112,6 +114,49 @@ const uploadImage = async (file, type) => {
     })
   } finally {
     loadingState.value = false
+  }
+}
+
+const saveChanges = async () => {
+  try {
+    isSubmitting.value = true
+
+    const updateData = {}
+    if (editableData.value.username) updateData.username = editableData.value.username
+    if (editableData.value.profileDescription) updateData.profileDescription = editableData.value.profileDescription
+
+    // Используем правильный путь в зависимости от типа пользователя
+    const pathSegment = userType.value === "model" ? "models" : "users";
+    const response = await fetch(`${Config.API_BASE_URL}/${pathSegment}/${userId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updateData)
+    })
+    
+    if (!response.ok) throw new Error('Failed to update profile')
+    
+    userData.value = {
+      ...userData.value,
+      username: editableData.value.username || userData.value.username,
+      profileDescription: editableData.value.profileDescription || userData.value.profileDescription
+    }
+
+    ElMessage({
+      message: 'Профиль успешно обновлен',
+      type: 'success'
+    })
+
+    isEditing.value = false
+  } catch (error) {
+    console.error('Error updating profile:', error)
+    ElMessage({
+      message: 'Ошибка при обновлении профиля',
+      type: 'error'
+    })
+  } finally {
+    isSubmitting.value = false
   }
 }
 
@@ -155,50 +200,14 @@ const cancelEditing = () => {
   }
 }
 
-const saveChanges = async () => {
-  try {
-    isSubmitting.value = true
 
-    const updateData = {}
-    if (editableData.value.username) updateData.username = editableData.value.username
-    if (editableData.value.profileDescription) updateData.profileDescription = editableData.value.profileDescription
-
-    const response = await fetch(`${Config.API_BASE_URL}/users/${userId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updateData)
-    })
-    
-    if (!response.ok) throw new Error('Failed to update profile')
-    
-    userData.value = {
-      ...userData.value,
-      username: editableData.value.username || userData.value.username,
-      profileDescription: editableData.value.profileDescription || userData.value.profileDescription
-    }
-
-    ElMessage({
-      message: 'Профиль успешно обновлен',
-      type: 'success'
-    })
-
-    isEditing.value = false
-  } catch (error) {
-    console.error('Error updating profile:', error)
-    ElMessage({
-      message: 'Ошибка при обновлении профиля',
-      type: 'error'
-    })
-  } finally {
-    isSubmitting.value = false
-  }
-}
 
 const fetchUserData = async () => {
   try {
-    const response = await fetch(`${Config.API_BASE_URL}/users/${userId}`)
+    
+    const userType = sessionStorage.getItem("userType")?.toString();
+    const pathSegment = userType === "model" ? "models" : "users";
+    const response = await fetch(`${Config.API_BASE_URL}/${pathSegment}/${userId}`);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
     const data = await response.json()
     
@@ -213,6 +222,19 @@ const fetchUserData = async () => {
     isLoaded.value = true
   }
 }
+
+const userType = ref(sessionStorage.getItem("userType"))
+
+// Добавьте computed свойство для текста статистики:
+const statsText = computed(() => {
+  const count = userType.value === "model" 
+    ? userData.value.followers.length 
+    : userData.value.likes.length;
+  const label = userType.value === "model" 
+    ? "подписчиков" 
+    : "лайков";
+  return `${count} ${label}`;
+})
 
 onMounted(fetchUserData)
 </script>
@@ -296,8 +318,11 @@ onMounted(fetchUserData)
 
           <div class="stats">
             <el-text class="stat-badge">
-              <el-text class="stat-text">{{ userData.likes.length }} лайков</el-text>
-            </el-text>
+              <el-text class="stat-text">
+  {{ statsText }}
+</el-text>       
+
+</el-text>
             <el-text class="stat-date">
               На сайте с {{ formatDate(userData.createdAt) }}
             </el-text>

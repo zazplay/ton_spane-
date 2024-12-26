@@ -16,7 +16,7 @@
                 </el-container>
             </el-aside>
             <el-main class="info-container-profile">
-                <span class="info-container-profileEmail">{{ userData?.email || 'Loading...' }}</span>
+                <span class="info-container-profileEmail">{{ userData?.email || userData.username }}</span>
                 <router-link 
                     :to="`/app/myPage/${userId}`" 
                     class="link-style"
@@ -45,8 +45,9 @@ const handleError = () => {
 }
 
 const fetchUserData = async () => {
+  const userType =  sessionStorage.getItem("userType");
     try {
-        const response = await fetch(`${config.API_BASE_URL}/users/${userId.value}`)
+        const response = userType == "user" ?  await fetch(`${config.API_BASE_URL}/users/${userId.value}`) : await fetch(`${config.API_BASE_URL}/models/${userId.value}`)
         if (!response.ok) {
             throw new Error('Failed to fetch user data')
         }

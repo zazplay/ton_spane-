@@ -160,7 +160,7 @@ const loadChatHistory = async () => {
         text: msg.content,
         sender: msg.senderType === 'model' ? 'model' : msg.senderId, // Различаем сообщения от модели
         senderType: msg.senderType || 'user', // Добавляем тип отправителя
-        timestamp: msg.timestamp || new Date().toISOString()
+        timestamp: msg.createdAt || new Date().toISOString()
       }))
       setTimeout(() => {
         scrollToBottom()
