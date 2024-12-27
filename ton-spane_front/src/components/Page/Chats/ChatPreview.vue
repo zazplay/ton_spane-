@@ -33,10 +33,10 @@
           <div class="header-actions">
             <el-text class="timestamp" type="info" size="small">{{ timestamp }}</el-text>
             <div @click.stop>
-              <el-dropdown trigger="click" @command="handleCommand"  >
+              <el-dropdown trigger="click" @command="handleCommand">
                 <el-icon class="more-icon" :size="20"><MoreFilled /></el-icon>
-                <template #dropdown >
-                  <el-dropdown-menu >
+                <template #dropdown>
+                  <el-dropdown-menu>
                     <el-dropdown-item command="delete" class="delete-option">
                       <el-icon><Delete /></el-icon>
                       <span>Удалить чат</span>
@@ -49,17 +49,26 @@
         </div>
         
         <div class="chat-footer">
-          <el-text class="message-preview" truncated>
-            {{ lastMessage }}
-          </el-text>
+  <el-text 
+    class="message-preview" 
+    :class="{
+      'you': isEmail,
+      'other': !isEmail && messages.length > 0,
+      'start': messages.length === 0
+    }" 
+    truncated
+  >
+  
+    {{ lastMessageUser }} <el-text>{{ lastMessageText }}</el-text>
+  </el-text>
           
-          <el-badge
-            v-if="unreadCount"
-            :value="unreadCount"
-            class="unread-badge"
-            type="primary"
-          />
-        </div>
+  <el-badge
+    v-if="unreadCount"
+    :value="unreadCount"
+    class="unread-badge"
+    type="primary"
+  />
+</div>
       </div>
     </div>
   </el-card>
@@ -76,13 +85,16 @@
 </template>
 
 <script setup>
-/* eslint-disable */
-import { ref, defineProps, defineEmits } from 'vue'
+import { ref, defineProps, defineEmits, onMounted, computed } from 'vue'
 import { User, Position, MoreFilled, Delete } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import UsersChat from './UsersChat.vue'
+import axios from 'axios'
 
 const emit = defineEmits(['delete'])
+const messages = ref([])
+const showChat = ref(false)
+const isVisible = ref(true)
 
 const props = defineProps({
   chatId: {
@@ -119,12 +131,100 @@ const props = defineProps({
   }
 })
 
-const showChat = ref(false)
-const isVisible = ref(true)
+// Вычисляемое свойство для отображения последнего сообщения
+const lastMessageText = computed(() => {
+  if (!messages.value || messages.value.length === 0) {
+    return 'Начните общение'
+  }
+  
+  const sortedMessages = [...messages.value].sort((a, b) => 
+    new Date(b.timestamp) - new Date(a.timestamp)
+  )
+  
+  return sortedMessages[0]?.text || 'Начните общение'
+})
+
+
+
+const isEmail = computed(() => {
+  if (!messages.value || messages.value.length === 0) {
+    return false;
+  }
+  
+  const sortedMessages = [...messages.value].sort((a, b) => 
+    new Date(b.timestamp) - new Date(a.timestamp)
+  );
+  
+  const lastMessage = sortedMessages[0];
+  return lastMessage.senderType !== 'model'; // Проверяем, что отправитель не модель
+});
+
+const lastMessageUser = computed(() => {
+  if (!messages.value || messages.value.length === 0) {
+    return '';
+  }
+  
+  const sortedMessages = [...messages.value].sort((a, b) => 
+    new Date(b.timestamp) - new Date(a.timestamp)
+  );
+  
+  const lastMessage = sortedMessages[0];
+  
+  // Если сообщение от модели, показываем имя из props
+  if (lastMessage.senderType === 'model') {
+    return `${props.username}: `;
+  }
+  
+  // Если не от модели, значит от пользователя
+  return 'Вы: ';
+});
 
 const openChatModal = () => {
   showChat.value = true
 }
+
+// const formatTimestamp = (timestamp) => {
+//   const date = new Date(timestamp)
+//   const now = new Date()
+//   const diffInMinutes = Math.floor((now - date) / (1000 * 60))
+//   const diffInHours = Math.floor(diffInMinutes / 60)
+//   const diffInDays = Math.floor(diffInHours / 24)
+
+//   if (diffInMinutes < 60) {
+//     return `${diffInMinutes} мин назад`
+//   } else if (diffInHours < 24) {
+//     return `${diffInHours} ч назад`
+//   } else if (diffInDays < 7) {
+//     return `${diffInDays} д назад`
+//   } else {
+//     return date.toLocaleDateString('ru-RU', {
+//       day: 'numeric',
+//       month: 'long'
+//     })
+//   }
+// }
+
+const loadChatHistory = async () => {
+  try {
+    const response = await axios.get(
+      `https://ton-back-e015fa79eb60.herokuapp.com/api/chats/${props.chatId}/messages`
+    )
+    
+    if (response.data) {
+      messages.value = response.data.map(msg => ({
+        id: msg.id || Date.now(),
+        text: msg.content,
+        senderId: msg.senderId, // Changed from sender to senderId
+        senderType: msg.senderType || 'user',
+        timestamp: msg.createdAt || new Date().toISOString()
+      }))
+    }
+  } catch (error) {
+    console.error('Error loading chat history:', error)
+    messages.value = []
+  }
+}
+
 
 const handleCommand = async (command) => {
   if (command === 'delete') {
@@ -140,12 +240,15 @@ const handleCommand = async (command) => {
       )
       
       try {
-        const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/chats/${props.chatId}`, {
-          method: 'DELETE',
-          headers: {
-            'accept': '*/*'
+        const response = await fetch(
+          `https://ton-back-e015fa79eb60.herokuapp.com/api/chats/${props.chatId}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'accept': '*/*'
+            }
           }
-        })
+        )
         
         if (!response.ok) {
           throw new Error('Network response was not ok')
@@ -156,19 +259,25 @@ const handleCommand = async (command) => {
           message: 'Чат успешно удален',
         })
         
-        // Скрываем компонент
         isVisible.value = false
+        emit('delete', props.chatId)
       } catch (error) {
+        console.error('Error deleting chat:', error)
         ElMessage({
           type: 'error',
           message: 'Не удалось удалить чат',
         })
       }
     } catch {
-      // User cancelled the deletion
+      // Пользователь отменил удаление
     }
   }
 }
+
+// Инициализация при монтировании
+onMounted(async () => {
+  await loadChatHistory()
+})
 </script>
 
 <style scoped>
@@ -397,6 +506,44 @@ html.dark .more-icon:hover {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+}
+
+/* Message Preview Base Styles */
+.message-preview {
+  margin-top: -25px;  
+  font-size: 0.95em;
+  transition: color 0.3s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Dark Theme Message Types */
+html.dark .message-preview.you {
+  color: #60a5fa !important; /* Голубой для "Вы:" */
+}
+
+html.dark .message-preview.other {
+  color: #ec4899 !important; /* Розовый для никнейма */
+}
+
+html.dark .message-preview.start {
+  color: #6b7280 !important; /* Серый для "Начните общение" */
+  font-style: italic;
+}
+
+/* Light Theme Message Types */
+html:not(.dark) .message-preview.you {
+  color: #3b82f6 !important; /* Более темный голубой для светлой темы */
+}
+
+html:not(.dark) .message-preview.other {
+  color: #db2777 !important; /* Более темный розовый для светлой темы */
+}
+
+html:not(.dark) .message-preview.start {
+  color: #9ca3af !important;
+  font-style: italic;
 }
 
 .message-preview {

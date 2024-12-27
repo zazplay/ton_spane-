@@ -38,7 +38,6 @@
                 (chat.user.profilePicture || '/default-avatar.png') : 
                 (chat.model.profilePicture || '/default-avatar.png')"
               :timestamp="formatDate(chat.createdAt)"
-              last-message="Начните общение"
               :is-online="true"
               :unread-count="0"
               :is-pinned="false"

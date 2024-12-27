@@ -208,6 +208,10 @@ export default {
 /* Стили для состояния загрузки */
 .loading-container {
  padding: 20px;
+ width: 100% !important;
+ margin-left: -20px;
+ margin-top: -20px;
+
 }
 
 /* Темная тема */
@@ -217,6 +221,8 @@ html.dark .loading-card {
  border: none;
  border-radius: 16px;
  overflow: hidden;
+ width: 100% !important;
+
 }
 
 html.dark .loading-card :deep(.el-skeleton__item) {
