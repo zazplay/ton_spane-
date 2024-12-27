@@ -1,4 +1,3 @@
-<!--ProfileContent-->
 <script setup>
 import { ref, onMounted, watch, onUnmounted,defineProps,reactive } from 'vue'
 import { ElMessage } from 'element-plus'
@@ -6,6 +5,13 @@ import { Loading } from '@element-plus/icons-vue'
 import config from '@/config'
 import PostsAP from '../PostsAP.vue'
 import CreatePost from './AddPostForm.vue'
+import ChatPage from './Chats/ChatsPage.vue'
+const showChats = ref(false)
+
+// Добавляем метод открытия чатов вместо startEditing
+const openChats = () => {
+  showChats.value = true
+}
 
 const props = defineProps({
    userIdProp: {
@@ -304,6 +310,8 @@ const handleAddSubscribers = async () => {
     }
 }
 
+
+
 // Функция добавления множественных подписчиков
 const addMultipleSubscribers = async (subscribersCount) => {
     const results = {
@@ -351,7 +359,7 @@ const addMultipleSubscribers = async (subscribersCount) => {
     }
 
     return results;
-};
+}
 
 const handlePostsUpdate = async () => {
    console.log("Data update triggered")
@@ -478,6 +486,21 @@ onUnmounted(() => {
 
             <div class="actions">
                 <template v-if="!isEditing">
+                    <el-button class="openChatsButton" type="primary" @click="openChats">
+                        Открыть чаты
+                    </el-button>
+                    <el-dialog
+  v-model="showChats"
+  :fullscreen="false"
+  :show-close="true"
+  :close-on-click-modal="false"
+  :destroy-on-close="true"
+>
+  <ChatPage 
+    :model-id="props.userIdProp"
+    @close="showChats = false"
+  /></el-dialog>
+
                     <el-button type="primary" @click="startEditing">
                         Редактировать профиль
                     </el-button>
@@ -515,6 +538,8 @@ onUnmounted(() => {
             :userId="props.userIdProp" 
             @close="showPostModal = false"
         />
+
+        
     </div>
     <div v-else class="loading-container">
         <el-skeleton :rows="3" animated />
@@ -552,6 +577,7 @@ onUnmounted(() => {
         </el-dialog>
 
 </template>
+
 
 <style scoped>
 .layout {
@@ -794,6 +820,11 @@ onUnmounted(() => {
     font-size: 0.95rem;
     font-weight: 500;
     color: #38bdf8;
+}
+
+.openChatsButton{
+    margin-right: 200px !important;
+
 }
 
 .collapse-content {

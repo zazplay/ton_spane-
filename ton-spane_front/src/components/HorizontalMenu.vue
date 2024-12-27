@@ -50,12 +50,6 @@
 <script setup>
 import { Menu as IconMenu, House, Film, Message, Search } from '@element-plus/icons-vue';
 
-const handleOpen = (key, keyPath) => {
-    console.log(key, keyPath);
-};
-const handleClose = (key, keyPath) => {
-    console.log(key, keyPath);
-};
 </script>
 
 <style scoped>
