@@ -39,7 +39,7 @@
                   <el-dropdown-menu >
                     <el-dropdown-item command="delete" class="delete-option">
                       <el-icon><Delete /></el-icon>
-                      <span>Delete chat</span>
+                      <span>Удалить чат</span>
                     </el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
@@ -433,12 +433,13 @@ html.dark .more-icon:hover {
   }
   
   .preview-container {
-    padding: 12px 14px;
+    padding: 0px 0px;
   }
   
   .avatar-wrapper {
     width: 46px;
     height: 46px;
+    margin-left: -5px;
   }
   
   .status-indicator {
@@ -453,6 +454,10 @@ html.dark .more-icon:hover {
   .timestamp,
   .message-preview {
     font-size: 0.85em;
+    margin-right: -10px;
   }
+  .more-icon{
+    margin-right: 20px !important;
+  } 
 }
 </style>

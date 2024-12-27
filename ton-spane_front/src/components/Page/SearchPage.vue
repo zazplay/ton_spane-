@@ -256,7 +256,7 @@ onMounted(async () => {
  width: 100%;
  max-width: 800px;
  margin: 0 auto;
- padding: 24px;
+ padding: 0px;
 }
 
 .search-container {
@@ -267,10 +267,20 @@ onMounted(async () => {
 /* Темная тема */
 html.dark .search-title {
  color: #e6edf3;
- font-size: 2rem;
+ font-size: 28px;
+ margin-top: 0px;
  margin-bottom: 20px;
- font-weight: 600;
  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+ background-color: #191E25;
+ margin-top: -0px;
+ border-radius: 15px;
+ padding-bottom: 5px;
+ border-radius: 10px;
+ border-bottom: solid;
+ border-color: rgb(87, 87, 87);
+ border-width: 1px;
+ font-weight: 500 !important;
+
 }
 
 /* Светлая тема */
@@ -278,7 +288,7 @@ html:not(.dark) .search-title {
  color: #1f2937;
  font-size: 2rem;
  margin-bottom: 20px;
- font-weight: 600;
+ font-weight: 500 !important;
  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 

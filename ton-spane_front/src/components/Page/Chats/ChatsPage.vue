@@ -48,8 +48,7 @@
       </el-main>
     </el-container>
     <el-container>
-      <MessageUser />
-    </el-container>
+   </el-container>
   </div>
 </template>
 
@@ -138,7 +137,6 @@ export default {
 .common-layout {
   width: 100%;
   height: 100vh;
-  background: transparent;
 }
 
 /* Базовые стили */
@@ -147,6 +145,9 @@ export default {
   transition: all 0.3s ease;
   border-bottom-width: 1px;
   border-bottom-style: solid;
+  background-color: transparent !important;
+  border-radius: 15px;
+
 }
 
 .container-header {
@@ -156,12 +157,17 @@ export default {
   width: 100%;
   height: 60px;
   padding: 0 0px;
+  background: transparent;
+  
 }
 
 .header-title {
   font-size: 25px;
   font-weight: 500;
   transition: color 0.3s ease;
+  font-weight: 600 !important;
+
+
 }
 
 .back-arrow {
