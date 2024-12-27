@@ -16,7 +16,7 @@
                 </el-container>
             </el-aside>
             <el-main class="info-container-profile">
-                <span class="info-container-profileEmail">{{ userData?.email || userData.username }}</span>
+                <span class="info-container-profileEmail">{{ userData?.email || userData?.username }}</span>
                 <router-link 
                     :to="`/app/myPage/${userId}`" 
                     class="link-style"

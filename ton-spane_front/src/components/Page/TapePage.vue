@@ -452,6 +452,10 @@ html:not(.dark) .el-scrollbar ::-webkit-scrollbar-track {
    .logo-container img {
        margin-left: 25px;
    }
+
+   .logo-icon{
+    margin-left: 30px
+   }
    
 }
 

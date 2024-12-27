@@ -1,5 +1,5 @@
 <template>
-    <el-menu class='horizontal-menu' default-active="1" @open="handleOpen" @close="handleClose">
+    <el-menu class='horizontal-menu' default-active="1"  >
         <router-link to="/app/tape">
             <el-menu-item index="1" >
                 <el-icon>
@@ -55,33 +55,34 @@ import { Menu as IconMenu, House, Film, Message, Search } from '@element-plus/ic
 <style scoped>
 /* Основные стили меню */
 .horizontal-menu {
-   height: 90px;
+   height: 60px;
    position: fixed;
    bottom: 0;
-   width: 100%;
+   width: 101%;
    z-index: 1000;
    backdrop-filter: blur(10px);
    display: flex;
    justify-content: space-around;
    align-items: stretch;
+   animation: slideUp 0.3s ease-out;
+   padding-left: 0px;
+   padding-right: 5px;
 }
 
 /* Темная тема для меню */
 html.dark .horizontal-menu {
-   background: linear-gradient(to top, 
-       rgba(28, 28, 28, 0.98) 0%,
-       rgba(44, 44, 44, 0.95) 100%);
+   background: rgba(22, 27, 34, 0.8);
    border-top: 1px solid rgba(255, 255, 255, 0.05);
-   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+   color: #E5EAF3;
 }
 
 /* Светлая тема для меню */
 html:not(.dark) .horizontal-menu {
-   background: linear-gradient(to top, 
-       rgba(255, 255, 255, 0.98) 0%,
-       rgba(249, 250, 251, 0.95) 100%);
+   background: rgba(255, 255, 255, 0.9);
    border-top: 1px solid rgba(0, 0, 0, 0.05);
-   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+   color: #1f2937;
 }
 
 /* Стили для ссылок-контейнеров */
@@ -98,39 +99,32 @@ html:not(.dark) .horizontal-menu {
 
 /* Стили элементов меню */
 .horizontal-menu .el-menu-item {
-   width: 100%;
-   height: 100% !important;
+   width: 80%;
+   height: 50px !important;
    display: flex;
    flex-direction: column;
    align-items: center;
    justify-content: center;
    padding: 0 !important;
-   margin: 0;
+   margin: 4px 12px !important;
    border: none !important;
    gap: 6px;
    position: relative;
+   border-radius: 12px;
+   transition: all 0.3s ease;
+   font-size: 18px !important;
+   font-weight: bold;
 }
 
-/* Цвета для темной темы */
-html.dark .horizontal-menu .el-menu-item {
-   color: #E5EAF3;
-}
-
-/* Цвета для светлой темы */
-html:not(.dark) .horizontal-menu .el-menu-item {
-   color: #1f2937;
-}
-
-/* Контейнер для иконки */
+/* Иконки */
 .horizontal-menu .el-icon {
+   font-size: 20px;
    width: 24px;
    height: 24px;
    display: flex;
    align-items: center;
    justify-content: center;
-   font-size: 24px;
    transition: transform 0.3s ease;
-   margin: 0;
 }
 
 /* Текст под иконками */
@@ -142,22 +136,43 @@ html:not(.dark) .horizontal-menu .el-menu-item {
    line-height: 1;
    padding: 0 4px;
    margin: 0;
+   letter-spacing: 0.3px;
 }
 
-/* Активное состояние для темной темы */
-html.dark .horizontal-menu .el-menu-item.is-active {
+/* Наведение - темная тема */
+html.dark .horizontal-menu .el-menu-item:hover {
+   background: rgba(79, 140, 255, 0.1) !important;
    color: #4f8cff !important;
-   background: transparent !important;
+   transform: translateX(5px);
 }
 
-/* Активное состояние для светлой темы */
-html:not(.dark) .horizontal-menu .el-menu-item.is-active {
+/* Наведение - светлая тема */
+html:not(.dark) .horizontal-menu .el-menu-item:hover {
+   background: rgba(79, 140, 255, 0.08) !important;
    color: #2563eb !important;
-   background: transparent !important;
+   transform: translateX(5px);
 }
 
-/* Подчеркивание активного элемента для темной темы */
-html.dark .horizontal-menu .el-menu-item.is-active::after {
+/* Наведение иконки */
+.horizontal-menu .el-menu-item:hover .el-icon {
+   transform: scale(1.1);
+}
+
+/* Активное состояние - темная тема */
+html.dark .horizontal-menu .el-menu-item.is-active {
+   background: linear-gradient(90deg, rgba(79, 140, 255, 0.2) 0%, rgba(37, 99, 235, 0.1) 100%) !important;
+   color: #4f8cff !important;
+}
+
+/* Активное состояние - светлая тема */
+html:not(.dark) .horizontal-menu .el-menu-item.is-active {
+   background: linear-gradient(90deg, rgba(79, 140, 255, 0.15) 0%, rgba(37, 99, 235, 0.08) 100%) !important;
+   color: #3182ce !important;
+}
+
+/* Подчеркивание активного элемента */
+html.dark .horizontal-menu .el-menu-item.is-active::after,
+html:not(.dark) .horizontal-menu .el-menu-item.is-active::after {
    content: '';
    position: absolute;
    bottom: 0;
@@ -167,47 +182,20 @@ html.dark .horizontal-menu .el-menu-item.is-active::after {
    height: 3px;
    background: linear-gradient(90deg, #4f8cff 0%, #2563eb 100%);
    border-radius: 2px 2px 0 0;
-}
+   width: 90%;
 
-/* Подчеркивание активного элемента для светлой темы */
-html:not(.dark) .horizontal-menu .el-menu-item.is-active::after {
-   content: '';
-   position: absolute;
-   bottom: 0;
-   left: 50%;
-   transform: translateX(-50%);
-   width: 40%;
-   height: 3px;
-   background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
-   border-radius: 2px 2px 0 0;
-}
-
-/* Эффекты при наведении для темной темы */
-html.dark .horizontal-menu .el-menu-item:hover {
-   background-color: transparent !important;
-   color: #4f8cff !important;
-}
-
-/* Эффекты при наведении для светлой темы */
-html:not(.dark) .horizontal-menu .el-menu-item:hover {
-   background-color: transparent !important;
-   color: #2563eb !important;
-}
-
-.horizontal-menu .el-menu-item:hover .el-icon {
-   transform: translateY(-2px);
 }
 
 /* Эффект при нажатии */
 .horizontal-menu .el-menu-item:active {
-   transform: scale(0.95);
+   transform: scale(0.98) translateX(0px);
 }
 
 /* Safe area для iPhone */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
    .horizontal-menu {
        padding-bottom: env(safe-area-inset-bottom);
-       height: calc(90px + env(safe-area-inset-bottom));
+       height: calc(70px + env(safe-area-inset-bottom));
    }
    
    .horizontal-menu .el-menu-item {
@@ -227,7 +215,17 @@ html:not(.dark) .horizontal-menu .el-menu-item:hover {
    }
 }
 
-.horizontal-menu {
-   animation: slideUp 0.3s ease-out;
+/* Сброс стилей для ссылок */
+.horizontal-menu a:-webkit-any-link {
+   color: inherit !important;
+   cursor: pointer !important;
+   text-decoration: none !important;
+   display: block;
+}
+
+.horizontal-menu router-link {
+   color: inherit;
+   text-decoration: none;
+   cursor: pointer;
 }
 </style>

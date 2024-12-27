@@ -558,13 +558,28 @@ onUnmounted(() => {
   justify-content: center;
 }
 
-.header-image {
-  width: 100%;
-  max-height: 300px !important;
-  border-radius: 20px;
-  margin-bottom: 10px;
-  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
-  transition: transform 0.3s ease;
+.header-image { 
+    width: 100%; 
+    max-height: 300px !important; 
+    border-radius: 20px; 
+    margin-bottom: 10px; 
+    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15); 
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: subtle-glow 3s infinite alternate;
+}
+
+@keyframes subtle-glow {
+    0% {
+        box-shadow: 0 8px 132px rgba(99, 102, 241, 0.15);
+    }
+    100% {
+        box-shadow: 0 8px 140px rgba(99, 102, 241, 0.25);
+    }
+}
+
+.header-image:hover {
+    transform: scale(1.015);
+    box-shadow: 0 12px 45px rgba(99, 102, 241, 0.3);
 }
 
 .content-container {

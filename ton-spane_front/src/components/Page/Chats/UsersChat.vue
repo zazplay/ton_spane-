@@ -710,7 +710,7 @@ html.dark .send-button:hover {
 @media (max-width: 768px) {
   .chat-modal {
     width: 90%;
-    height: 80vh;
+    height: 80vh !important ;
     margin: 20px;
   }
   

@@ -280,7 +280,6 @@ html.dark .search-title {
  border-color: rgb(87, 87, 87);
  border-width: 1px;
  font-weight: 500 !important;
-
 }
 
 /* Светлая тема */
@@ -523,6 +522,7 @@ html:not(.dark) .el-button:disabled {
 @media (max-width: 480px) {
  .layout {
    padding: 16px;
+   width: 90%;
  }
 
  .search-title {
