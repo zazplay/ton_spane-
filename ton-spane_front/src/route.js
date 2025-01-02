@@ -30,7 +30,7 @@ const routes = [
     children: [
       { path: 'tape', component: () => import('./components/Page/TapePage.vue') },
       { path: 'notifications', component: () => import('./components/Page/NotificationsPage.vue') },
-      { path: 'clips', component: () => import('./components/Page/ClipsPage.vue') },
+      { path: 'clips', component: () => import('./components/Page/ClipPage.vue') },
       { path: 'message', component: () => import('./components/Page/Chats/ChatsPage.vue') },
       { path: 'search', component: () => import('./components/Page/SearchPage.vue') },
       { path: 'purchased', component: () => import('./components/Page/PurchasedPage.vue') },
