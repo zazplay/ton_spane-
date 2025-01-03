@@ -21,7 +21,7 @@
         </span>
       </div>
     </header>
-
+ 
     <div 
       v-if="isLoading" 
       class="loading-overlay"
@@ -33,23 +33,23 @@
         <Loading />
       </el-icon>
     </div>
-
-    <transition-group 
-      name="slide" 
-      mode="out-in" 
-      class="video-container"
-    >
-      <ShortVideoPlayer
-        v-if="!isLoading && currentVideo"
-        :key="currentVideo.id"
-        :video="currentVideo"
-        @prev="handlePrev"
-        @next="handleNext"
-        @like="handleLike"
-        @share="handleShare"
-      />
-    </transition-group>
-
+ 
+    <div class="video-container" :class="`direction-${direction}`">
+      <transition
+        name="slide"
+        mode="out-in"
+      >
+        <ShortVideoPlayer
+          v-if="!isLoading && currentVideo"
+          :key="currentVideo.id"
+          :video="currentVideo"
+          @prev="handlePrev"
+          @next="handleNext"
+          @like="handleLike"
+          @share="handleShare"
+        />
+      </transition>
+      </div>
     <div class="preload-videos">
       <video 
         v-for="video in preloadVideos" 
@@ -60,7 +60,7 @@
       ></video>
     </div>
   </div>
-</template>
+ </template>
 
 <script setup>
 import { ref, onMounted, watch, computed, nextTick } from 'vue'
@@ -76,6 +76,8 @@ const currentVideoIndex = ref(0)
 const currentVideo = ref(null)
 const preloadVideos = ref([])
 const userId = computed(() => store.getters.getSub)
+const direction = ref('next') // добавляем направление
+
 
 const fetchVideos = async () => {
   try {
@@ -108,8 +110,10 @@ const switchTab = async (tab) => {
   }
 }
 
+
 const handlePrev = () => {
   if (currentVideoIndex.value > 0) {
+    direction.value = 'prev'
     currentVideoIndex.value--
     currentVideo.value = videos.value[currentVideoIndex.value]
     
@@ -123,6 +127,7 @@ const handlePrev = () => {
 
 const handleNext = () => {
   if (currentVideoIndex.value < videos.value.length - 1) {
+    direction.value = 'next'
     currentVideoIndex.value++
     currentVideo.value = videos.value[currentVideoIndex.value]
     
@@ -167,28 +172,46 @@ watch(activeTab, fetchVideos)
   overflow: hidden;
 }
 
+/* Общие стили для анимации */
 .slide-enter-active,
 .slide-leave-active {
-  transition: all 0.5s ease-in-out;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   position: absolute;
   width: 100%;
   max-width: 550px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin: 0 auto;
 }
 
 .slide-enter-from {
   opacity: 0;
-  transform: translateX(-50%) translateY(100%);
+  transform: translateY(100%);
 }
 
 .slide-leave-to {
   opacity: 0;
-  transform: translateX(-50%) translateY(-100%);
+  transform: translateY(-100%);
 }
 
-.slide-move {
-  transition: all 0.5s ease;
+.direction-prev .slide-enter-from {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+.direction-prev .slide-leave-to {
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
 
 .header {
@@ -269,27 +292,7 @@ watch(activeTab, fetchVideos)
   backdrop-filter: blur(8px);
 }
 
-.slide-enter-active,
-.slide-leave-active {
-  transition: all 0.5s ease-in-out;
-  position: absolute;
-  width: 100%;
-  max-width: 550px;
-}
 
-.slide-enter-from {
-  opacity: 0;
-  transform: translateY(100%) scale(0.9);
-}
-
-.slide-leave-to {
-  opacity: 0;
-  transform: translateY(-100%) scale(0.9);
-}
-
-.slide-move {
-  transition: all 0.5s ease;
-}
 
 .preload-videos {
   display: none;

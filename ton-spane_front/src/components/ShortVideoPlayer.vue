@@ -13,27 +13,29 @@
       </div>
     </div>
 
-    <transition name="slide" mode="out-in">
-      <video
-        ref="videoRef"
-        :key="videoData.id"
-        class="video-content"
-        :src="videoData.videoUrl"
-        @click="togglePlay"
-        @loadedmetadata="onVideoLoaded"
-        @error="handleVideoError"
-        loop
-        playsinline
-        muted 
-        autoplay
-        preload="metadata"
-        type="video/mp4"
-        crossorigin="anonymous"
-      >
-        <source :src="videoData.videoUrl" type="video/mp4">
-        Ваш браузер не поддерживает видео
-      </video>
-    </transition>
+    <div class="video-container">
+      <transition name="slide">
+        <video
+          ref="videoRef"
+          :key="videoData.id"
+          class="video-content"
+          :src="videoData.videoUrl"
+          @click="togglePlay"
+          @loadedmetadata="onVideoLoaded"
+          @error="handleVideoError"
+          loop
+          playsinline
+          muted 
+          autoplay
+          preload="metadata"
+          type="video/mp4"
+          crossorigin="anonymous"
+        >
+          <source :src="videoData.videoUrl" type="video/mp4">
+          Ваш браузер не поддерживает видео
+        </video>
+      </transition>
+    </div>
 
     <div class="controls-overlay">
       <div class="controls-container">
@@ -91,7 +93,6 @@
     </div>
   </div>
 </template>
-
 <script setup>
 /* eslint-disable */ 
 import { ref, computed, watch } from 'vue'
@@ -298,21 +299,6 @@ const handleNext = () => {
   transform: scale(2.5);
 }
 
-.slide-enter-active,
-.slide-leave-active {
-  transition: all 0.5s ease-in-out;
-}
-
-.slide-enter-from {
-  opacity: 0;
-  transform: translateY(100%);
-}
-
-.slide-leave-to {
-  opacity: 0;
-  transform: translateY(-100%);
-}
-
 .navigation-controls .el-button {
   transition: transform 0.3s ease;
 }
@@ -324,5 +310,30 @@ const handleNext = () => {
 
 .navigation-controls .el-button:active {
   transform: scale(0.9);
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.5s ease-in-out;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.slide-enter-from {
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+.slide-leave-to {
+  opacity: 0;
+  transform: translateY(-100%) ;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 </style>
