@@ -202,6 +202,12 @@ const handleNext = () => {
   border-radius: 10px;
 }
 
+@media screen and (max-width: 1000px) {
+  .video-player {
+    margin-bottom: 90px;
+  }
+}
+
 .user-info {
   position: absolute;
   bottom: 100px;
