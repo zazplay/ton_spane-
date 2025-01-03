@@ -2,8 +2,13 @@
   <div class="clips-container">
     <header class="header">
       <el-button class="back-btn" circle @click="$router.back()">
+        
         <el-icon><ArrowLeft /></el-icon>
       </el-button>
+      <el-button class="addVideo-btn" circle @click="$router.back()">
+        <el-icon :size="30">
+          <CirclePlus /></el-icon>
+            </el-button>
       <div class="header-tabs">
         <span 
           class="tab" 
@@ -292,7 +297,21 @@ watch(activeTab, fetchVideos)
   backdrop-filter: blur(8px);
 }
 
+.addVideo-btn {
+  height: 40px;
+  width: 40px;
 
+  position: absolute;
+  right: 0;
+  margin-right: 20px;
+  margin-top: 15px;
+  --el-button-bg-color: rgba(255, 255, 255, 0.2);
+  --el-button-hover-bg-color: rgba(255, 255, 255, 0.3);
+  --el-button-text-color: #fff;
+  --el-button-border-color: transparent;
+  --el-button-hover-border-color: transparent;
+  backdrop-filter: blur(8px);
+}
 
 .preload-videos {
   display: none;
