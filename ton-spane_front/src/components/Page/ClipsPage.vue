@@ -18,9 +18,10 @@
 <el-dialog
   v-model="dialogVisible"
   title="Загрузить клип"
-  width="70%"
+  width="80%"
   :close-on-click-modal="false"
   :close-on-press-escape="!uploading"
+  style="margin-top: 10px;"
 >
   <el-form 
     ref="uploadForm" 
@@ -288,11 +289,12 @@ watch(activeTab, fetchVideos)
 
 <style scoped>
 .clips-container {
-  min-height: 100vh;
+  max-height: 100vh;
   background-color: #000;
   position: relative;
   overflow: hidden;
   margin-top: -8px;
+  margin-bottom: -100px;
 }
 
 .video-container {

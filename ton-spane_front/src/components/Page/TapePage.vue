@@ -15,13 +15,24 @@
               </div>  
             </div>
           </el-text>
+
+          <el-icon 
+            v-if="userType === 'model'" 
+            class="icon-style" 
+            @click="openForm"
+          ><CirclePlusFilled /></el-icon>
+
+
           <div class="icon-container">
             <router-link to="/app/notifications">
               <el-icon class="icon-style">
                 <BellFilled />
               </el-icon>
             </router-link>
-            <AddPostForm :isOpen="isFormOpen" @close="closeForm" />
+            <AddPostForm 
+              :isOpen="isFormOpen" 
+              @close="closeForm" 
+            />
           </div>
         </div>
       </el-header>
@@ -83,42 +94,49 @@
 </template>
 
 <script>
-import { BellFilled, Box } from '@element-plus/icons-vue';
+import { BellFilled, Box, CirclePlusFilled } from '@element-plus/icons-vue';
 import ListPostCards from '../ListPostCards.vue';
-import AddPostForm from './AdminPanel/Models/AddPostForm.vue';
 import { ref, computed } from 'vue'
 import FollowingPage from './FollowingPage/FollowingPage.vue';
 import config from '../../config';
 import { useStore } from 'vuex';
 import UserLikes from './Likes/UserLikes.vue';
+import AddPostForm from './AddPostForm.vue'
+
+
+
 
 export default {
   components: {
-    AddPostForm,
     ListPostCards,
     BellFilled,
     Box,
     FollowingPage,
-    UserLikes
+    UserLikes,
+    CirclePlusFilled,
+    AddPostForm
   },
   data() {
     const store = useStore()
     const userId = computed(() => store.getters.getSub)
-    
+    const userType = sessionStorage.getItem('userType')
+
     return {
-      isFormOpen: false,
+      isFormOpen: false,  
       activeTab: 'first',
       isDataLoaded: false,
       posts: ref([]),
-      userId
+      userId,
+      userType
     };
   },
   methods: {
     openForm() {
-      this.isFormOpen = true;
+      this.isFormOpen = true  // открываем форму при клике
     },
+    
     closeForm() {
-      this.isFormOpen = false;
+      this.isFormOpen = false  // закрываем форму
     },
     async fetchPosts() {
   try {
@@ -163,7 +181,7 @@ export default {
 }
 
 .icon-style {
- font-size: 1.5em;
+ font-size: 1.6em;
  cursor: pointer;
  color: #E5EAF3;
  padding: 0.3em;

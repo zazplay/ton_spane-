@@ -216,6 +216,8 @@ const handleNext = () => {
 @media screen and (max-width: 1000px) {
   .video-player {
     margin-bottom: 90px;
+    max-height: 600px;
+    margin-top: -90px;
   }
 }
 
