@@ -7,54 +7,67 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import router from './route.js'
 import store from './store'
 
-// Функция для определения начальной темы
-function getInitialTheme() {
-  // Проверяем, есть ли сохраненная тема
-  const savedTheme = localStorage.getItem('theme')
-  if (savedTheme) {
-    return savedTheme
+// Оптимизация определения темы
+const themeManager = {
+  getInitialTheme() {
+    const savedTheme = localStorage.getItem('theme')
+    if (savedTheme) return savedTheme
+    
+    const hours = new Date().getHours()
+    return hours >= 6 && hours < 16 ? 'dark' : 'light'
+  },
+  
+  setTheme(theme) {
+    document.documentElement.className = theme
+    localStorage.setItem('theme', theme)
+  }
+}
+
+// Инициализация приложения
+const initApp = () => {
+  const app = createApp(App)
+  
+  // Оптимизация производительности
+  app.config.performance = true
+  
+  // Регистрация иконок
+  Object.entries(ElementPlusIconsVue).forEach(([key, component]) => {
+    app.component(key, component)
+  })
+  
+  // Обработка ошибок
+  app.config.errorHandler = (err) => {
+    if (err.message === 'Script error.') return
+    console.error('Error:', err.message)
   }
   
-  // Если темы нет, определяем по времени суток
-  const hours = new Date().getHours()
-  return hours >= 6 && hours < 16 ? 'dark' : 'light'
+  // Инициализация Element Plus
+  app.use(ElementPlus, {
+    size: 'default',
+    zIndex: 3000
+  })
+  
+  // Инициализация store и router
+  store.dispatch('initializeStore')
+  app.use(store)
+  app.use(router)
+  
+  // Установка начальной темы
+  themeManager.setTheme(themeManager.getInitialTheme())
+  
+  return app
 }
 
-// Устанавливаем начальную тему
-const initialTheme = getInitialTheme()
-document.documentElement.className = initialTheme
-localStorage.setItem('theme', initialTheme)
-
-// Экспортируем функцию для использования в других компонентах
-export function setTheme(newTheme) {
-  document.documentElement.className = newTheme
-  localStorage.setItem('theme', newTheme)
-}
-
-const app = createApp(App)
-
-for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
-  app.component(key, component)
-}
-
-app.config.errorHandler = (err) => {
-  if (err.message === 'Script error.') {
-    return
-  }
-  console.error(err)
-}
-
-window.onerror = function(msg) {
-  if (msg === 'Script error.') {
-    return false
-  }
+// Глобальная обработка ошибок
+window.onerror = function(msg, source, lineno) {
+  if (msg === 'Script error.') return false
+  console.error(`Global error: ${msg}\nSource: ${source}\nLine: ${lineno}`)
   return true
 }
 
-store.dispatch('initializeStore')
-
-app.use(store)
-app.use(ElementPlus)
-app.use(router)
-
+// Запуск приложения
+const app = initApp()
 app.mount('#app')
+
+// Экспорт функции установки темы
+export const setTheme = themeManager.setTheme.bind(themeManager)

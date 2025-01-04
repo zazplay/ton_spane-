@@ -288,13 +288,23 @@ watch(activeTab, fetchVideos)
 </script>
 
 <style scoped>
+/* Основные стили */
 .clips-container {
   max-height: 100vh;
-  background-color: #000;
   position: relative;
   overflow: hidden;
   margin-top: -8px;
   margin-bottom: -100px;
+}
+
+/* Светлая тема */
+html:not(.dark) .clips-container {
+  background-color: #7c758615; /* светло-фиолетовый */
+}
+
+/* Темная тема */
+html.dark .clips-container {
+  background-color: #000000; /* черный */
 }
 
 .video-container {
