@@ -292,6 +292,7 @@ watch(activeTab, fetchVideos)
   background-color: #000;
   position: relative;
   overflow: hidden;
+  margin-top: -8px;
 }
 
 .video-container {
@@ -302,6 +303,7 @@ watch(activeTab, fetchVideos)
   justify-content: center;
   align-items: center;
   overflow: hidden;
+  
 }
 
 .slide-enter-active,
@@ -346,6 +348,8 @@ watch(activeTab, fetchVideos)
   grid-template-columns: auto 1fr;
   gap: 1rem;
   background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+  margin-top: -8px;
+
 }
 
 .header-tabs {

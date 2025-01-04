@@ -1,5 +1,7 @@
 <template>
   <div class="video-player">
+    <ShareModal v-model:dialogVisible="isShareModalVisible" />
+    
     <div class="user-info">
       <el-avatar 
         :size="40"
@@ -8,33 +10,36 @@
         class="avatar"
       />
       <div class="user-details">
-        <h3 class="username">@{{ videoData.model.username }}</h3>
+        <router-link 
+          :to="`/app/user/${videoData.model.id}`" 
+          class="username"
+        >
+          @{{ videoData.model.username}}
+        </router-link>
         <p class="description">{{ videoData.caption }}</p>
       </div>
     </div>
 
     <div class="video-container">
-      <transition name="slide">
-        <video
-          ref="videoRef"
-          :key="videoData.id"
-          class="video-content"
-          :src="videoData.videoUrl"
-          @click="togglePlay"
-          @loadedmetadata="onVideoLoaded"
-          @error="handleVideoError"
-          loop
-          playsinline
-          muted 
-          autoplay
-          preload="metadata"
-          type="video/mp4"
-          crossorigin="anonymous"
-        >
-          <source :src="videoData.videoUrl" type="video/mp4">
-          Ваш браузер не поддерживает видео
-        </video>
-      </transition>
+      <video
+        ref="videoRef"
+        :key="videoData.id"
+        class="video-content"
+        :src="videoData.videoUrl"
+        @click="togglePlay"
+        @loadedmetadata="onVideoLoaded"
+        @error="handleVideoError"
+        loop
+        playsinline
+        muted 
+        autoplay
+        preload="metadata"
+        type="video/mp4"
+        crossorigin="anonymous"
+      >
+        <source :src="videoData.videoUrl" type="video/mp4">
+        Ваш браузер не поддерживает видео
+      </video>
     </div>
 
     <div class="controls-overlay">
@@ -71,12 +76,13 @@
             </svg>
           </el-button>
           <el-button
+            :class="{ 'shared': isShared }"
             @click="handleShare"
             circle
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"
-                fill="white" />
+                :fill="isShared ? '#ffa726' : 'white'" />
             </svg>
           </el-button>
         </div>
@@ -93,11 +99,13 @@
     </div>
   </div>
 </template>
+
 <script setup>
-/* eslint-disable */ 
+/* eslint-disable */
 import { ref, computed, watch } from 'vue'
 import { ArrowUpBold, ArrowDownBold, UserFilled } from '@element-plus/icons-vue'
 import { useStore } from 'vuex'
+import ShareModal from './ShareModal.vue'
 
 const props = defineProps({
   video: {
@@ -117,6 +125,8 @@ const videoData = ref({ ...props.video })
 const videoRef = ref(null)
 const isPlaying = ref(true)
 const isMuted = ref(false)
+const isShareModalVisible = ref(false)
+const isShared = ref(false)
 
 // Watch for changes in the original prop and update videoData
 watch(() => props.video, (newVideo) => {
@@ -177,7 +187,9 @@ const toggleLike = async () => {
 }
 
 const handleShare = () => {
-  emit('share')
+  isShared.value = !isShared.value
+  isShareModalVisible.value = true
+  emit('share', isShared.value)
 }
 
 const handlePrev = () => {
@@ -188,7 +200,6 @@ const handleNext = () => {
   emit('next')
 }
 </script>
-
 
 <style scoped>
 .video-player {
@@ -232,6 +243,7 @@ const handleNext = () => {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
+  color: white;
 }
 
 .description {
@@ -292,6 +304,11 @@ const handleNext = () => {
   padding: 0;
 }
 
+:deep(.el-button.shared) {
+  --el-button-bg-color: rgba(255, 152, 0, 0.2);
+  --el-button-hover-bg-color: rgba(255, 152, 0, 0.3);
+}
+
 :deep(.el-button i) {
   display: flex;
   justify-content: center;
@@ -316,24 +333,6 @@ const handleNext = () => {
 
 .navigation-controls .el-button:active {
   transform: scale(0.9);
-}
-
-.slide-enter-active,
-.slide-leave-active {
-  transition: all 0.5s ease-in-out;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-.slide-enter-from {
-  opacity: 0;
-  transform: translateY(100%);
-}
-
-.slide-leave-to {
-  opacity: 0;
-  transform: translateY(-100%) ;
 }
 
 .video-container {

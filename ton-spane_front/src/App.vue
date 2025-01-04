@@ -50,12 +50,13 @@ export default {
 .statusModelMessage{
   position: fixed;
   right: 0;
-  top:0;
+  top:20%;
   background: rgba(255, 0, 0, 0.2);
     padding: 10px;
   border-radius: 10px;
   margin: 10px;
   color:white;
+  font-size: 10px;
 }
 
 .floating-theme-switcher {
