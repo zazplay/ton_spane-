@@ -172,7 +172,7 @@ const isActive = (path) => {
 }
 
 .menu-item span {
-    font-size: 15px;
+    font-size: 17px;
     letter-spacing: 0.3px;
 }
 
