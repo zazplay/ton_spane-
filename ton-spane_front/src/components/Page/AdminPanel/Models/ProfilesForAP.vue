@@ -1,6 +1,7 @@
 <script setup>
-import { ref, onMounted,defineEmits } from 'vue'
+import { ref, onMounted, defineEmits, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import { Search, Plus, Delete, Close, UserFilled } from '@element-plus/icons-vue'
 import axios from 'axios'
 import config from '@/config'
 import { validateInputToScript, removeTagsOperators, validateLogin } from "../../../Validation"
@@ -17,10 +18,20 @@ const formRef = ref(null)
 const scrollContainer = ref(null)
 const loading = ref(true)
 const users = ref([])
+const searchQuery = ref('')
 const selectedUsers = ref([])
 const dialogVisible = ref(false)
 const deleteDialogVisible = ref(false)
 const dragState = ref({ isDragging: false, startX: 0, scrollLeft: 0 })
+
+// Вычисляемые свойства
+const filteredUsers = computed(() => {
+  if (!searchQuery.value) return users.value
+  const query = searchQuery.value.toLowerCase()
+  return users.value.filter(user => 
+    user.username.toLowerCase().includes(query)
+  )
+})
 
 const newUser = ref({
   username: '',
@@ -32,6 +43,12 @@ const errors = ref({
   username: '',
   description: ''
 })
+
+// Вспомогательные функции
+const truncateText = (text, maxLength) => {
+  if (!text) return ''
+  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text
+}
 
 // Правила валидации
 const validationRules = {

@@ -15,23 +15,38 @@
     </el-dialog>
 
     <div class="container-btn">
-        <div class="btn-add-profile">
+        <div class="btn-group-left">
+            
             <el-button type="primary" @click="dialogVisible = true">
                 Добавить модель
             </el-button>
         </div>
-        <div class="btn-add-profile" style="margin-left: 6px;">
+        <div class="btn-group-right">
             <template v-if="selectedUsers.length > 0">
-                <el-button type="danger" @click="showDeleteConfirmation">
+                <el-button type="danger" @click="showDeleteConfirmation" style="margin-left: 10px;">
                     Удалить ({{ selectedUsers.length }})
                 </el-button>
                 <el-button type="info" @click="resetSelection">
                     Cбросить
                 </el-button>
+
             </template>
+
+            
         </div>
     </div>
-
+    <el-input
+                v-model="searchQuery"
+                placeholder="Поиск по имени..."
+                clearable
+                class="search-input"
+                style="width: 300px;
+                margin-top: 20px;"
+            >
+                <template #prefix>
+                    <el-icon><Search /></el-icon>
+                </template>
+            </el-input>
     <el-dialog
         v-model="dialogVisible"
         title="Добавить профиль"
@@ -105,7 +120,7 @@
                     @mouseleave="stopDrag"
                 >
                     <el-card
-                        v-for="item in lists"
+                        v-for="item in filteredLists"
                         :key="item.id"
                         :body-style="{ padding: '0px', marginBottom: '1px' }"
                         class="card"
@@ -135,8 +150,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineEmits,defineExpose } from 'vue'
+import { ref, onMounted, defineEmits, defineExpose, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
 import axios from 'axios'
 import config from '@/config'
 import { validateInputToScript, removeTagsOperators, validateLogin } from "../../../Validation"
@@ -147,9 +163,18 @@ const defaultUserImage = "https://via.placeholder.com/150"
 
 const loading = ref(true)
 const lists = ref([])
+const searchQuery = ref('')
 const selectedUsers = ref([])
 const dialogVisible = ref(false)
 const deleteDialogVisible = ref(false)
+
+const filteredLists = computed(() => {
+    if (!searchQuery.value) return lists.value
+    const query = searchQuery.value.toLowerCase()
+    return lists.value.filter(item => 
+        item.username.toLowerCase().includes(query)
+    )
+})
 
 const newProfile = ref({
     username: '',
@@ -265,7 +290,7 @@ const saveNewProfile = async () => {
         })
         
         dialogVisible.value = false
-        emit('user-created', response.data.id) // Добавлено событие для родительского компонента
+        emit('user-created', response.data.id)
         newProfile.value = { username: '', password: '', description: '' }
         selectedUsers.value = []
         await fetchData()

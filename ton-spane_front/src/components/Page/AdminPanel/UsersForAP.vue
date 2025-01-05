@@ -6,6 +6,16 @@
         <el-button type="primary" @click="dialogVisible = true">
           Добавить профиль
         </el-button>
+        <el-input
+          v-model="searchQuery"
+          placeholder="Поиск по имени"
+          clearable
+          class="search-input"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
       </div>
       <div class="control-panel__right">
         <template v-if="selectedUsers.length > 0">
@@ -50,7 +60,7 @@
             @mouseleave="stopDrag"
           >
             <el-card
-              v-for="user in users"
+              v-for="user in filteredUsers"
               :key="user.id"
               :body-style="{ padding: '0px', marginBottom: '1px' }"
               class="user-card"
@@ -162,8 +172,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineEmits } from 'vue'
+import { ref, onMounted, defineEmits, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
 import axios from 'axios'
 import config from '@/config'
 import { validateInputToScript, removeTagsOperators, validateLogin } from "../../Validation"
@@ -180,10 +191,19 @@ const formRef = ref(null)
 const scrollContainer = ref(null)
 const loading = ref(true)
 const users = ref([])
+const searchQuery = ref('')
 const selectedUsers = ref([])
 const dialogVisible = ref(false)
 const deleteDialogVisible = ref(false)
 const dragState = ref({ isDragging: false, startX: 0, scrollLeft: 0 })
+
+// Вычисляемые свойства
+const filteredUsers = computed(() => {
+  if (!searchQuery.value) return users.value
+  return users.value.filter(user => 
+    user.username.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+})
 
 const newUser = ref({
   username: '',
@@ -351,6 +371,7 @@ onMounted(() => {
   fetchUsers()
 })
 </script>
+
 
 <style scoped>
 .profiles-container {

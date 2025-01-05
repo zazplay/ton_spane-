@@ -42,7 +42,7 @@ import { ref, computed, markRaw } from 'vue'
 import UsersForAp from './UsersForAP.vue'
 import ModelsPage from './Models/ModelsPage.vue'
 import PostsAP from './PostsAPAll.vue'
-// import Clips from './ClipsAP.vue'
+import Clips from './Models/ClipsForAP.vue'
 
 // State
 const activeTab = ref('users')
@@ -53,7 +53,7 @@ const tabs = [
   { id: 'users', label: 'Пользователи', component: markRaw(UsersForAp) },
   { id: 'models', label: 'Модели', component: markRaw(ModelsPage) },
   { id: 'posts', label: 'Посты', component: markRaw(PostsAP) },
-  // { id: 'clips', label: 'Клипы', component: markRaw(Clips) }
+  { id: 'clips', label: 'Клипы', component: markRaw(Clips) }
 ]
 
 // Computed
