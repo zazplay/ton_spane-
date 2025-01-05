@@ -28,7 +28,6 @@ const routes = [
     path: '/app',
     component: MainPage,
     children: [
-      
       { path: 'tape', component: () => import('./components/Page/TapePage.vue') },
       { path: 'notifications', component: () => import('./components/Page/NotificationsPage.vue') },
       { path: 'clips', component: () => import('./components/Page/ClipsPage.vue') },
@@ -36,10 +35,6 @@ const routes = [
       { path: 'search', component: () => import('./components/Page/SearchPage.vue') },
       { path: 'purchased', component: () => import('./components/Page/PurchasedPage.vue') },
       { path: 'more', component: () => import('./components/Page/More/MorePage.vue') },
-      { 
-        path: 'tape/popular', 
-        component: () => import('./components/Page/PopularTapes.vue')  // Используем созданный ранее компонент
-      },
       
       {
         path: 'user/:id',

@@ -114,10 +114,6 @@ const isActive = (path) => {
     flex-direction: column;
     gap: 24px;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
 }
 
 .el-menu-vertical-demo {
@@ -221,7 +217,7 @@ const isActive = (path) => {
     align-items: center;
     gap: 0px;
     font-weight: 600;
-    padding: 0px;
+    padding: 16px;
 }
 
 .card-content {

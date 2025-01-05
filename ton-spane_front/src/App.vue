@@ -38,13 +38,13 @@ export default {
   </div>
 </template>
 
-<style>
+<style scoped>
 #app {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-  width: 100%;
-  caret-color: transparent;  /* Скрываем курсор выделения */
+ -webkit-font-smoothing: antialiased;
+ -moz-osx-font-smoothing: grayscale;
+ /* text-align: center; */
+ color: #2c3e50;
+ width: 100%;
 }
 
 .statusModelMessage{
