@@ -3,7 +3,7 @@ import { ref, onMounted, watch, onUnmounted,defineProps,reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import config from '@/config'
-import PostsAP from '../PostsAP.vue'
+import PostsAP from '../PostsAPForUser.vue'
 import CreatePost from './AddPostForm.vue'
 import ChatPage from './Chats/ChatsPage.vue'
 const showChats = ref(false)

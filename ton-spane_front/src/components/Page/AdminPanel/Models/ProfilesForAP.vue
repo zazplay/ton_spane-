@@ -1,155 +1,3 @@
-<template>
-  <div class="profiles-container">
-    <!-- Панель управления пользователями -->
-    <div class="control-panel">
-      <div class="control-panel__left">
-        <el-button type="primary" @click="dialogVisible = true"> 
-          Добавить модель
-        </el-button>
-      </div>
-      <div class="control-panel__right">
-        <template v-if="selectedUsers.length > 0">
-          <el-button type="danger" @click="showDeleteConfirmation">
-            Удалить ({{ selectedUsers.length }})
-          </el-button>
-          <el-button type="info" @click="selectedUsers = []">
-            Cбросить
-          </el-button>
-        </template>
-      </div>
-    </div>
-
-    <!-- Список пользователей с загрузчиком -->
-    <el-space style="width: 100%" fill>
-      <el-skeleton 
-        style="display: flex; gap: 8px" 
-        :loading="loading" 
-        animated 
-        :count="3"
-      >
-        <template #template>
-          <div style="flex: 1">
-            <el-skeleton-item variant="image" style="height: 240px" />
-            <div style="padding: 14px">
-              <el-skeleton-item variant="h3" style="width: 50%" />
-              <div style="display: flex; align-items: center; margin-top: 16px; height: 16px;">
-                <el-skeleton-item variant="text" style="margin-right: 16px" />
-                <el-skeleton-item variant="text" style="width: 30%" />
-              </div>
-            </div>
-          </div>
-        </template>
-
-        <template #default>
-          <div 
-            class="user-grid"
-            ref="scrollContainer"
-            @mousedown="startDrag"
-            @mousemove="handleDrag"
-            @mouseup="stopDrag"
-            @mouseleave="stopDrag"
-          >
-            <el-card
-              v-for="user in users"
-              :key="user.id"
-              :body-style="{ padding: '0px', marginBottom: '1px' }"
-              class="user-card"
-            >
-              <img
-                :src="user.profilePicture || defaultUserImg"
-                class="user-card__image"
-                @click="handleUserSelect(user)"
-                @error="e => e.target.src = defaultUserImg"
-              />
-              <div class="user-card__content">
-                <el-text class="user-card__username" @click="handleUserSelect(user)">
-                  {{ user.username }}
-                </el-text>
-                <div class="user-card__checkbox">
-                  <el-checkbox
-                    :model-value="selectedUsers.includes(user.id)"
-                    @change="val => handleUserSelection(val, user.id)"
-                  />
-                </div>
-              </div>
-            </el-card>
-          </div>
-        </template>
-      </el-skeleton>
-    </el-space>
-
-    <!-- Диалог добавления пользователя -->
-    <el-dialog
-      v-model="dialogVisible"
-      title="Добавить профиль"
-      width="500px"
-      destroy-on-close
-    >
-      <el-form 
-        ref="formRef"
-        :model="newUser"
-        :rules="validationRules"
-        label-position="top"
-      >
-        <el-form-item label="Имя" prop="username">
-          <el-input
-            v-model="newUser.username"
-            @input="validateUsername"
-            placeholder="Введите имя профиля"
-          />
-          <span v-if="errors.username" class="error-message">
-            {{ errors.username }}
-          </span>
-        </el-form-item>
-
-        <el-form-item label="Пароль" prop="password">
-          <el-input
-            v-model="newUser.password"
-            type="password"
-            placeholder="Введите пароль"
-            show-password
-          />
-        </el-form-item>
-
-        <el-form-item label="Описание" prop="description">
-          <el-input
-            v-model="newUser.description"
-            type="textarea"
-            :rows="4"
-            @input="validateDescription"
-            placeholder="Введите описание"
-          />
-          <span v-if="errors.description" class="error-message">
-            {{ errors.description }}
-          </span>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="dialogVisible = false">Отмена</el-button>
-          <el-button type="primary" @click="saveUser">Сохранить</el-button>
-        </div>
-      </template>
-    </el-dialog>
-
-    <!-- Диалог подтверждения удаления -->
-    <el-dialog
-      v-model="deleteDialogVisible"
-      title="Подтверждение удаления"
-      width="400px"
-      destroy-on-close
-    >
-      <span>Вы действительно хотите удалить {{ selectedUsers.length }} пользователя(ей)?</span>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="deleteDialogVisible = false">Отменить</el-button>
-          <el-button type="danger" @click="deleteUsers">Удалить</el-button>
-        </div>
-      </template>
-    </el-dialog>
-  </div>
-</template>
-
 <script setup>
 import { ref, onMounted,defineEmits } from 'vue'
 import { ElMessage } from 'element-plus'
@@ -229,6 +77,7 @@ const saveUser = async () => {
     ElMessage.success('Профиль успешно добавлен')
     dialogVisible.value = false
     newUser.value = { username: '', password: '', description: '' }
+    
     await fetchUsers()
   } catch (error) {
     ElMessage.error('Ошибка при сохранении профиля')
@@ -324,127 +173,444 @@ onMounted(() => {
 })
 </script>
 
+<template>
+  <el-scrollbar height="calc(100vh - 64px)" class="scrollbar-container">
+    <div class="profiles-container">
+      <!-- Search and Controls -->
+      <el-card class="control-panel" shadow="never">
+        <div class="control-panel__content">
+          <div class="control-panel__left">
+            <el-input
+              v-model="searchQuery"
+              placeholder="Поиск по имени..."
+              :prefix-icon="Search"
+              clearable
+              class="search-input"
+            />
+            <el-button type="primary" :icon="Plus" @click="dialogVisible = true">
+              Добавить модель
+            </el-button>
+          </div>
+
+          <div class="control-panel__right" v-if="selectedUsers.length > 0">
+            <el-tag type="info" class="selection-tag">
+              Выбрано: {{ selectedUsers.length }}
+            </el-tag>
+            <el-button-group>
+              <el-button type="danger" :icon="Delete" @click="showDeleteConfirmation">
+                Удалить
+              </el-button>
+              <el-button :icon="Close" @click="selectedUsers = []">
+                Сбросить
+              </el-button>
+            </el-button-group>
+          </div>
+        </div>
+      </el-card>
+
+      <!-- Users Grid with Loading State -->
+      <div class="content-wrapper">
+        <el-skeleton 
+          :loading="loading" 
+          animated 
+          :count="8"
+          class="skeleton-grid"
+        >
+          <template #template>
+            <div class="skeleton-card">
+              <el-skeleton-item variant="image" class="skeleton-image" />
+              <div class="skeleton-content">
+                <el-skeleton-item variant="text" style="width: 70%" />
+                <el-skeleton-item variant="text" style="width: 50%" />
+              </div>
+            </div>
+          </template>
+
+          <template #default>
+            <el-empty
+              v-if="filteredUsers.length === 0"
+              description="Пользователи не найдены"
+              class="empty-state"
+            >
+              <template #image>
+                <el-icon :size="60"><UserFilled /></el-icon>
+              </template>
+            </el-empty>
+
+            <div v-else class="users-grid">
+              <el-card
+                v-for="user in filteredUsers"
+                :key="user.id"
+                class="user-card"
+                :class="{ 'user-card--selected': selectedUsers.includes(user.id) }"
+                shadow="hover"
+              >
+                <div class="user-card__selection">
+                  <el-checkbox
+                    :model-value="selectedUsers.includes(user.id)"
+                    @change="val => handleUserSelection(val, user.id)"
+                  />
+                </div>
+
+                <div class="user-card__main" @click="handleUserSelect(user)">
+                  <el-avatar
+                    :size="100"
+                    :src="user.profilePicture || defaultUserImg"
+                    @error="e => e.target.src = defaultUserImg"
+                    class="user-card__avatar"
+                  />
+                  <div class="user-card__info">
+                    <h3 class="user-card__username">{{ user.username }}</h3>
+                    <p class="user-card__description" v-if="user.profileDescription">
+                      {{ truncateText(user.profileDescription, 50) }}
+                    </p>
+                  </div>
+                </div>
+              </el-card>
+            </div>
+          </template>
+        </el-skeleton>
+      </div>
+
+      <!-- Add User Dialog -->
+      <el-dialog
+        v-model="dialogVisible"
+        title="Добавить профиль"
+        width="500px"
+        destroy-on-close
+        class="user-dialog"
+      >
+        <el-form 
+          ref="formRef"
+          :model="newUser"
+          :rules="validationRules"
+          label-position="top"
+          class="user-form"
+        >
+          <el-form-item label="Имя" prop="username">
+            <el-input
+              v-model="newUser.username"
+              @input="validateUsername"
+              placeholder="Введите имя профиля"
+            />
+            <span v-if="errors.username" class="error-message">
+              {{ errors.username }}
+            </span>
+          </el-form-item>
+
+          <el-form-item label="Пароль" prop="password">
+            <el-input
+              v-model="newUser.password"
+              type="password"
+              placeholder="Введите пароль"
+              show-password
+            />
+          </el-form-item>
+
+          <el-form-item label="Описание" prop="description">
+            <el-input
+              v-model="newUser.description"
+              type="textarea"
+              :rows="4"
+              @input="validateDescription"
+              placeholder="Введите описание"
+              resize="none"
+            />
+            <span v-if="errors.description" class="error-message">
+              {{ errors.description }}
+            </span>
+          </el-form-item>
+        </el-form>
+
+        <template #footer>
+          <div class="dialog-footer">
+            <el-button @click="dialogVisible = false">Отмена</el-button>
+            <el-button type="primary" @click="saveUser">Сохранить</el-button>
+          </div>
+        </template>
+      </el-dialog>
+
+      <!-- Delete Confirmation Dialog -->
+      <el-dialog
+        v-model="deleteDialogVisible"
+        title="Подтверждение удаления"
+        width="400px"
+        destroy-on-close
+        class="delete-dialog"
+      >
+        <template #default>
+          <el-alert
+            type="warning"
+            :closable="false"
+            show-icon
+          >
+            <p>Вы действительно хотите удалить {{ selectedUsers.length }} пользователя(ей)?</p>
+            <p class="alert-subtitle">Это действие нельзя отменить</p>
+          </el-alert>
+        </template>
+
+        <template #footer>
+          <div class="dialog-footer">
+            <el-button @click="deleteDialogVisible = false">Отменить</el-button>
+            <el-button type="danger" @click="deleteUsers">Удалить</el-button>
+          </div>
+        </template>
+      </el-dialog>
+    </div>
+  </el-scrollbar>
+</template>
+
 <style scoped>
-.profiles-container {
+.scrollbar-container {
+  height: calc(100vh - 64px);
   width: 100%;
+}
+
+.scrollbar-container :deep(.el-scrollbar__wrap) {
+  overflow-x: hidden;
+}
+
+.profiles-container {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  padding: 1rem;
+  min-height: 100%;
 }
 
+/* Control Panel Styles */
 .control-panel {
+  position: sticky;
+  top: 1rem;
+  z-index: 10;
+  background: var(--el-bg-color);
+  margin-bottom: 1rem;
+}
+
+.control-panel__content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 0;
-  border-bottom: 1px solid #e4e7ed;
+  gap: 1rem;
 }
 
 .control-panel__left {
   display: flex;
-  gap: 8px;
+  gap: 1rem;
+  align-items: center;
+  flex: 1;
+}
+
+.search-input {
+  max-width: 300px;
 }
 
 .control-panel__right {
   display: flex;
-  gap: 8px;
+  gap: 1rem;
+  align-items: center;
 }
 
-.user-grid {
+.selection-tag {
+  font-size: 14px;
+  padding: 8px 12px;
+}
+
+/* Grid Styles */
+.content-wrapper {
+  flex: 1;
+}
+
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+/* Skeleton Styles */
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.skeleton-card {
+  background: var(--el-bg-color);
+  border-radius: 8px;
+  padding: 1rem;
+  height: 200px;
+}
+
+.skeleton-image {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 1rem;
+}
+
+.skeleton-content {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 10px 0;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
 }
 
+/* User Card Styles */
 .user-card {
   position: relative;
-  width: 150px;
-  height: 180px;
-  border: none;
-  transition: transform 0.2s ease-in-out;
-  text-align: center;
-  background-color: transparent;
-  cursor: pointer;
+  transition: all 0.3s ease;
+  height: 100%;
 }
 
 .user-card:hover {
+  transform: translateY(-2px);
+}
+
+.user-card--selected {
+  border-color: var(--el-color-primary);
+  background-color: var(--el-color-primary-light-9);
+}
+
+.user-card__selection {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1;
+}
+
+.user-card__main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  cursor: pointer;
+}
+
+.user-card__avatar {
+  transition: transform 0.2s ease;
+}
+
+.user-card:hover .user-card__avatar {
   transform: scale(1.05);
 }
 
-.user-card__image {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 10px;
-}
-
-.user-card__content {
-  padding: 8px;
-  position: relative;
+.user-card__info {
+  text-align: center;
+  width: 100%;
 }
 
 .user-card__username {
-  font-size: 14px;
-  display: block;
-  margin-bottom: 4px;
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem;
+  color: var(--el-text-color-primary);
 }
 
-.user-card__checkbox {
-  position: absolute;
-  bottom: 5px;
-  left: 5px;
+.user-card__description {
+  font-size: 0.9rem;
+  color: var(--el-text-color-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Dialog Styles */
+.user-dialog :deep(.el-dialog__body) {
+  padding-top: 0;
+}
+
+.user-form {
+  margin-top: 1rem;
 }
 
 .error-message {
-  color: #f56c6c;
+  color: var(--el-color-danger);
   font-size: 12px;
   margin-top: 4px;
 }
 
-.user-grid::-webkit-scrollbar {
-  height: 8px;
+.alert-subtitle {
+  font-size: 0.9em;
+  margin-top: 0.5em;
+  color: var(--el-text-color-secondary);
 }
 
-.user-grid::-webkit-scrollbar-thumb {
-  background-color: #909399;
-  border-radius: 4px;
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
 }
 
-.user-grid::-webkit-scrollbar-track {
-  background-color: #f4f4f5;
+/* Empty State */
+.empty-state {
+  padding: 2rem;
 }
 
-@media (max-width: 1200px) {
-  .control-panel {
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .profiles-container {
+    padding: 0.5rem;
+  }
+
+  .control-panel__content {
     flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
-    padding: 12px;
+    align-items: stretch;
   }
 
-  .control-panel__right {
-    width: 100%;
-    justify-content: flex-start;
+  .control-panel__left {
+    flex-direction: column;
   }
 
-  .user-grid {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    cursor: grab;
-    padding: 0;
-    margin-bottom: 10px;
+  .search-input {
+    max-width: 100%;
   }
 
-  .user-card {
-    flex: 0 0 90px;
-    height: 160px;
+  .users-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.5rem;
   }
 
-  .user-card__image {
-    width: 90px;
-    height: 85px;
+  .user-card__main {
+    padding: 0.5rem;
   }
+
+  .el-dialog {
+    width: 90% !important;
+    margin: 0 auto;
+  }
+}
+
+/* Touch Device Optimization */
+@media (hover: none) {
+  .user-card:hover {
+    transform: none;
+  }
+
+  .user-card:hover .user-card__avatar {
+    transform: none;
+  }
+}
+
+/* Custom Scrollbar */
+:deep(*) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--el-color-primary-light-3) transparent;
+}
+
+:deep(*::-webkit-scrollbar) {
+  width: 6px;
+  height: 6px;
+}
+
+:deep(*::-webkit-scrollbar-track) {
+  background: transparent;
+}
+
+:deep(*::-webkit-scrollbar-thumb) {
+  background-color: var(--el-color-primary-light-3);
+  border-radius: 3px;
+}
+
+:deep(*::-webkit-scrollbar-thumb:hover) {
+  background-color: var(--el-color-primary);
 }
 </style>
