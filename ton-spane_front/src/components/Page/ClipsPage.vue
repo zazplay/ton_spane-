@@ -4,82 +4,83 @@
       <el-button class="back-btn" circle @click="$router.back()">
         <el-icon><ArrowLeft /></el-icon>
       </el-button>
+      
       <el-button 
-  v-if="userType === 'model'"
-  class="addVideo-btn" 
-  circle 
-  @click="dialogVisible = true"
->
-  <el-icon :size="30">
-    <CirclePlus />
-  </el-icon>
-</el-button>
-
-<el-dialog
-  v-model="dialogVisible"
-  title="Загрузить клип"
-  width="80%"
-  :close-on-click-modal="false"
-  :close-on-press-escape="!uploading"
-  style="margin-top: 10px;"
->
-  <el-form 
-    ref="uploadForm" 
-    :model="formData"
-    label-position="top"
-    @submit.prevent="handleUpload"
-  >
-    <el-form-item label="Видео файл">
-      <el-upload
-        class="upload-demo"
-        drag
-        action="#"
-        :auto-upload="false"
-        :on-change="handleFileChange"
-        :limit="1"
-        accept="video/*"
-        :disabled="uploading"
+        v-if="userType === 'model'"
+        class="addVideo-btn" 
+        circle 
+        @click="dialogVisible = true"
       >
-        <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-        <div class="el-upload__text">
-          Переместите видео сюда<em> Нажмите что бы загрузить</em>
-        </div>
-        <template #tip>
-          <div class="el-upload__tip">
-            Пожалуйста загрузите видео-файл
-          </div>
-        </template>
-      </el-upload>
-    </el-form-item>
-
-    <el-form-item label="Описание">
-      <el-input
-        v-model="formData.caption"
-        type="textarea"
-        :rows="2"
-        placeholder="Добавьте описание вашему видео..."
-        :disabled="uploading"
-      />
-    </el-form-item>
-  </el-form>
-
-  <template #footer>
-    <span class="dialog-footer">
-      <el-button 
-        @click="dialogVisible = false" 
-        :disabled="uploading"
-      >Отмена</el-button>
-      <el-button 
-        type="primary" 
-        @click="handleUpload"
-        :loading="uploading"
-        :disabled="!formData.videoFile"
-      >
-        {{ uploading ? 'Загрузка...' : 'Загрузить' }}
+        <el-icon :size="30">
+          <CirclePlus />
+        </el-icon>
       </el-button>
-    </span>
-  </template>
-</el-dialog >
+
+      <el-dialog
+        v-model="dialogVisible"
+        title="Загрузить клип"
+        width="80%"
+        :close-on-click-modal="false"
+        :close-on-press-escape="!uploading"
+        style="margin-top: 10px;"
+      >
+        <el-form 
+          ref="uploadForm" 
+          :model="formData"
+          label-position="top"
+          @submit.prevent="handleUpload"
+        >
+          <el-form-item label="Видео файл">
+            <el-upload
+              class="upload-demo"
+              drag
+              action="#"
+              :auto-upload="false"
+              :on-change="handleFileChange"
+              :limit="1"
+              accept="video/*"
+              :disabled="uploading"
+            >
+              <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
+              <div class="el-upload__text">
+                Переместите видео сюда<em> Нажмите что бы загрузить</em>
+              </div>
+              <template #tip>
+                <div class="el-upload__tip">
+                  Пожалуйста загрузите видео-файл
+                </div>
+              </template>
+            </el-upload>
+          </el-form-item>
+
+          <el-form-item label="Описание">
+            <el-input
+              v-model="formData.caption"
+              type="textarea"
+              :rows="2"
+              placeholder="Добавьте описание вашему видео..."
+              :disabled="uploading"
+            />
+          </el-form-item>
+        </el-form>
+
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button 
+              @click="dialogVisible = false" 
+              :disabled="uploading"
+            >Отмена</el-button>
+            <el-button 
+              type="primary" 
+              @click="handleUpload"
+              :loading="uploading"
+              :disabled="!formData.videoFile"
+            >
+              {{ uploading ? 'Загрузка...' : 'Загрузить' }}
+            </el-button>
+          </span>
+        </template>
+      </el-dialog>
 
       <div class="header-tabs">
         <span 
@@ -115,6 +116,8 @@
           @next="handleNext"
           @like="handleLike"
           @share="handleShare"
+          @error="handleVideoError"
+          @loaded="handleVideoLoaded"
         />
       </transition>
     </div>
@@ -125,17 +128,18 @@
         :key="video.id"
         :src="video.videoUrl" 
         preload="metadata"
-        style="display:none"
+        style="display: none;"
+        @error="(e) => handlePreloadError(e, video)"
       ></video>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { useStore } from 'vuex'
-import { ElButton, ElIcon,ElMessage } from 'element-plus'
-import { ArrowLeft, Loading, CirclePlus } from '@element-plus/icons-vue'
+import { ElButton, ElIcon, ElMessage } from 'element-plus'
+import { ArrowLeft, Loading, CirclePlus, UploadFilled } from '@element-plus/icons-vue'
 import ShortVideoPlayer from '@/components/ShortVideoPlayer.vue'
 
 const store = useStore()
@@ -150,25 +154,90 @@ const direction = ref('next')
 const dialogVisible = ref(false)
 const uploading = ref(false)
 const userType = sessionStorage.getItem('userType')
+const videoBlobs = ref({})
+const loadedVideos = ref(new Set())
 
+// Форма загрузки
 const formData = ref({
   caption: '',
   videoFile: null
 })
 
+// Очередь загрузки для видео
+const loadingQueue = ref([])
+const isProcessingQueue = ref(false)
 
+// Обработка очереди загрузки
+const processLoadingQueue = async () => {
+  if (isProcessingQueue.value || loadingQueue.value.length === 0) return
+  
+  isProcessingQueue.value = true
+  
+  while (loadingQueue.value.length > 0) {
+    const video = loadingQueue.value[0]
+    
+    if (!videoBlobs.value[video.id]) {
+      try {
+        videoBlobs.value[video.id] = await createBlobUrl(video.videoUrl)
+        video.videoUrl = videoBlobs.value[video.id]
+      } catch (error) {
+        console.error('Error loading video:', error)
+      }
+    }
+    
+    loadingQueue.value.shift()
+    await new Promise(resolve => setTimeout(resolve, 100)) // Предотвращение перегрузки браузера
+  }
+  
+  isProcessingQueue.value = false
+}
+
+// Оптимизированное создание blob с таймаутом и повторными попытками
+const createBlobUrl = async (url, retries = 2) => {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 секунд таймаут
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'Range': 'bytes=0-', // Поддержка частичного контента
+      }
+    })
+    
+    clearTimeout(timeoutId)
+    
+    if (!response.ok) throw new Error('Network response was not ok')
+    
+    const blob = await response.blob()
+    return URL.createObjectURL(blob)
+  } catch (error) {
+    clearTimeout(timeoutId)
+    
+    if (retries > 0 && error.name !== 'AbortError') {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      return createBlobUrl(url, retries - 1)
+    }
+    
+    console.error('Error creating blob URL:', error)
+    return url
+  }
+}
+
+// Обработчик изменения файла
 const handleFileChange = (file) => {
   if (file && file.raw.type.startsWith('video/')) {
     formData.value.videoFile = file.raw
   } else {
-    ElMessage.error('Please select a valid video file')
+    ElMessage.error('Пожалуйста, выберите видео файл')
     formData.value.videoFile = null
   }
 }
 
+// Обработчик загрузки файла
 const handleUpload = async () => {
   if (!formData.value.videoFile) {
-    ElMessage.warning('Please select a video file')
+    ElMessage.warning('Пожалуйста, выберите видео файл')
     return
   }
 
@@ -182,34 +251,38 @@ const handleUpload = async () => {
 
     const response = await fetch('https://ton-back-e015fa79eb60.herokuapp.com/api/clips', {
       method: 'POST',
-      body: uploadData
+      body: uploadData,
+      headers: {
+        'Accept': 'application/json'
+      }
     })
 
     if (!response.ok) {
-      throw new Error('Upload failed')
+      throw new Error('Ошибка загрузки')
     }
 
-    ElMessage.success('Video uploaded successfully!')
+    ElMessage.success('Видео успешно загружено!')
     dialogVisible.value = false
     formData.value = {
       caption: '',
       videoFile: null
     }
     
-    // Перезагружаем видео после успешной загрузки
     await fetchVideos()
 
   } catch (error) {
-    console.error('Upload error:', error)
-    ElMessage.error('Failed to upload video. Please try again.')
+    console.error('Ошибка загрузки:', error)
+    ElMessage.error('Не удалось загрузить видео. Пожалуйста, попробуйте снова.')
   } finally {
     uploading.value = false
   }
 }
 
+// Оптимизированная загрузка видео
 const fetchVideos = async () => {
   try {
     isLoading.value = true
+    
     const response = await fetch(
       `https://ton-back-e015fa79eb60.herokuapp.com/api/clips/requester/${userId.value}?tab=${activeTab.value}`,
       {
@@ -220,58 +293,151 @@ const fetchVideos = async () => {
       }
     )
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
     
     const data = await response.json()
-    videos.value = data
+    
+    // Очистка существующей очереди загрузки
+    loadingQueue.value = []
+    
+    // Обработка только первых 2 видео немедленно
+    const initialVideos = await Promise.all(
+      data.slice(0, 2).map(async (video) => {
+        if (!videoBlobs.value[video.id]) {
+          try {
+            videoBlobs.value[video.id] = await createBlobUrl(video.videoUrl)
+          } catch (error) {
+            console.error('Error creating blob for initial video:', error)
+            return video
+          }
+        }
+        return {
+          ...video,
+          videoUrl: videoBlobs.value[video.id]
+        }
+      })
+    )
+    
+    // Добавление оставшихся видео в очередь загрузки
+    loadingQueue.value = data.slice(2)
+    
+    videos.value = [
+      ...initialVideos,
+      ...data.slice(2).map(video => ({
+        ...video,
+        videoUrl: video.videoUrl
+      }))
+    ]
     
     if (videos.value.length > 0) {
       currentVideo.value = videos.value[0]
-      preloadVideos.value = videos.value.slice(1, 4)
+      preloadVideos.value = videos.value.slice(1, 3) // Уменьшено до 2 предзагружаемых видео
     }
+    
+    // Запуск обработки очереди
+    processLoadingQueue()
+    
   } catch (error) {
     console.error('Error fetching videos:', error)
-    videos.value = []
-    currentVideo.value = null
-    preloadVideos.value = []
+    ElMessage.error('Не удалось загрузить видео. Пожалуйста, попробуйте позже.')
   } finally {
     isLoading.value = false
   }
 }
 
-const switchTab = async (tab) => {
-  if (activeTab.value !== tab) {
-    activeTab.value = tab
-    currentVideoIndex.value = 0
-    await fetchVideos()
+// Оптимизированная навигация по видео
+const handleNext = async () => {
+  if (currentVideoIndex.value < videos.value.length - 1) {
+    direction.value = 'next'
+    const nextIndex = currentVideoIndex.value + 1
+    
+    const nextVideo = videos.value[nextIndex]
+    if (nextVideo && !videoBlobs.value[nextVideo.id]) {
+      try {
+        videoBlobs.value[nextVideo.id] = await createBlobUrl(nextVideo.videoUrl)
+        nextVideo.videoUrl = videoBlobs.value[nextVideo.id]
+      } catch (error) {
+        console.error('Error loading next video:', error)
+      }
+    }
+    
+    currentVideoIndex.value = nextIndex
+    currentVideo.value = nextVideo
+    
+    // Предзагрузка следующих видео
+    const nextPreloadVideos = videos.value.slice(nextIndex + 1, nextIndex + 3)
+    preloadVideos.value = nextPreloadVideos
+    
+    // Добавление в очередь загрузки, если ещё не загружено
+    nextPreloadVideos.forEach(video => {
+      if (!videoBlobs.value[video.id] && !loadingQueue.value.includes(video)) {
+        loadingQueue.value.push(video)
+      }
+    })
+    
+    processLoadingQueue()
   }
 }
 
-const handlePrev = () => {
+const handlePrev = async () => {
   if (currentVideoIndex.value > 0) {
     direction.value = 'prev'
-    currentVideoIndex.value--
-    currentVideo.value = videos.value[currentVideoIndex.value]
+    const prevIndex = currentVideoIndex.value - 1
     
+    const prevVideo = videos.value[prevIndex]
+    if (prevVideo && !videoBlobs.value[prevVideo.id]) {
+      try {
+        videoBlobs.value[prevVideo.id] = await createBlobUrl(prevVideo.videoUrl)
+        prevVideo.videoUrl = videoBlobs.value[prevVideo.id]
+      } catch (error) {
+        console.error('Error loading previous video:', error)
+      }
+    }
+    
+    currentVideoIndex.value = prevIndex
+    currentVideo.value = prevVideo
+    
+    // Обновление предзагрузки
     preloadVideos.value = [
-      ...(videos.value[currentVideoIndex.value - 1] ? [videos.value[currentVideoIndex.value - 1]] : []),
-      ...videos.value.slice(currentVideoIndex.value + 1, currentVideoIndex.value + 4)
+      ...(videos.value[prevIndex - 1] ? [videos.value[prevIndex - 1]] : []),
+      ...videos.value.slice(prevIndex + 1, prevIndex + 3)
     ]
   }
 }
 
-const handleNext = () => {
-  if (currentVideoIndex.value < videos.value.length - 1) {
-    direction.value = 'next'
-    currentVideoIndex.value++
-    currentVideo.value = videos.value[currentVideoIndex.value]
-    
-    preloadVideos.value = videos.value.slice(
-      currentVideoIndex.value + 1, 
-      currentVideoIndex.value + 4
-    )
+const handleVideoError = async (error, videoId) => {
+  console.warn('Video error:', error)
+  
+  if (videoId && videoBlobs.value[videoId]) {
+    try {
+      const video = videos.value.find(v => v.id === videoId)
+      if (video) {
+        URL.revokeObjectURL(videoBlobs.value[videoId])
+        videoBlobs.value[videoId] = await createBlobUrl(video.videoUrl)
+        video.videoUrl = videoBlobs.value[videoId]
+      }
+    } catch (error) {
+      console.error('Error recreating blob:', error)
+      ElMessage.error('Ошибка загрузки видео')
+    }
+  }
+}
+
+const handleVideoLoaded = (videoId) => {
+  if (videoId) {
+    loadedVideos.value.add(videoId)
+  }
+}
+
+const handlePreloadError = async (error, video) => {
+  console.warn('Preload error for video:', video.id, error)
+  if (video && !videoBlobs.value[video.id]) {
+    try {
+      videoBlobs.value[video.id] = await createBlobUrl(video.videoUrl)
+      video.videoUrl = videoBlobs.value[video.id]
+    } catch (err) {
+      console.error('Error creating blob for preload retry:', err)
+    }
   }
 }
 
@@ -283,7 +449,48 @@ const handleShare = () => {
   console.log('Share clicked')
 }
 
-onMounted(fetchVideos)
+const switchTab = async (tab) => {
+  if (activeTab.value !== tab) {
+    activeTab.value = tab
+    currentVideoIndex.value = 0
+    cleanup()
+    await fetchVideos()
+  }
+}
+
+// Функция очистки
+const cleanup = () => {
+  Object.values(videoBlobs.value).forEach(url => {
+    if (url.startsWith('blob:')) {
+      URL.revokeObjectURL(url)
+    }
+  })
+  
+  videoBlobs.value = {}
+  loadedVideos.value.clear()
+  loadingQueue.value = []
+}
+
+onMounted(() => {
+  fetchVideos()
+  
+  // Добавление слушателя видимости страницы
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      // Пауза загрузки когда вкладка не активна
+      isProcessingQueue.value = false
+    } else {
+      // Возобновление загрузки когда вкладка становится видимой
+      processLoadingQueue()
+    }
+  })
+})
+
+onUnmounted(() => {
+  cleanup()
+  document.removeEventListener('visibilitychange', () => {})
+})
+
 watch(activeTab, fetchVideos)
 </script>
 
@@ -293,8 +500,7 @@ watch(activeTab, fetchVideos)
   background-color: #000;
   position: relative;
   overflow: hidden;
-  margin-top: -8px;
-  margin-bottom: -100px;
+  margin-top: -10px;
 }
 
 .video-container {

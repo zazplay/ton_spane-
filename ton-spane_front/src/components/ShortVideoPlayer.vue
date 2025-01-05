@@ -213,12 +213,44 @@ const handleNext = () => {
   border-radius: 10px;
 }
 
-@media screen and (max-width: 1000px) {
+/* Mobile styles */
+@media screen and (max-width: 767px) {
   .video-player {
-    margin-bottom: 90px;
-    max-height: 600px;
-    margin-top: -90px;
+    height: calc(100vh - 120px);
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+    width: 100vw;
+    margin-bottom: 140px;
   }
+}
+
+/* Tablet styles */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  .video-player {
+    height: 80vh;
+    margin: 2rem auto;
+    margin-top: 0px;
+    margin-top: -100px;
+
+  }
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  margin-top: 0px;
+
+}
+
+.video-content {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  margin-top: 0px;
+
 }
 
 .user-info {
@@ -231,6 +263,13 @@ const handleNext = () => {
   align-items: center;
   gap: 12px;
   color: white;
+}
+
+@media screen and (max-width: 767px) {
+  .user-info {
+    bottom: 80px;
+    padding: 0.75rem;
+  }
 }
 
 .avatar {
@@ -246,18 +285,15 @@ const handleNext = () => {
   font-size: 16px;
   font-weight: 600;
   color: white;
+  text-decoration: none;
 }
 
 .description {
   margin: 4px 0 0;
   font-size: 14px;
   opacity: 0.9;
-}
-
-.video-content {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  word-break: break-word;
+  max-width: 80%;
 }
 
 .controls-overlay {
@@ -267,6 +303,12 @@ const handleNext = () => {
   right: 0;
   padding: 1rem;
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+}
+
+@media screen and (max-width: 767px) {
+  .controls-overlay {
+    padding: 0.5rem;
+  }
 }
 
 .controls-container {
@@ -292,6 +334,13 @@ const handleNext = () => {
   align-items: center;
 }
 
+@media screen and (max-width: 767px) {
+  .navigation-controls {
+    right: 0.5rem;
+    margin-bottom: 20px;
+  }
+}
+
 :deep(.el-button) {
   --el-button-bg-color: rgba(255, 255, 255, 0.2);
   --el-button-hover-bg-color: rgba(255, 255, 255, 0.3);
@@ -304,6 +353,7 @@ const handleNext = () => {
   width: 40px;
   height: 40px;
   padding: 0;
+  transition: all 0.3s ease;
 }
 
 :deep(.el-button.shared) {
@@ -337,10 +387,14 @@ const handleNext = () => {
   transform: scale(0.9);
 }
 
-.video-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
+/* Additional touch device optimizations */
+@media (hover: none) {
+  .navigation-controls .el-button:hover {
+    transform: none;
+  }
+  
+  :deep(.el-button:hover) {
+    --el-button-hover-bg-color: var(--el-button-bg-color);
+  }
 }
 </style>

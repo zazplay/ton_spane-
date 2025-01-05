@@ -32,6 +32,8 @@
   import UsersForAp from './UsersForAP.vue'
   import ModelsPage from './Models/ModelsPage.vue'
   import PostsAP from './PostsAP.vue'
+  // import Clips from './ClipsAP.vue'
+
   
   
   // State
@@ -42,7 +44,9 @@
   const tabs = [
     { id: 'users', label: 'Пользователи', component: UsersForAp },
     { id: 'models', label: 'Модели', component: ModelsPage },
-    { id: 'posts', label: 'Посты', component: PostsAP }
+    { id: 'posts', label: 'Посты', component: PostsAP },
+    // { id: 'clips', label: 'Клипы', component: Clips }
+
   ]
   
   // Computed
