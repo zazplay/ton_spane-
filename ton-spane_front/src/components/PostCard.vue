@@ -1,20 +1,17 @@
 <script setup>
-import { ref, defineProps, defineEmits, computed, onMounted } from 'vue'
+import { ref, defineProps, defineEmits, computed } from 'vue'
 import ShareModal from './ShareModal.vue' 
 import TipsModal from './TipsModal.vue'
 import SubscriptionModal from '../components/Page/SubOnCardModal/SubCardModal.vue'
 import { useStore } from 'vuex'
-import { Lock, Share, Money } from '@element-plus/icons-vue'
+import { Lock, Share, Money, Comment } from '@element-plus/icons-vue'
 
 const S3_BASE_URL = 'https://tonimages.s3.us-east-1.amazonaws.com/'
 
 const formatImageUrl = (imageUrl) => {
-  if (!imageUrl) return null;
-    const cleanUrl = imageUrl.replace(new RegExp(S3_BASE_URL, 'g'), '');
-  if (cleanUrl.startsWith('http')) {
-    return cleanUrl;
-  }
-    return `${S3_BASE_URL}${cleanUrl}`;
+  if (!imageUrl) return null
+  const cleanUrl = imageUrl.replace(new RegExp(S3_BASE_URL, 'g'), '')
+  return cleanUrl.startsWith('http') ? cleanUrl : `${S3_BASE_URL}${cleanUrl}`
 }
 
 const props = defineProps({
@@ -75,35 +72,30 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['like', 'share', 'donate', 'subscribe'])
+const emit = defineEmits(['like', 'share', 'donate', 'subscribe', 'comment'])
+const store = useStore()
 
-onMounted(() => {
-  // console.log('Card props:', {
-  //   id: props.id,
-  //   isLikedByCurrentUser: props.isLikedByCurrentUser
-  // })
-})
-
+// Refs
 const subscriptionModalRef = ref(null)
 const isLiked = ref(props.isLikedByCurrentUser)
-const likes = ref(props.likes.length)
+const likesCount = ref(props.likes.length)
 const isSubscribed = ref(props.isSubscribed)
-const isShared = ref(props.initialShared)
-const isDonated = ref(props.initialDonated)
+const isShared = ref(false)
+const isDonated = ref(false)
 const isShareModalVisible = ref(false)
 const isTipsModalVisible = ref(false)
+const showAllComments = ref(false)
+const newComment = ref('')
+const isSubmitting = ref(false)
 
-const formattedImageUrl = computed(() => formatImageUrl(props.imageUrl))
-
-const handleImageClick = () => {
-  if (props.isBlurred && subscriptionModalRef.value) {
-    subscriptionModalRef.value.openDialog()
-  }
-}
-
-const store = useStore()
+// Computed
 const userId = computed(() => store.getters.getSub)
+const formattedImageUrl = computed(() => formatImageUrl(props.imageUrl))
+const displayedComments = computed(() => 
+  showAllComments.value ? props.comments : props.comments.slice(0, 2)
+)
 
+// Methods
 const formatDate = (dateString) => {
   const date = new Date(dateString)
   const now = new Date()
@@ -126,32 +118,68 @@ const formatDate = (dateString) => {
   }
 }
 
+const formatCommentTime = (dateString) => {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffInMinutes = Math.floor((now - date) / (1000 * 60))
+  
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes}м`
+  } else if (diffInMinutes < 1440) {
+    return `${Math.floor(diffInMinutes / 60)}ч`
+  } else {
+    return `${Math.floor(diffInMinutes / 1440)}д`
+  }
+}
+
+const isUserLoggedIn = () => {
+  const userType = sessionStorage.getItem("userType")
+  return userType === "user"
+}
+
+const handleImageClick = () => {
+  if (props.isBlurred && subscriptionModalRef.value) {
+    subscriptionModalRef.value.openDialog()
+  }
+}
+
 const handleLike = async () => {
-  if (sessionStorage.getItem("userType").toString() == "user"){
+  if (!isUserLoggedIn()) return
+
   try {
     const endpoint = isLiked.value ? 'unlike' : 'like'
     const method = isLiked.value ? 'DELETE' : 'POST'
+    
+    // Оптимистичное обновление UI
     isLiked.value = !isLiked.value
-    likes.value = isLiked.value ? likes.value + 1 : likes.value - 1
-    const response = await fetch(`https://ton-back-e015fa79eb60.herokuapp.com/api/likes/${userId.value}/${endpoint}/${props.id}`, {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json',
-        'accept': '*/*'
+    likesCount.value = isLiked.value ? likesCount.value + 1 : likesCount.value - 1
+
+    const response = await fetch(
+      `https://ton-back-e015fa79eb60.herokuapp.com/api/likes/${userId.value}/${endpoint}/${props.id}`,
+      {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'accept': '*/*'
+        }
       }
-    })
+    )
+
     if (!response.ok) {
       throw new Error('Failed to update like')
     }
+
     emit('like', isLiked.value)
   } catch (error) {
     console.error('Error updating like:', error)
+    // Откат изменений при ошибке
+    isLiked.value = !isLiked.value
+    likesCount.value = isLiked.value ? likesCount.value + 1 : likesCount.value - 1
   }
-}
 }
 
 const checkSubscriptionStatus = async () => {
-  if (sessionStorage.getItem("userType").toString() == "user"){
+  if (!isUserLoggedIn()) return false
 
   try {
     const response = await fetch(
@@ -162,68 +190,53 @@ const checkSubscriptionStatus = async () => {
           'accept': '*/*'
         }
       }
-    );
+    )
 
     if (response.ok) {
-      const followingList = await response.json();
-      return followingList.some(user => user.id === props.user.id);
+      const followingList = await response.json()
+      return followingList.some(user => user.id === props.user.id)
     }
-    return false;
+    return false
   } catch (error) {
-    console.error('Error checking subscription status:', error);
-    return false;
+    console.error('Error checking subscription status:', error)
+    return false
   }
 }
-};
 
 const handleSubscribe = async () => {
-  if (sessionStorage.getItem("userType").toString() == "user"){
+  if (!isUserLoggedIn()) return
 
   try {
-    // Сразу меняем визуальное состояние
-    isSubscribed.value = !isSubscribed.value;
-    
-    // Отправляем событие для обновления UI
-    emit('subscribe', isSubscribed.value);
+    // Оптимистичное обновление UI
+    isSubscribed.value = !isSubscribed.value
+    emit('subscribe', isSubscribed.value)
 
-    // Проверяем текущий статус подписки
-    const currentStatus = await checkSubscriptionStatus();
+    const currentStatus = await checkSubscriptionStatus()
+    const endpoint = currentStatus ? 'unfollow' : 'follow'
+    const method = currentStatus ? 'DELETE' : 'POST'
     
-    if (currentStatus) {
-      // Отписка
-      await fetch(
-        `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId.value}/unfollow/${props.user.id}`, 
-        {
-          method: 'DELETE',
-          headers: {
-            'accept': '*/*',
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-    } else {
-      // Подписка
-      await fetch(
-        `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId.value}/follow/${props.user.id}`, 
-        {
-          method: 'POST',
-          headers: {
-            'accept': '*/*',
-            'Content-Type': 'application/json'
-          },
-          body: ''
-        }
-      );
+    const response = await fetch(
+      `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${userId.value}/${endpoint}/${props.user.id}`,
+      {
+        method,
+        headers: {
+          'accept': '*/*',
+          'Content-Type': 'application/json'
+        },
+        body: method === 'POST' ? '' : undefined
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error('Failed to update subscription')
     }
-    
   } catch (error) {
-    console.error('Error while subscribing/unsubscribing:', error);
-    // В случае ошибки возвращаем предыдущее состояние
-    isSubscribed.value = !isSubscribed.value;
-    emit('subscribe', isSubscribed.value);
+    console.error('Error while subscribing/unsubscribing:', error)
+    // Откат изменений при ошибке
+    isSubscribed.value = !isSubscribed.value
+    emit('subscribe', isSubscribed.value)
   }
 }
-};
 
 const handleShare = () => {
   isShared.value = !isShared.value
@@ -237,10 +250,44 @@ const handleDonate = () => {
   emit('donate', isDonated.value)
 }
 
-// console.log('Original Image URL:', props.imageUrl)
-// console.log('Formatted Image URL:', formattedImageUrl.value)
-</script>
+const postComment = async () => {
+  if (!isUserLoggedIn() || !newComment.value.trim()) return
+  
+  isSubmitting.value = true
+  try {
+    const response = await fetch('https://ton-back-e015fa79eb60.herokuapp.com/api/comments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'accept': '*/*'
+      },
+      body: JSON.stringify({
+        content: newComment.value.trim(),
+        postId: props.id,
+        userId: userId.value
+      })
+    })
 
+    if (!response.ok) {
+      throw new Error('Failed to post comment')
+    }
+
+    // Очищаем поле ввода после успешной отправки
+    newComment.value = ''
+    // Эмитим событие для обновления списка комментариев
+    emit('comment', true)
+  } catch (error) {
+    console.error('Error posting comment:', error)
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+const toggleComments = () => {
+  showAllComments.value = !showAllComments.value
+  emit('comment', showAllComments.value)
+}
+</script>
 <template>
   <ShareModal v-model:dialogVisible="isShareModalVisible" />
   <TipsModal v-model:dialogDonateVisible="isTipsModalVisible" />
@@ -248,7 +295,9 @@ const handleDonate = () => {
     ref="subscriptionModalRef"
     :userId="props.user.id"  
   />
+  
   <el-card class="post-card">
+    <!-- Header Section -->
     <div class="header">
       <el-avatar :size="50" class="avatar" :src="props.user.profilePicture" />
       <div class="user-info">
@@ -271,6 +320,7 @@ const handleDonate = () => {
       </el-button>
     </div>
 
+    <!-- Image Section -->
     <div class="demo-image__preview">
       <div 
         class="image-container" 
@@ -295,6 +345,7 @@ const handleDonate = () => {
           </template>
         </el-image>
         
+        <!-- Lock Overlay for Blurred Images -->
         <div v-if="isBlurred" class="lock-overlay">
           <el-icon :size="50" class="lock-icon">
             <Lock />
@@ -304,182 +355,167 @@ const handleDonate = () => {
       </div>
     </div>
 
-    <div class="actions">
-      <div class="action-buttons">
-        <el-check-tag 
-          :checked="isLiked"
-          @change="handleLike"
-          class="action-tag heart"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="25"
-            height="25"
-            viewBox="0 0 24 24"
-            :fill="isLiked ? 'red' : 'none'"
-            stroke="red"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+    <!-- Post Content Section -->
+    <div class="post-content">
+      <!-- Action Buttons -->
+      <div class="actions">
+        <div class="action-buttons">
+          <!-- Like Button -->
+          <el-check-tag 
+            :checked="isLiked"
+            @change="handleLike"
+            class="action-tag heart"
           >
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-          </svg>
-          <span style="margin-left: 5px">{{ likes }}</span>
-        </el-check-tag>
-        
-        <el-check-tag 
-          :checked="isShared"
-          @change="handleShare"
-          class="action-tag share"
-        >
-          <el-icon size="25px"><Share /></el-icon>
-        </el-check-tag>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="25"
+              height="25"
+              viewBox="0 0 24 24"
+              :fill="isLiked ? 'red' : 'none'"
+              stroke="red"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <span style="margin-left: 5px">{{ likesCount }}</span>
+          </el-check-tag>
+          
+          <!-- Share Button -->
+          <el-check-tag 
+            :checked="isShared"
+            @change="handleShare"
+            class="action-tag share"
+          >
+            <el-icon size="25px"><Share /></el-icon>
+          </el-check-tag>
 
-        <el-check-tag 
-          :checked="isDonated"
-          @change="handleDonate"
-          class="action-tag donate"
-        >
-          <el-icon size="25px"><Money /></el-icon>
-        </el-check-tag>
-        <el-check-tag 
-          :checked="isDonated"
-          @change="handleDonate"
-          class="action-tag comment"
-        >
-        <el-icon size="25px"><Comment /></el-icon>
-      </el-check-tag>
+          <!-- Donate Button -->
+          <el-check-tag 
+            :checked="isDonated"
+            @change="handleDonate"
+            class="action-tag donate"
+          >
+            <el-icon size="25px"><Money /></el-icon>
+          </el-check-tag>
 
+          <!-- Comment Button -->
+          <el-check-tag 
+            class="action-tag comment"
+            @click="toggleComments"
+          >
+            <el-icon size="25px"><Comment /></el-icon>
+            <span v-if="comments.length" class="comment-count">
+              {{ comments.length }}
+            </span>
+          </el-check-tag>
+        </div>
+
+        <!-- Caption -->
+        <el-text class="description" tag="b" emphasis>
+          {{ caption.length > 100 ? caption.slice(0, 100) + '...' : caption }}
+        </el-text>
       </div>
-      <el-text class="description" tag="b" emphasis>
-        {{ caption.length > 100 ? caption.slice(0, 100) + '...' : caption }}
-      </el-text>
-    </div>
-  </el-card>
-  <div class="comments-section" v-if="comments.length > 0">
-    <el-card 
-      v-for="comment in comments.slice(0, 2)" 
-      :key="comment.id" 
-      class="comment-preview-card"
-    >
-      <div class="preview-content">
-        <el-avatar 
-          :size="36"
-          :src="comment.user?.profilePicture"
-          class="preview-avatar"
-        />
-        <div class="preview-text">
-          <div class="preview-author">{{ comment.user?.username }}</div>
-          <div class="preview-message">{{ comment.content }}</div>
+
+      <!-- Comments Section -->
+      <div class="comments-section">
+        <!-- Add Comment Form -->
+        <div v-if="isUserLoggedIn()">
+          <el-form @submit.prevent="postComment">
+            <el-form-item>
+              <el-input
+                v-model="newComment"
+                type="textarea"
+                :rows="2"
+                :maxlength="500"
+                show-word-limit
+                placeholder="Написать комментарий..."
+                resize="none"
+              />
+            </el-form-item>
+            <el-form-item>
+              <el-button 
+                type="primary"
+                :loading="isSubmitting"
+                :disabled="!newComment.trim()"
+                @click="postComment"
+              >
+                Отправить
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+
+        <div v-if="comments.length > 0">
+          <el-divider />
+          
+          <!-- Comments List -->
+          <transition-group 
+            name="comment-fade" 
+            tag="div" 
+            class="comments-container"
+          >
+            <div 
+              v-for="comment in displayedComments" 
+              :key="comment.id"
+              class="comment-item"
+            >
+              <div class="comment-header">
+                <div 
+                  class="custom-avatar"
+                  :style="{
+                    backgroundImage: `url(${comment.user?.profilePicture})`,
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    overflow: 'hidden',
+                    flexShrink: 0,
+                  }"
+                />
+                <div class="comment-info">
+                  <div class="comment-author">
+                    {{ comment.user?.username }} 
+                    <span class="comment-meta">
+                      {{ formatCommentTime(comment.createdAt) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="comment-content">
+                <el-text class="comment-text">{{ comment.content }}</el-text>
+              </div>
+            </div>
+          </transition-group>
+          
+          <!-- Show More Comments Button -->
+          <div 
+            v-if="comments.length > 2" 
+            class="comments-footer"
+          >
+            <el-button 
+              type="text" 
+              class="show-more-btn"
+              @click="showAllComments = !showAllComments"
+            >
+              {{ showAllComments ? 'Скрыть комментарии' : `Показать все комментарии (${comments.length})` }}
+            </el-button>
+          </div>
         </div>
       </div>
-    </el-card>
-    <div v-if="comments.length > 2" class="more-comments">
-      +{{ comments.length - 2 }} more comments
     </div>
-  </div>
+  </el-card>
 </template>
 
 <style scoped>
-.comments-section {
-  padding: 0 2px;
-  margin-bottom: 20px;
-}
-
-.comment-preview-card {
-  margin-left: -3px !important;
-  width: 100.7%;
-  margin: 0 auto;
-  margin-top: -30px;
-  border-radius: 0 0 12px 12px;
-  background: linear-gradient(135deg, #1a1f2c, #121620);
-  box-shadow: 0 4px 15px rgb(0 0 0 / 0.2);
-  transition: 0.3s ease;
-  border: none;
-}
-
-.comment-preview-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgb(41 98 255 / 0.2);
-}
-
-.comment-preview-card :deep(.el-card__body) {
-  padding: 8px 12px;
-  background: linear-gradient(90deg, rgb(26 32 44 / 0.95), rgb(17 24 39 / 0.95));
-  border-radius: 0 0 12px 12px;
-  border: 1px solid rgb(66 153 225 / 0.1);
-}
-
-.preview-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 4px;
-}
-
-.preview-avatar {
-  flex-shrink: 0;
-  border: 2px solid #2962ff;
-  padding: 2px;
-  background: linear-gradient(45deg, #2962ff, #1e88e5);
-  box-shadow: 0 0 10px rgb(41 98 255 / 0.2);
-}
-
-.preview-text {
-  flex: 1;
-  min-width: 0;
-}
-
-.preview-author {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 2px;
-  background: linear-gradient(90deg, #63b3ed, #2962ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 20px rgb(41 98 255 / 0.1);
-}
-
-.preview-message {
-  font-size: 13px;
-  color: #a0aec0;
-  line-height: 1.4;
-  transition: color 0.3s ease;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-
-.more-comments {
-  text-align: center;
-  padding: 8px;
-  color: #63b3ed;
-  font-size: 13px;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.more-comments:hover {
-  color: #2962ff;
-}
-
-/* Dark theme adjustments */
-html.dark .comment-preview-card {
-  background: #161b22;
-}
-
-html:not(.dark) .comment-preview-card {
-  background: #ffffff;
-}
 /* Базовые стили карточки */
 .post-card {
   width: auto;
   margin-bottom: 30px;
   border-radius: 16px;
   transition: transform 0.3s ease;
-  
   
   @media (max-width: 480px) {
     width: 95%;
@@ -619,68 +655,6 @@ html:not(.dark) .comment-preview-card {
   filter: blur(30px);
 }
 
-.actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 15px;
-  padding: 0 15px;
-  
-  @media (max-width: 480px) {
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    padding: 0px;
-  }
-}
-
-.action-buttons {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  min-width: fit-content;
-}
-
-.action-tag {
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(4px);
-}
-
-.description {
-  width: 500px;
-  display: flex;
-  justify-content: center;
-  text-align: center;
-  padding: 10px 15px;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 180, 219, 0.1);
-  transition: all 0.3s ease;
-  margin-left: auto;
-  font-size: 16px;
-
-  &:hover {
-    border-color: rgba(0, 180, 219, 0.4);
-    box-shadow: 0 6px 20px rgba(0, 180, 219, 0.2);
-  }
-
-  @media (max-width: 480px) {
-    width: 100%;
-    margin-left: 0;
-    font-size: 12px;
-    text-align: left;
-    justify-content: flex-start;
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: calc(100% - 10px);
-    padding: 5px;
-  }
-}
-
 .image-container {
   position: relative;
   width: 100%;
@@ -720,7 +694,166 @@ html:not(.dark) .comment-preview-card {
   backdrop-filter: blur(8px);
 }
 
-/* Темная тема */
+/* Post Content & Actions */
+.post-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 15px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+  
+  @media (max-width: 480px) {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    padding: 0px;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: fit-content;
+}
+
+.action-tag {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+.comment-count {
+  margin-left: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.description {
+  flex: 1;
+  padding: 10px 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  
+  @media (max-width: 480px) {
+    width: 100%;
+    font-size: 12px;
+    padding: 5px;
+  }
+}
+
+/* Comments Section */
+.comments-section {
+  margin-top: -15px;
+  padding-top: 8px;
+}
+
+.comments-divider {
+  height: 1px;
+  background: linear-gradient(90deg, 
+    rgba(0, 180, 219, 0.1) 0%,
+    rgba(0, 180, 219, 0.2) 50%,
+    rgba(0, 180, 219, 0.1) 100%
+  );
+  margin: 8px 0;
+}
+
+.comments-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.comment-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.comment-avatar {
+  border: 2px solid rgba(0, 180, 219, 0.2);
+  padding: 2px;
+  transition: all 0.3s ease;
+}
+
+.comment-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: -15px;
+}
+
+.comment-author {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--el-color-primary);
+}
+
+.comment-meta {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  margin-left: 10px;
+}
+
+.comment-content {
+  padding-left: 52px;
+  margin-top: -20px;
+}
+
+.comment-text {
+  font-size: 14px;
+  line-height: 1.4;
+  margin: 0;
+  color: var(--el-text-color-primary);
+  word-break: break-word;
+}
+
+.comments-footer {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 4px;
+}
+
+.show-more-btn {
+  font-size: 14px;
+  color: var(--el-color-primary);
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Анимации */
+.comment-fade-enter-active,
+.comment-fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.comment-fade-enter-from,
+.comment-fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* Dark theme */
 html.dark .post-card {
   background: #161b22;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
@@ -744,8 +877,13 @@ html.dark .description {
   border: 1px solid rgba(0, 180, 219, 0.2);
 }
 
-html.dark .post-image {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+html.dark .comment-item {
+  background: rgba(22, 27, 34, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html.dark .comment-text {
+  color: #e6edf3;
 }
 
 html.dark .action-tag.heart { 
@@ -772,20 +910,7 @@ html.dark .action-tag.comment {
   color: #5783a4;
 }
 
-html.dark .lock-icon {
-  color: #e6edf3;
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-}
-
-html.dark .lock-text {
-  color: #e6edf3;
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Светлая тема */
+/* Light theme */
 html:not(.dark) .post-card {
   background: #ffffff;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
@@ -809,8 +934,9 @@ html:not(.dark) .description {
   border: 1px solid rgba(0, 180, 219, 0.15);
 }
 
-html:not(.dark) .post-image {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+html:not(.dark) .comment-item {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 html:not(.dark) .action-tag.heart { 
@@ -831,19 +957,13 @@ html:not(.dark) .action-tag.donate {
   color: #66bb6a;
 }
 
-html:not(.dark) .lock-icon {
-  color: #1f2937;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+html:not(.dark) .action-tag.comment {
+  background: rgba(76, 175, 80, 0.05);
+  border: 1px solid rgba(112, 174, 255, 0.2);
+  color: #5783a4;
 }
 
-html:not(.dark) .lock-text {
-  color: #1f2937;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
+/* Mobile Responsive */
 @media (max-width: 480px) {
   .subBtn {
     width: 40% !important;
@@ -860,6 +980,26 @@ html:not(.dark) .lock-text {
   .lock-text {
     font-size: 18px;
     padding: 3px 10px;
+  }
+  
+  .comment-item {
+    padding: 8px;
+  }
+  
+  .comment-content {
+    padding-left: 44px;
+  }
+  
+  .comment-author {
+    font-size: 13px;
+  }
+  
+  .comment-text {
+    font-size: 13px;
+  }
+  
+  .show-more-btn {
+    font-size: 13px;
   }
 }
 </style>
