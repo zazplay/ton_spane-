@@ -417,7 +417,7 @@ const handleDelete = async (videoId) => {
   try {
     deletingId.value = videoId
     const response = await fetch(
-      `${API_BASE_URL}/clips/admin/${videoId}`,
+      `https://ton-back-e015fa79eb60.herokuapp.com/api/clips/${videoId}`,
       {
         method: 'DELETE',
         headers: {
