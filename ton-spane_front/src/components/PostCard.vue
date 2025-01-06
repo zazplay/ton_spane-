@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, defineEmits, computed } from 'vue'
+import { ref, defineProps, defineEmits, computed, watch } from 'vue'
 import ShareModal from './ShareModal.vue' 
 import TipsModal from './TipsModal.vue'
 import SubscriptionModal from '../components/Page/SubOnCardModal/SubCardModal.vue'
@@ -77,6 +77,7 @@ const store = useStore()
 
 // Refs
 const subscriptionModalRef = ref(null)
+const localComments = ref([])
 const isLiked = ref(props.isLikedByCurrentUser)
 const likesCount = ref(props.likes.length)
 const isSubscribed = ref(props.isSubscribed)
@@ -88,14 +89,33 @@ const showAllComments = ref(false)
 const newComment = ref('')
 const isSubmitting = ref(false)
 
+// Watchers для синхронизации состояния
+watch(() => props.comments, (newComments) => {
+  localComments.value = [...newComments]
+}, { immediate: true, deep: true })
+
+watch(() => props.isLikedByCurrentUser, (newValue) => {
+  isLiked.value = newValue
+}, { immediate: true })
+
+watch(() => props.likes.length, (newValue) => {
+  likesCount.value = newValue
+}, { immediate: true })
+
+watch(() => props.isSubscribed, (newValue) => {
+  isSubscribed.value = newValue
+}, { immediate: true })
+
 // Computed
 const userId = computed(() => store.getters.getSub)
 const formattedImageUrl = computed(() => formatImageUrl(props.imageUrl))
-const displayedComments = computed(() => 
-  showAllComments.value ? props.comments : props.comments.slice(0, 2)
-)
+const displayedComments = computed(() => {
+  const sortedComments = [...localComments.value].sort((a, b) => 
+    new Date(b.createdAt) - new Date(a.createdAt)
+  )
+  return showAllComments.value ? sortedComments : sortedComments.slice(0, 2)
+})
 
-// Methods
 const formatDate = (dateString) => {
   const date = new Date(dateString)
   const now = new Date()
@@ -121,9 +141,17 @@ const formatDate = (dateString) => {
 const formatCommentTime = (dateString) => {
   const date = new Date(dateString)
   const now = new Date()
-  const diffInMinutes = Math.floor((now - date) / (1000 * 60))
   
-  if (diffInMinutes < 60) {
+  if (isNaN(date.getTime()) || date > now) {
+    return 'сейчас'
+  }
+
+  const diffInMilliseconds = now - date
+  const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60))
+  
+  if (diffInMinutes <= 0) {
+    return 'сейчас'
+  } else if (diffInMinutes < 60) {
     return `${diffInMinutes}м`
   } else if (diffInMinutes < 1440) {
     return `${Math.floor(diffInMinutes / 60)}ч`
@@ -150,7 +178,6 @@ const handleLike = async () => {
     const endpoint = isLiked.value ? 'unlike' : 'like'
     const method = isLiked.value ? 'DELETE' : 'POST'
     
-    // Оптимистичное обновление UI
     isLiked.value = !isLiked.value
     likesCount.value = isLiked.value ? likesCount.value + 1 : likesCount.value - 1
 
@@ -172,7 +199,6 @@ const handleLike = async () => {
     emit('like', isLiked.value)
   } catch (error) {
     console.error('Error updating like:', error)
-    // Откат изменений при ошибке
     isLiked.value = !isLiked.value
     likesCount.value = isLiked.value ? likesCount.value + 1 : likesCount.value - 1
   }
@@ -207,7 +233,6 @@ const handleSubscribe = async () => {
   if (!isUserLoggedIn()) return
 
   try {
-    // Оптимистичное обновление UI
     isSubscribed.value = !isSubscribed.value
     emit('subscribe', isSubscribed.value)
 
@@ -232,7 +257,6 @@ const handleSubscribe = async () => {
     }
   } catch (error) {
     console.error('Error while subscribing/unsubscribing:', error)
-    // Откат изменений при ошибке
     isSubscribed.value = !isSubscribed.value
     emit('subscribe', isSubscribed.value)
   }
@@ -253,7 +277,9 @@ const handleDonate = () => {
 const postComment = async () => {
   if (!isUserLoggedIn() || !newComment.value.trim()) return
   
+  const commentContent = newComment.value.trim()
   isSubmitting.value = true
+  
   try {
     const response = await fetch('https://ton-back-e015fa79eb60.herokuapp.com/api/comments', {
       method: 'POST',
@@ -262,7 +288,7 @@ const postComment = async () => {
         'accept': '*/*'
       },
       body: JSON.stringify({
-        content: newComment.value.trim(),
+        content: commentContent,
         postId: props.id,
         userId: userId.value
       })
@@ -272,10 +298,22 @@ const postComment = async () => {
       throw new Error('Failed to post comment')
     }
 
-    // Очищаем поле ввода после успешной отправки
+    const responseData = await response.json()
+    
+    if (!responseData || !responseData.id) {
+      throw new Error('Invalid response data')
+    }
+
+    // Добавляем новый комментарий в начало массива
+    localComments.value = [{
+      id: responseData.id,
+      content: responseData.content,
+      createdAt: responseData.createdAt,
+      user: responseData.user
+    }, ...localComments.value]
+
+    emit('comment', responseData)
     newComment.value = ''
-    // Эмитим событие для обновления списка комментариев
-    emit('comment', true)
   } catch (error) {
     console.error('Error posting comment:', error)
   } finally {
@@ -285,9 +323,9 @@ const postComment = async () => {
 
 const toggleComments = () => {
   showAllComments.value = !showAllComments.value
-  emit('comment', showAllComments.value)
 }
 </script>
+
 <template>
   <ShareModal v-model:dialogVisible="isShareModalVisible" />
   <TipsModal v-model:dialogDonateVisible="isTipsModalVisible" />
@@ -388,7 +426,7 @@ const toggleComments = () => {
             @change="handleShare"
             class="action-tag share"
           >
-            <el-icon size="25px"><Share /></el-icon>
+          <el-icon size="25px"><Share /></el-icon>
           </el-check-tag>
 
           <!-- Donate Button -->
@@ -406,8 +444,8 @@ const toggleComments = () => {
             @click="toggleComments"
           >
             <el-icon size="25px"><Comment /></el-icon>
-            <span v-if="comments.length" class="comment-count">
-              {{ comments.length }}
+            <span v-if="localComments.length" class="comment-count">
+              {{ localComments.length }}
             </span>
           </el-check-tag>
         </div>
@@ -447,7 +485,7 @@ const toggleComments = () => {
           </el-form>
         </div>
 
-        <div v-if="comments.length > 0">
+        <div v-if="localComments.length > 0">
           <el-divider />
           
           <!-- Comments List -->
@@ -492,15 +530,15 @@ const toggleComments = () => {
           
           <!-- Show More Comments Button -->
           <div 
-            v-if="comments.length > 2" 
+            v-if="localComments.length > 2" 
             class="comments-footer"
           >
             <el-button 
-              type="text" 
+              link
               class="show-more-btn"
               @click="showAllComments = !showAllComments"
             >
-              {{ showAllComments ? 'Скрыть комментарии' : `Показать все комментарии (${comments.length})` }}
+              {{ showAllComments ? 'Скрыть комментарии' : `Показать все комментарии (${localComments.length})` }}
             </el-button>
           </div>
         </div>
@@ -508,9 +546,7 @@ const toggleComments = () => {
     </div>
   </el-card>
 </template>
-
 <style scoped>
-/* Базовые стили карточки */
 .post-card {
   width: auto;
   margin-bottom: 30px;
@@ -971,6 +1007,10 @@ html:not(.dark) .action-tag.comment {
     font-size: 12px !important;
     padding: 0 10px !important;
   }
+
+  .comment-text {
+    margin-left: 10px;
+}
   
   .lock-icon {
     font-size: 30px;
