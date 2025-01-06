@@ -124,13 +124,14 @@
 
     <div class="preload-videos">
       <video 
-        v-for="video in preloadVideos" 
-        :key="video.id"
-        :src="video.videoUrl" 
-        preload="metadata"
-        style="display: none;"
-        @error="(e) => handlePreloadError(e, video)"
-      ></video>
+  v-for="video in preloadVideos" 
+  :key="video.id"
+  :src="video.videoUrl" 
+  preload="metadata"
+  style="display: none;"
+  @error="(e) => handlePreloadError(e, video)"
+  @canplay="handleCanPlay(video.id)"
+></video>
     </div>
   </div>
 </template>
@@ -156,6 +157,7 @@ const uploading = ref(false)
 const userType = sessionStorage.getItem('userType')
 const videoBlobs = ref({})
 const loadedVideos = ref(new Set())
+const videoPlayer = ref(null)  
 
 // Форма загрузки
 const formData = ref({
@@ -192,17 +194,22 @@ const processLoadingQueue = async () => {
   isProcessingQueue.value = false
 }
 
-// Оптимизированное создание blob с таймаутом и повторными попытками
 const createBlobUrl = async (url, retries = 2) => {
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 секунд таймаут
+  const timeoutId = setTimeout(() => controller.abort(), 10000)
 
   try {
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
-        'Range': 'bytes=0-', // Поддержка частичного контента
-      }
+        'Range': 'bytes=0-',
+        'Accept': 'video/mp4,video/x-m4v,video/*',
+        'Cache-Control': 'no-cache',
+        // Удалите Origin заголовок, чтобы избежать CORS проблем
+        'Pragma': 'no-cache'
+      },
+      mode: 'cors', // Явно указываем режим CORS
+      credentials: 'omit' // Не отправляем credentials
     })
     
     clearTimeout(timeoutId)
@@ -215,15 +222,15 @@ const createBlobUrl = async (url, retries = 2) => {
     clearTimeout(timeoutId)
     
     if (retries > 0 && error.name !== 'AbortError') {
+      console.warn('Retrying blob creation:', error)
       await new Promise(resolve => setTimeout(resolve, 1000))
       return createBlobUrl(url, retries - 1)
     }
     
     console.error('Error creating blob URL:', error)
-    return url
+    return url // Возвращаем оригинальный URL как fallback
   }
 }
-
 // Обработчик изменения файла
 const handleFileChange = (file) => {
   if (file && file.raw.type.startsWith('video/')) {
@@ -297,12 +304,20 @@ const fetchVideos = async () => {
     
     const data = await response.json()
     
-    // Очистка существующей очереди загрузки
+    // Преобразование URL для видео
+    const processedData = data.map(video => ({
+      ...video,
+      videoUrl: video.videoUrl.startsWith('http') 
+        ? video.videoUrl 
+        : `https://tonimages.s3.us-east-1.amazonaws.com/${video.videoUrl}`
+    }))
+    
+    // Очистка существующей очереди
     loadingQueue.value = []
     
-    // Обработка только первых 2 видео немедленно
+    // Обработка только первых 2 видео
     const initialVideos = await Promise.all(
-      data.slice(0, 2).map(async (video) => {
+      processedData.slice(0, 2).map(async (video) => {
         if (!videoBlobs.value[video.id]) {
           try {
             videoBlobs.value[video.id] = await createBlobUrl(video.videoUrl)
@@ -313,33 +328,28 @@ const fetchVideos = async () => {
         }
         return {
           ...video,
-          videoUrl: videoBlobs.value[video.id]
+          videoUrl: videoBlobs.value[video.id] || video.videoUrl
         }
       })
     )
     
-    // Добавление оставшихся видео в очередь загрузки
-    loadingQueue.value = data.slice(2)
-    
     videos.value = [
       ...initialVideos,
-      ...data.slice(2).map(video => ({
-        ...video,
-        videoUrl: video.videoUrl
-      }))
+      ...processedData.slice(2)
     ]
     
     if (videos.value.length > 0) {
       currentVideo.value = videos.value[0]
-      preloadVideos.value = videos.value.slice(1, 3) // Уменьшено до 2 предзагружаемых видео
+      preloadVideos.value = videos.value.slice(1, 3)
     }
     
-    // Запуск обработки очереди
+    // Добавляем оставшиеся видео в очередь загрузки
+    loadingQueue.value = processedData.slice(2)
     processLoadingQueue()
     
   } catch (error) {
     console.error('Error fetching videos:', error)
-    ElMessage.error('Не удалось загрузить видео. Пожалуйста, попробуйте позже.')
+    ElMessage.error('Не удалось загрузить видео')
   } finally {
     isLoading.value = false
   }
@@ -412,9 +422,21 @@ const handleVideoError = async (error, videoId) => {
     try {
       const video = videos.value.find(v => v.id === videoId)
       if (video) {
+        // Очищаем старый blob
         URL.revokeObjectURL(videoBlobs.value[videoId])
-        videoBlobs.value[videoId] = await createBlobUrl(video.videoUrl)
+        delete videoBlobs.value[videoId]
+        
+        // Пробуем создать новый blob с увеличенным количеством попыток
+        videoBlobs.value[videoId] = await createBlobUrl(video.videoUrl, 3)
         video.videoUrl = videoBlobs.value[videoId]
+        
+        // Добавляем небольшую задержку перед повторной попыткой загрузки
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        // Принудительно обновляем source видео
+        if (videoPlayer.value) {
+          videoPlayer.value.load()
+        }
       }
     } catch (error) {
       console.error('Error recreating blob:', error)

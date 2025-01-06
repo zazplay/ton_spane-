@@ -365,7 +365,7 @@ const fetchPosts = async () => {
     const userId = props.selectedUser?.id || DEFAULT_USER_ID
     console.log('Fetching posts for userId:', userId)
     
-    const response = await fetch(`${API_URL}/posts/requester/${userId}`)
+    const response = await fetch(`${API_URL}/posts/admin`)
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
     
     const data = await response.json()
