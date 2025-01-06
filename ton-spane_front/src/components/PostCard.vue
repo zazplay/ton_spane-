@@ -342,21 +342,114 @@ const handleDonate = () => {
         >
           <el-icon size="25px"><Money /></el-icon>
         </el-check-tag>
+        <el-check-tag 
+          :checked="isDonated"
+          @change="handleDonate"
+          class="action-tag comment"
+        >
+        <el-icon size="25px"><Comment /></el-icon>
+      </el-check-tag>
+
       </div>
       <el-text class="description" tag="b" emphasis>
         {{ caption.length > 100 ? caption.slice(0, 100) + '...' : caption }}
       </el-text>
     </div>
   </el-card>
+  <el-card class="preview-card" shadow="always">
+    <div class="preview-content">
+      <el-avatar 
+        :size="36"
+        src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+        class="preview-avatar"
+      />
+      <div class="preview-text">
+        <div class="preview-author">John Doe</div>
+        <div class="preview-message">This is a preview of the comment message...</div>
+      </div>
+    </div>
+  </el-card>  
 </template>
 
 <style scoped>
+.preview-card {
+  width: 99.5%;
+  height: fit-content;
+  margin: 0 auto 30px;
+  margin-top: 5px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #1a1f2c 0%, #121620 100%);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
+.preview-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(41, 98, 255, 0.25);
+}
 
+.preview-card :deep(.el-card__body) {
+  padding: 10px 12px;
+  height: 100%;
+  background: linear-gradient(to right, rgba(26, 32, 44, 0.95), rgba(17, 24, 39, 0.95));
+  border-radius: 15px;
+  border: 1px solid rgba(66, 153, 225, 0.1);
+}
+
+.preview-content {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  overflow: hidden;
+  padding: 8px;
+}
+
+.preview-avatar {
+  flex-shrink: 0;
+  margin-right: 16px;
+  border: 2px solid #2962ff;
+  border-radius: 50%;
+  padding: 2px;
+  background: linear-gradient(45deg, #2962ff, #1e88e5);
+  box-shadow: 0 0 10px rgba(41, 98, 255, 0.3);
+}
+
+.preview-text {
+  flex-grow: 1;
+  overflow: hidden;
+  padding: 4px 0;
+}
+
+.preview-author {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: linear-gradient(90deg, #63b3ed, #2962ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px rgba(41, 98, 255, 0.1);
+}
+
+.preview-message {
+  font-size: 13px;
+  color: #a0aec0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  transition: color 0.3s ease;
+}
+
+.preview-card:hover .preview-message {
+  color: #63b3ed;
+}
 /* Базовые стили карточки */
 .post-card {
   width: auto;
-  margin-bottom: 30px;
+  margin-bottom: 0px;
   border-radius: 16px;
   transition: transform 0.3s ease;
   
@@ -644,6 +737,12 @@ html.dark .action-tag.donate {
   background: rgba(76, 175, 80, 0.1);
   border: 1px solid rgba(76, 175, 80, 0.3);
   color: #66bb6a;
+}
+
+html.dark .action-tag.comment {
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(112, 174, 255, 0.481);
+  color: #5783a4;
 }
 
 html.dark .lock-icon {
