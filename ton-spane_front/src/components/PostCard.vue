@@ -356,100 +356,127 @@ const handleDonate = () => {
       </el-text>
     </div>
   </el-card>
-  <el-card class="preview-card" shadow="always">
-    <div class="preview-content">
-      <el-avatar 
-        :size="36"
-        src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-        class="preview-avatar"
-      />
-      <div class="preview-text">
-        <div class="preview-author">John Doe</div>
-        <div class="preview-message">This is a preview of the comment message...</div>
+  <div class="comments-section" v-if="comments.length > 0">
+    <el-card 
+      v-for="comment in comments.slice(0, 2)" 
+      :key="comment.id" 
+      class="comment-preview-card"
+    >
+      <div class="preview-content">
+        <el-avatar 
+          :size="36"
+          :src="comment.user?.profilePicture"
+          class="preview-avatar"
+        />
+        <div class="preview-text">
+          <div class="preview-author">{{ comment.user?.username }}</div>
+          <div class="preview-message">{{ comment.content }}</div>
+        </div>
       </div>
+    </el-card>
+    <div v-if="comments.length > 2" class="more-comments">
+      +{{ comments.length - 2 }} more comments
     </div>
-  </el-card>  
+  </div>
 </template>
 
 <style scoped>
-.preview-card {
-  width: 99.5%;
-  height: fit-content;
-  margin: 0 auto 30px;
-  margin-top: 5px;
-  border-radius: 15px;
-  background: linear-gradient(135deg, #1a1f2c 0%, #121620 100%);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.comments-section {
+  padding: 0 2px;
+  margin-bottom: 20px;
 }
 
-.preview-card:hover {
+.comment-preview-card {
+  margin-left: -3px !important;
+  width: 100.7%;
+  margin: 0 auto;
+  margin-top: -30px;
+  border-radius: 0 0 12px 12px;
+  background: linear-gradient(135deg, #1a1f2c, #121620);
+  box-shadow: 0 4px 15px rgb(0 0 0 / 0.2);
+  transition: 0.3s ease;
+  border: none;
+}
+
+.comment-preview-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(41, 98, 255, 0.25);
+  box-shadow: 0 6px 20px rgb(41 98 255 / 0.2);
 }
 
-.preview-card :deep(.el-card__body) {
-  padding: 10px 12px;
-  height: 100%;
-  background: linear-gradient(to right, rgba(26, 32, 44, 0.95), rgba(17, 24, 39, 0.95));
-  border-radius: 15px;
-  border: 1px solid rgba(66, 153, 225, 0.1);
+.comment-preview-card :deep(.el-card__body) {
+  padding: 8px 12px;
+  background: linear-gradient(90deg, rgb(26 32 44 / 0.95), rgb(17 24 39 / 0.95));
+  border-radius: 0 0 12px 12px;
+  border: 1px solid rgb(66 153 225 / 0.1);
 }
 
 .preview-content {
   display: flex;
   align-items: center;
-  height: 100%;
-  overflow: hidden;
-  padding: 8px;
+  gap: 12px;
+  padding: 4px;
 }
 
 .preview-avatar {
   flex-shrink: 0;
-  margin-right: 16px;
   border: 2px solid #2962ff;
-  border-radius: 50%;
   padding: 2px;
   background: linear-gradient(45deg, #2962ff, #1e88e5);
-  box-shadow: 0 0 10px rgba(41, 98, 255, 0.3);
+  box-shadow: 0 0 10px rgb(41 98 255 / 0.2);
 }
 
 .preview-text {
-  flex-grow: 1;
-  overflow: hidden;
-  padding: 4px 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .preview-author {
   font-size: 14px;
   font-weight: 600;
-  margin-bottom: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  margin-bottom: 2px;
   background: linear-gradient(90deg, #63b3ed, #2962ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 20px rgba(41, 98, 255, 0.1);
+  text-shadow: 0 0 20px rgb(41 98 255 / 0.1);
 }
 
 .preview-message {
   font-size: 13px;
   color: #a0aec0;
-  white-space: nowrap;
+  line-height: 1.4;
+  transition: color 0.3s ease;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.more-comments {
+  text-align: center;
+  padding: 8px;
+  color: #63b3ed;
+  font-size: 13px;
+  cursor: pointer;
   transition: color 0.3s ease;
 }
 
-.preview-card:hover .preview-message {
-  color: #63b3ed;
+.more-comments:hover {
+  color: #2962ff;
+}
+
+/* Dark theme adjustments */
+html.dark .comment-preview-card {
+  background: #161b22;
+}
+
+html:not(.dark) .comment-preview-card {
+  background: #ffffff;
 }
 /* Базовые стили карточки */
 .post-card {
   width: auto;
-  margin-bottom: 0px;
+  margin-bottom: 30px;
   border-radius: 16px;
   transition: transform 0.3s ease;
   
