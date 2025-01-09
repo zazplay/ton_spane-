@@ -17,7 +17,7 @@ function getInitialTheme() {
   
   // Если темы нет, определяем по времени суток
   const hours = new Date().getHours()
-  return hours >= 6 && hours < 16 ? 'dark' : 'light'
+  return hours >= 6 && hours < 16 ? 'light' : 'dark'
 }
 
 // Устанавливаем начальную тему

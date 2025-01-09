@@ -85,23 +85,29 @@
           </div>
 
           <div class="crypto-message" v-else>
-            <div class="message-content">
-              <div class="lock-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
-              </div>
-              <span>Оплата криптовалютой скоро будет доступна</span>
+          <div class="message-content">
+            <div class="wallet-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
+                <path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
+                <path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" />
+              </svg>
             </div>
+            <span>Привяжите свой кошелек</span>
           </div>
+          <a href="https://dreamscapes.top/" class="crypto-redirect-btn">
+            Перейти к оплате
+          </a>
+        </div>
 
           <div class="payment-footer">
             <button class="cancel-btn" @click="closeDialog">
               Отмена
             </button>
             <button class="pay-btn" @click="submitForm">
-              Оплатить
+              <a href="https://dreamscapes.top/" class="crypto-redirect-btn">
+            Оплатить
+          </a>
             </button>
           </div>
         </div>
@@ -311,6 +317,49 @@ defineExpose({
   flex-direction: column;
   gap: 12px;
   margin-bottom: 24px;
+}
+
+.crypto-message {
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.message-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 15px;
+}
+
+.wallet-icon {
+  width: 24px;
+  height: 24px;
+  color: #fff;
+}
+
+.crypto-redirect-btn {
+  display: inline-block;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+  border-radius: 12px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.crypto-redirect-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
 }
 
 .payment-method-item {
