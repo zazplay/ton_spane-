@@ -323,7 +323,7 @@ const addMultipleSubscribers = async (subscribersCount) => {
         // Создаем все запросы сразу
         const requests = Array(subscribersCount).fill().map(() => 
             fetch(
-                `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/3dc42836-ded0-42af-a574-b6eaf1fcc8c0/follow/${props.userIdProp}`,
+                `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/49c598e5-3a2e-47ce-9e03-db88b8dc6977/follow/${props.userIdProp}`,
                 {
                     method: 'POST',
                     headers: {

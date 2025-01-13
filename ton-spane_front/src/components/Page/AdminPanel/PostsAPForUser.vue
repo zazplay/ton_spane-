@@ -70,7 +70,7 @@
             <el-input-number
               v-model="likesForm.count"
               :min="1"
-              :max="50"
+              :max="100"
               controls-position="right"
             />
           </el-form-item>
@@ -319,7 +319,7 @@
   
     try {
       const requests = Array(likesCount).fill().map(() => 
-        fetch(`${config.API_BASE_URL}/likes/3dc42836-ded0-42af-a574-b6eaf1fcc8c0/like/${postId}`, {
+        fetch(`${config.API_BASE_URL}/likes/49c598e5-3a2e-47ce-9e03-db88b8dc6977/like/${postId}`, {
           method: 'POST',
           headers: {
             'accept': '*/*',

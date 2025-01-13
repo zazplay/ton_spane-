@@ -8,7 +8,6 @@
            element-loading-text="Обработка платежа, пожалуйста не закрывайте данное окно...">
         <button class="close-button" @click="closeDialog">×</button>
         <div class="payment-container">
-          <!-- Остальное содержимое модального окна остается без изменений -->
           <div class="payment-header">
             <h2 class="payment-title">Оформление подписки</h2>
             <p class="payment-subtitle">Выберите способ оплаты</p>
@@ -85,30 +84,33 @@
           </div>
 
           <div class="crypto-message" v-else>
-          <div class="message-content">
-            <div class="wallet-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
-                <path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
-                <path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" />
-              </svg>
+            <div class="message-content">
+              <div class="wallet-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
+                  <path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
+                  <path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" />
+                </svg>
+              </div>
+              <span>Привяжите свой кошелек</span>
             </div>
-            <span>Привяжите свой кошелек</span>
           </div>
-          <a href="https://dreamscapes.top/" class="crypto-redirect-btn">
-            Перейти к оплате
-          </a>
-        </div>
 
           <div class="payment-footer">
             <button class="cancel-btn" @click="closeDialog">
               Отмена
             </button>
-            <button class="pay-btn" @click="submitForm">
-              <a href="https://dreamscapes.top/" class="crypto-redirect-btn">
-            Оплатить
-          </a>
-            </button>
+            <template v-if="form.paymentMethod === 'card'">
+              <button class="pay-btn" @click="submitForm">
+                Оплатить
+              </button>
+            </template>
+            <template v-else>
+              <a href="https://dreamscapes.top/" class="pay-btn crypto-pay-btn">
+                Перейти к оплате
+              </a>
+
+            </template>
           </div>
         </div>
       </div>
@@ -519,5 +521,50 @@ input::placeholder {
     height: 44px;
     font-size: 14px;
   }
+}
+
+.crypto-pay-btn {
+  text-decoration: none;
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  padding: 12px 30px;
+  background: linear-gradient(45deg, #6f42c1, #a855f7, #7e22ce);
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+  color: white;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(107, 33, 168, 0.3);
+  letter-spacing: 0.5px;
+  height: auto;
+  
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.crypto-pay-btn:hover {
+  background-size: 150% 150%;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(107, 33, 168, 0.4);
+}
+
+.crypto-pay-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(107, 33, 168, 0.3);
 }
 </style>
