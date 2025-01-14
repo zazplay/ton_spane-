@@ -70,47 +70,59 @@ const fetchModelPosts = async (modelId, modelData) => {
   }
 }
 
-// Fetch following list and their posts
 const fetchAllModelPosts = async () => {
-  const userType =  sessionStorage.getItem("userType");
-  console.log(userType.toString);
-  if (userType.toString() === "user"){
-  try {
-    loading.value = true
-    
-    // Fetch following list
-    const response = await fetch(
-      `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${CurrUserId.value}/following`,
-      {
-        headers: {
-          'accept': '*/*'
+  // Проверяем наличие авторизации и тип пользователя
+  const authToken = sessionStorage.getItem("authToken");
+  const userType = sessionStorage.getItem("userType");
+
+  // Если нет токена или тип пользователя, прекращаем выполнение
+  if (!authToken || !userType) {
+    allPosts.value = [];
+    loading.value = false;
+    return;
+  }
+
+  // Продолжаем только если пользователь типа "user"
+  if (userType === "user") {
+    try {
+      loading.value = true;
+
+      // Fetch following list
+      const response = await fetch(
+        `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/${CurrUserId.value}/following`,
+        {
+          headers: {
+            'accept': '*/*',
+            'Authorization': `Bearer ${authToken}`
+          }
         }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch following list');
       }
-    )
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch following list')
+
+      followingList.value = await response.json();
+
+      // Fetch posts for each model
+      const allModelPosts = await Promise.all(
+        followingList.value.map(model => fetchModelPosts(model.id, model))
+      );
+
+      // Flatten and sort posts by date
+      allPosts.value = allModelPosts
+        .flat()
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    } catch (error) {
+      console.error('Error fetching all model posts:', error);
+      ElMessage.error('Ошибка при загрузке постов');
+      allPosts.value = [];
+    } finally {
+      loading.value = false;
     }
-    
-    followingList.value = await response.json()
-    
-    // Fetch posts for each model
-    const allModelPosts = await Promise.all(
-      followingList.value.map(model => fetchModelPosts(model.id, model))
-    )
-    
-    // Flatten and sort posts by date
-    allPosts.value = allModelPosts
-      .flat()
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    
-    loading.value = false
-  } catch (error) {
-    console.error('Error fetching all model posts:', error)
-    ElMessage.error('Ошибка при загрузке постов')
-    loading.value = false
-  }}
-}
+  }
+};
 
 onMounted(() => {
   fetchAllModelPosts()

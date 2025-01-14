@@ -141,16 +141,34 @@ export default {
     async fetchPosts() {
   try {
     this.isDataLoaded = false;
-    const response = await fetch(`${config.API_BASE_URL}/posts/requester/${this.userId}`)
-    const data = await response.json()
-    this.posts = data
-    setTimeout(() => {
-      this.isDataLoaded = true;
-    }, 1000);
+    const authToken = sessionStorage.getItem("authToken");
+    
+    // Получаем актуальное значение userId
+    const currentUserId = this.userId?.value;
+
+    const url = authToken && currentUserId
+      ? `${config.API_BASE_URL}/posts/requester/${currentUserId}`
+      : `${config.API_BASE_URL}/posts/admin`;
+
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+    };
+
+    const response = await fetch(url, { headers });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    this.posts = data;
+
   } catch (error) {
-    console.error('Error fetching posts:', error)
-    this.isDataLoaded = true;
+    console.error('Error fetching posts:', error);
     this.posts = [];
+  } finally {
+    this.isDataLoaded = true;
   }
 }
 

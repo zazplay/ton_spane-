@@ -1,62 +1,156 @@
 <script>
 import { computed, ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 export default {
-  name: 'App',
-  setup() {
-    const route = useRoute();
-    const isAuthPage = computed(() => route.path === '/auth');
+ name: 'App',
+ setup() {
+   const route = useRoute();
+   const router = useRouter();
+   const isAuthPage = computed(() => route.path === '/auth');
+   
+   const userType = ref(sessionStorage.getItem("userType") || '');
+   const isAuthenticated = ref(!!sessionStorage.getItem("authToken"));
 
-    // Безопасное получение userType
-    const userType = ref(sessionStorage.getItem("userType") || '');
+   onMounted(() => {
+     const storedType = sessionStorage.getItem("userType");
+     const storedToken = sessionStorage.getItem("authToken");
+     userType.value = storedType || '';
+     isAuthenticated.value = !!storedToken;
+   })
 
-    // Обновление при монтировании
-    onMounted(() => {
-      const storedType = sessionStorage.getItem("userType");
-      userType.value = storedType || '';
-      console.log('Current user type:', userType.value);
-    })
+   window.addEventListener('storage', () => {
+     userType.value = sessionStorage.getItem("userType") || '';
+     isAuthenticated.value = !!sessionStorage.getItem("authToken");
+   });
 
-    // Следим за изменениями в sessionStorage
-    window.addEventListener('storage', () => {
-      userType.value = sessionStorage.getItem("userType") || '';
-    });
+   const goToAuth = () => {
+     router.push('/auth');
+   };
 
-    return {
-      isAuthPage,
-      userType // Возвращаем userType чтобы использовать в шаблоне
-    };
-  }
+   return {
+     isAuthPage,
+     userType,
+     isAuthenticated,
+     goToAuth
+   };
+ }
 }
 </script>
 
 <template>
-  <router-view />
-  <div class="statusModelMessage" v-if="userType === 'model'">
-    Аккаунт модели
-  </div>
+ <router-view />
+ <div class="statusMessage" v-if="!isAuthPage">
+   <transition name="fade">
+     <div v-if="isAuthenticated && userType === 'model'" class="modelStatus">
+       <i class="fas fa-crown"></i>
+       <span>Аккаунт модели</span>
+     </div>
+   </transition>
+   <transition name="fade">
+     <div v-if="!isAuthenticated" class="authStatus" @click="goToAuth">
+       <i class="fas fa-user-lock"></i>
+       <span>Войдите в аккаунт</span>
+     </div>
+   </transition>
+ </div>
 </template>
 
 <style scoped>
 #app {
  -webkit-font-smoothing: antialiased;
  -moz-osx-font-smoothing: grayscale;
- /* text-align: center; */
  color: #2c3e50;
  width: 100%;
 }
 
-.statusModelMessage{
-  position: fixed;
-  right: 0;
-  top:20%;
-  background: rgba(255, 0, 0, 0.2);
-    padding: 10px;
-  border-radius: 10px;
-  margin: 10px;
-  color:white;
-  font-size: 10px;
+.statusMessage {
+ position: fixed;
+ right: 20px;
+ top: 20%;
+ z-index: 1000;
+}
+
+.modelStatus, .authStatus {
+ padding: 8px 15px;
+ border-radius: 12px;
+ margin-bottom: 8px;
+ font-size: 12px;
+ font-weight: 500;
+ display: flex;
+ align-items: center;
+ gap: 6px;
+ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+ backdrop-filter: blur(8px);
+ transition: all 0.3s ease;
+}
+
+.modelStatus {
+ background: linear-gradient(135deg, rgba(255, 99, 132, 0.9), rgba(255, 159, 64, 0.9));
+ color: white;
+}
+
+.authStatus {
+ background: linear-gradient(135deg, rgba(54, 162, 235, 0.9), rgba(75, 192, 192, 0.9));
+ color: white;
+ cursor: pointer;
+}
+
+.authStatus:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.modelStatus i, .authStatus i {
+ font-size: 14px;
+}
+
+/* Анимации */
+.fade-enter-active,
+.fade-leave-active {
+ transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+ opacity: 0;
+ transform: translateX(20px);
+}
+
+/* Медиа запросы */
+@media screen and (max-width: 768px) {
+ html {
+   font-size: 32px !important;
+ }
+
+ .statusMessage {
+   right: 10px;
+   top: 10px;
+ }
+
+ .modelStatus, .authStatus {
+   padding: 6px 12px;
+   font-size: 11px;
+   border-radius: 8px;
+ }
+
+ .modelStatus i, .authStatus i {
+   font-size: 12px;
+ }
+
+ #app {
+   transform-origin: top left;
+   font-size: 1rem;
+ }
+}
+
+/* Стили для темной темы */
+html.dark .modelStatus {
+ background: linear-gradient(135deg, rgba(255, 99, 132, 0.8), rgba(255, 159, 64, 0.8));
+}
+
+html.dark .authStatus {
+ background: linear-gradient(135deg, rgba(54, 162, 235, 0.8), rgba(75, 192, 192, 0.8));
 }
 
 .floating-theme-switcher {
@@ -76,29 +170,24 @@ export default {
  font-size: 20px;
 }
 
-/* Мобильные стили */
+/* Element Plus стили */
+:root {
+ --el-message-z-index: 10000;
+}
+
+.el-message {
+ z-index: var(--el-message-z-index) !important;
+ top: 20px !important;
+ left: 50% !important;
+ transform: translateX(-50%) !important;
+}
+
+/* Мобильные стили для Element Plus */
 @media screen and (max-width: 768px) {
- html {
-   font-size: 32px !important;
+ .el-message {
+   width: 90% !important;
  }
 
- #app {
-   transform-origin: top left;
-   font-size: 1rem;
- }
-
- .floating-theme-switcher {
-   top: 40px;
-   right: 40px;
-   transform: scale(2.5);
-   transform-origin: top right;
- }
-
- .theme-button .el-icon {
-   font-size: 24px !important;
- }
-
- /* Element Plus компоненты */
  .el-button {
    height: auto !important;
    padding: 20px 40px !important;
@@ -126,7 +215,7 @@ export default {
    font-size: 1rem !important;
  }
 
- /* Отступы для компонентов */
+ /* Отступы */
  .el-form-item,
  .el-button,
  .el-input,
@@ -134,7 +223,7 @@ export default {
    margin: 15px 0 !important;
  }
 
- /* Контейнеры и сетка */
+ /* Контейнеры */
  .el-container,
  .el-row,
  .el-col {
@@ -152,25 +241,5 @@ export default {
  .el-table td {
    padding: 20px !important;
  }
-}
-</style>
-
-<style>
-/* Стили для уведомлений Element Plus */
-:root {
-  --el-message-z-index: 10000;
-}
-
-.el-message {
-  z-index: var(--el-message-z-index) !important;
-  top: 20px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-}
-
-@media screen and (max-width: 768px) {
-  .el-message {
-    width: 90% !important;
-  }
 }
 </style>

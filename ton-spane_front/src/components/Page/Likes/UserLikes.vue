@@ -12,41 +12,59 @@ const CurrUserId = computed(() => store.getters.getSub)
 const loadingInstance = ref(null)
 
 const fetchLikedPosts = async () => {
-  try {
-    loadingInstance.value = ElLoading.service({
-      fullscreen: true,
-      text: 'Загрузка...'
-    })
-    
-    const response = await fetch(
-      `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/requester/${CurrUserId.value}`
-    )
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    
-    const posts = await response.json()
-    if (!Array.isArray(posts)) {
-      console.error('Posts data is not an array:', posts)
-      return
-    }
+ // Проверяем наличие авторизации
+ const authToken = sessionStorage.getItem("authToken");
+ 
+ // Если нет токена, прекращаем выполнение
+ if (!authToken) {
+   likedPosts.value = [];
+   loading.value = false;
+   return;
+ }
 
-    // Filter only posts that are liked by current user
-    likedPosts.value = posts
-      .filter(post => post.isLikedByCurrentUser)
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    
-  } catch (error) {
-    console.error('Error fetching posts:', error)
-    ElMessage.error('Ошибка при загрузке постов')
-  } finally {
-    loading.value = false
-    if (loadingInstance.value) {
-      loadingInstance.value.close()
-    }
-  }
-}
+ try {
+   loadingInstance.value = ElLoading.service({
+     fullscreen: true,
+     text: 'Загрузка...'
+   });
+
+   const response = await fetch(
+     `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/requester/${CurrUserId.value}`,
+     {
+       headers: {
+         'accept': '*/*',
+         'Authorization': `Bearer ${authToken}`
+       }
+     }
+   );
+
+   if (!response.ok) {
+     throw new Error(`HTTP error! status: ${response.status}`);
+   }
+
+   const posts = await response.json();
+   if (!Array.isArray(posts)) {
+     console.error('Posts data is not an array:', posts);
+     likedPosts.value = [];
+     return;
+   }
+
+   // Filter only posts that are liked by current user
+   likedPosts.value = posts
+     .filter(post => post.isLikedByCurrentUser)
+     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+ } catch (error) {
+   console.error('Error fetching posts:', error);
+   ElMessage.error('Ошибка при загрузке постов');
+   likedPosts.value = [];
+ } finally {
+   loading.value = false;
+   if (loadingInstance.value) {
+     loadingInstance.value.close();
+   }
+ }
+};
 
 onMounted(() => {
   fetchLikedPosts()

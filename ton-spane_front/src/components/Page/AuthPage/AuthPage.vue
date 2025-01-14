@@ -108,6 +108,19 @@
                 </div>
               </button>
             </div>
+
+            <div class="guest-section">
+    <div class="separator">
+      <span>или</span>
+    </div>
+    <button 
+      @click="guestEntry" 
+      class="guest-btn"
+      type="button"
+    >
+      Войти как гость
+    </button>
+  </div>
           </form>
         </div>
         <div v-else>
@@ -228,6 +241,11 @@ export default {
       this.ruleForm.pass = "";
       this.errors = {};
     },
+    guestEntry() {
+    sessionStorage.removeItem("authToken");
+    sessionStorage.removeItem("userType");
+    window.location.href = "/app/tape";
+  }
   },
   
   watch: {
@@ -241,6 +259,146 @@ export default {
 </script>
 
 <style scoped>
+.guest-section {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 15px 0;
+}
+
+.separator::before,
+.separator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.separator span {
+  padding: 0 10px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+
+.guest-btn {
+            /* Градиентный зеленый фон */
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            
+            /* Типографика */
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            
+            /* Эффекты */
+            padding: 12px 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            
+            /* Анимация */
+            background-size: 200% 200%;
+            animation: gradientFlow 5s ease infinite;
+            
+            /* Убираем обводку по умолчанию */
+            outline: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Анимация градиента */
+        @keyframes gradientFlow {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        /* Эффект при наведении */
+        .guest-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+        
+        /* Эффект нажатия */
+        .guest-btn:active {
+            transform: scale(0.97) translateY(1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* Пульсирующий эффект */
+        .guest-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(
+                circle at center, 
+                rgba(255,255,255,0.3) 0%, 
+                transparent 70%
+            );
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .guest-btn:hover::before {
+            opacity: 1;
+        }
+
+/* Dark theme styles */
+html.dark .separator::before,
+html.dark .separator::after {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+html.dark .separator span {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Light theme styles */
+html:not(.dark) .separator::before,
+html:not(.dark) .separator::after {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+html:not(.dark) .separator span {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+html:not(.dark) .guest-btn {
+  border-color: rgba(0, 0, 0, 0.2);
+  color: rgba(0, 0, 0, 0.8);
+}
+
+html:not(.dark) .guest-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+@media screen and (max-width: 480px) {
+  .guest-section {
+    margin-top: 15px;
+  }
+  
+  .guest-btn {
+    font-size: 13px;
+    padding: 8px 16px;
+  }
+}
+
 .page-wrapper {
   min-height: 100vh;
   position: relative;

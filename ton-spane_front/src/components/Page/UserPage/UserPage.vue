@@ -318,19 +318,37 @@ const createChat = async (route, userId) => {
 
 const fetchUserPosts = async () => {
   try {
-    const response = await fetch(
-      `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${route.params.id}/requester/${CurrUserId.value}`,
-      { signal: abortController.signal }
-    )
+    const authToken = sessionStorage.getItem("authToken");
     
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-    const data = await response.json()
-    
-    if (!Array.isArray(data)) {
-      console.error('Posts data is not an array:', data)
-      return []
+    // Если нет userId или он null/undefined, не делаем запрос
+    if (!route.params.id) {
+      return [];
     }
-    
+
+    const url = authToken && CurrUserId.value
+      ? `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${route.params.id}/requester/${CurrUserId.value}`
+      : `https://ton-back-e015fa79eb60.herokuapp.com/api/posts/user/${route.params.id}/guest`;
+
+    const response = await fetch(url, { 
+      signal: abortController.signal,
+      // Добавляем заголовки авторизации если есть токен
+      ...(authToken && {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+
+    if (!Array.isArray(data)) {
+      console.error('Posts data is not an array:', data);
+      return [];
+    }
+
     return data.map(post => ({
       ...post,
       id: post.id,
@@ -341,20 +359,20 @@ const fetchUserPosts = async () => {
       createdAt: post.createdAt,
       model: {
         id: userId,
-        username: userData.value.username,
-        email: userData.value.email || '',
-        profilePicture: userData.value.profilePicture
+        username: userData.value?.username || '',
+        email: userData.value?.email || '',
+        profilePicture: userData.value?.profilePicture
       },
-      initialLiked: post.isLikedByCurrentUser || false,
+      initialLiked: authToken ? (post.isLikedByCurrentUser || false) : false,
       initialShared: false,
       initialDonated: false,
-      initialSubscribed: isSubscribed.value
-    }))
+      initialSubscribed: authToken ? isSubscribed.value : false
+    }));
   } catch (err) {
-    if (err.name === 'AbortError') return []
-    console.error('Error fetching user posts:', err)
-    ElMessage.error('Ошибка при загрузке постов пользователя')
-    return []
+    if (err.name === 'AbortError') return [];
+    console.error('Error fetching user posts:', err);
+    ElMessage.error('Ошибка при загрузке постов пользователя');
+    return [];
   }
 }
 
