@@ -138,7 +138,7 @@ const handleSubmit = () => {
 }
 
 const handlePaymentSuccess = () => {
-  ElMessage.success('Платеж успешно выполнен!')
+  ElMessage.success('Комната сформирована!')
   closeModal()
 }
 

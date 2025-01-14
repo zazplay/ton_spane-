@@ -73,7 +73,7 @@
               />
               <div class="user-card__content">
                 <el-text class="user-card__username" @click="handleUserSelect(user)">
-                  {{ user.username }}
+                  {{ user.username || user.email }}
                 </el-text>
                 <div class="user-card__checkbox">
                   <el-checkbox
@@ -90,68 +90,60 @@
 
     <!-- Диалог добавления пользователя -->
     <el-dialog
-      v-model="dialogVisible"
-      title="Добавить профиль"
-      width="500px"
-      destroy-on-close
-    >
-      <el-form 
-        ref="formRef"
-        :model="newUser"
-        :rules="validationRules"
-        label-position="top"
-      >
-        <el-form-item label="Имя" prop="username">
-          <el-input
-            v-model="newUser.username"
-            @input="validateUsername"
-            placeholder="Введите имя профиля"
-          />
-          <span v-if="errors.username" class="error-message">
-            {{ errors.username }}
-          </span>
-        </el-form-item>
+  v-model="dialogVisible"
+  title="Добавить профиль"
+  width="500px"
+  destroy-on-close
+>
+  <el-form 
+    ref="formRef"
+    :model="newUser"
+    :rules="validationRules"
+    label-position="top"
+  >
+    <el-form-item label="Имя" prop="username">
+      <el-input
+        v-model="newUser.username"
+        @input="validateUsername"
+        placeholder="Введите имя профиля"
+      />
+      <span v-if="errors.username" class="error-message">
+        {{ errors.username }}
+      </span>
+    </el-form-item>
 
-        <el-form-item label="Email" prop="email">
-          <el-input
-            v-model="newUser.email"
-            type="email"
-            placeholder="Введите email"
-          />
-          <span v-if="errors.email" class="error-message">
-            {{ errors.email }}
-          </span>
-        </el-form-item>
+    <el-form-item label="Email" prop="email">
+      <el-input
+        v-model="newUser.email"
+        type="email"
+        placeholder="Введите email"
+        @input="validateEmail"
+      />
+      <span v-if="errors.email" class="error-message">
+        {{ errors.email }}
+      </span>
+    </el-form-item>
 
-        <el-form-item label="Пароль" prop="password">
-          <el-input
-            v-model="newUser.password"
-            type="password"
-            placeholder="Введите пароль"
-            show-password
-          />
-        </el-form-item>
-
-        <el-form-item label="Описание" prop="description">
-          <el-input
-            v-model="newUser.description"
-            type="textarea"
-            :rows="4"
-            @input="validateDescription"
-            placeholder="Введите описание"
-          />
-          <span v-if="errors.description" class="error-message">
-            {{ errors.description }}
-          </span>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="dialogVisible = false">Отмена</el-button>
-          <el-button type="primary" @click="saveUser">Сохранить</el-button>
-        </div>
-      </template>
-    </el-dialog>
+    <el-form-item label="Пароль" prop="password">
+      <el-input
+        v-model="newUser.password"
+        type="password"
+        placeholder="Введите пароль"
+        show-password
+        @input="validatePassword"
+      />
+      <span v-if="errors.password" class="error-message">
+        {{ errors.password }}
+      </span>
+    </el-form-item>
+  </el-form>
+  <template #footer>
+    <div class="dialog-footer">
+      <el-button @click="dialogVisible = false">Отмена</el-button>
+      <el-button type="primary" @click="saveUser" :disabled="!isFormValid">Сохранить</el-button>
+    </div>
+  </template>
+</el-dialog>
 
     <!-- Диалог подтверждения удаления -->
     <el-dialog
@@ -183,7 +175,7 @@ import { validateInputToScript, removeTagsOperators, validateLogin } from "../..
 const emit = defineEmits(['select-user'])
 
 // Константы
-const defaultUserImg = "https://via.placeholder.com/150"
+const defaultUserImg = "https://img.icons8.com/?size=100&id=83151&format=png&color=22C3E6" // или другой надежный URL
 const API_URL = `${config.API_BASE_URL}/users`
 
 // Состояние компонента
@@ -205,38 +197,45 @@ const filteredUsers = computed(() => {
   )
 })
 
+// Состояния
 const newUser = ref({
   username: '',
   email: '',
-  password: '',
-  description: ''
+  password: ''
 })
 
 const errors = ref({
   username: '',
   email: '',
-  description: ''
+  password: ''
 })
 
-// Правила валидации
-const validationRules = {
-  username: [
-    { required: true, message: 'Введите имя пользователя', trigger: 'blur' },
-    { min: 3, message: 'Минимум 3 символа', trigger: 'blur' }
-  ],
-  email: [
-    { required: true, message: 'Введите email', trigger: 'blur' },
-    { type: 'email', message: 'Введите корректный email', trigger: 'blur' }
-  ],
-  password: [
-    { required: true, message: 'Введите пароль', trigger: 'blur' },
-    { min: 6, message: 'Минимум 6 символов', trigger: 'blur' }
-  ],
-  description: [
-    { required: true, message: 'Введите описание', trigger: 'blur' }
-  ]
+// Валидация email
+const validateEmail = () => {
+  errors.value.email = ''
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  if (!emailRegex.test(newUser.value.email)) {
+    errors.value.email = 'Введите корректный email'
+  }
 }
 
+// Валидация пароля
+const validatePassword = () => {
+  errors.value.password = ''
+  if (newUser.value.password.length < 6) {
+    errors.value.password = 'Пароль должен быть не менее 6 символов'
+  }
+}
+
+// Проверка валидности формы
+const isFormValid = computed(() => {
+  return !errors.value.username && 
+         !errors.value.email && 
+         !errors.value.password &&
+         newUser.value.username &&
+         newUser.value.email &&
+         newUser.value.password
+})
 // Методы для работы с API
 const fetchUsers = async () => {
   try {
@@ -257,15 +256,21 @@ const saveUser = async () => {
     const valid = await formRef.value.validate()
     if (!valid) return
 
-    await axios.post(API_URL, {
+    // Отправляем только необходимые поля в нужном формате
+    const userData = {
       username: newUser.value.username,
       email: newUser.value.email,
       password: newUser.value.password
-    })
+    }
 
+    console.log('Sending user data:', userData)
+
+    await axios.post(API_URL, userData)
+    
     ElMessage.success('Профиль успешно добавлен')
     dialogVisible.value = false
     
+    // Очищаем форму
     newUser.value = { 
       username: '',
       email: '',
@@ -275,12 +280,14 @@ const saveUser = async () => {
     
     await fetchUsers()
   } catch (error) {
+    console.error('Full error:', error)
+    console.error('Response data:', error.response?.data)
+    
     if (error.response?.status === 500) {
       ElMessage.error('Ошибка сервера при сохранении профиля. Проверьте правильность данных')
     } else {
       ElMessage.error('Ошибка при сохранении профиля')
     }
-    console.error('Error saving user:', error)
   }
 }
 
@@ -332,14 +339,7 @@ const validateUsername = () => {
   }
 }
 
-const validateDescription = () => {
-  errors.value.description = ''
-  const result = validateInputToScript(newUser.value.description)
-  if (!result.executionResult) {
-    errors.value.description = result.messange
-    newUser.value.description = removeTagsOperators(newUser.value.description)
-  }
-}
+
 
 // Обработчики drag-scroll
 const startDrag = (event) => {

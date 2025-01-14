@@ -9,18 +9,11 @@ const getThemeByTime = () => {
 };
 
 const routes = [
-  { path: '/', redirect: '/auth' },
+  { path: '/', redirect: '/app/tape' }, // Изменяем редирект на ленту вместо auth
   { 
     path: '/admin', 
     component: AdminPanel,
-    beforeEnter: (to, from, next) => {
-      const isAdmin = sessionStorage.getItem('adminToken');
-      if (!isAdmin) {
-        next('/admin-auth');
-        return;
-      }
-      next();
-    }
+    meta: { publicAccess: true }
   },
   { path: '/admin-auth', component: () => import('./components/Page/AdminPanel/authAdmin.vue') },
   { path: '/auth', component: AuthPage },
@@ -28,7 +21,18 @@ const routes = [
     path: '/app',
     component: MainPage,
     children: [
-      { path: 'tape', component: () => import('./components/Page/TapePage.vue') },
+      { 
+        path: 'tape', 
+        component: () => import('./components/Page/TapePage.vue'),
+        meta: { publicAccess: true } // Помечаем как публичный маршрут
+      },
+      { 
+        path: 'user/:id',
+        component: () => import('./components/Page/UserPage/UserPage.vue'),
+        name: 'userProfile',
+        meta: { publicAccess: true } // Помечаем как публичный маршрут
+      },
+      // Защищенные маршруты
       { path: 'notifications', component: () => import('./components/Page/NotificationsPage.vue') },
       { path: 'clips', component: () => import('./components/Page/ClipsPage.vue') },
       { path: 'message', component: () => import('./components/Page/Chats/ChatsPage.vue') },
@@ -37,13 +41,8 @@ const routes = [
       { path: 'more', component: () => import('./components/Page/More/MorePage.vue') },
       { 
         path: 'tape/popular', 
-        component: () => import('./components/Page/PopularTapes.vue') 
-      },
-      
-      {
-        path: 'user/:id',
-        component: () => import('./components/Page/UserPage/UserPage.vue'),
-        name: 'userProfile',
+        component: () => import('./components/Page/PopularTapes.vue'),
+        meta: { publicAccess: true } // Помечаем как публичный маршрут
       },
       {
         path: 'userSubscribeDonate/:id',
@@ -86,15 +85,39 @@ router.beforeEach((to, from, next) => {
     document.documentElement.className = savedTheme;
   }
 
-  // Обработка авторизации
-  if (to.path === '/admin' && !isAdmin) {
-    next('/admin-auth');
+  // Публичные роуты, доступные без авторизации
+  const publicRoutes = ['/auth', '/admin-auth'];
+  
+  // Проверка для админ-панели
+  if (to.path === '/admin') {
+    if (!isAdmin) {
+      next('/admin-auth');
+      return;
+    }
+  }
+
+  // Проверяем, является ли маршрут публичным через meta
+  const isPublicRoute = to.matched.some(record => record.meta.publicAccess);
+
+  // Если маршрут публичный - пропускаем без проверки авторизации
+  if (isPublicRoute) {
+    next();
     return;
   }
 
-  if (to.path.startsWith('/app') && !isAuthenticated) {
-    next('/auth');
+  // Если пользователь авторизован и пытается зайти на страницу авторизации,
+  // перенаправляем на главную
+  if (to.path === '/auth' && isAuthenticated) {
+    next('/app/tape');
     return;
+  }
+
+  // Проверка авторизации для защищенных маршрутов
+  if (!publicRoutes.includes(to.path) && !isPublicRoute) {
+    if (!isAuthenticated) {
+      next('/auth');
+      return;
+    }
   }
 
   next();
