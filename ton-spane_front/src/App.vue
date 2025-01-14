@@ -1,59 +1,101 @@
 <script>
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 export default {
- name: 'App',
- setup() {
-   const route = useRoute();
-   const router = useRouter();
-   const isAuthPage = computed(() => route.path === '/auth');
-   
-   const userType = ref(sessionStorage.getItem("userType") || '');
-   const isAuthenticated = ref(!!sessionStorage.getItem("authToken"));
+  name: 'App',
+  setup() {
+    const route = useRoute();
+    const router = useRouter();
+    
+    const isAuthPage = computed(() => route.path === '/auth');
+    
+    // Reactive state for authentication
+    const userType = ref(sessionStorage.getItem("userType") || '');
+    const isAuthenticated = ref(!!sessionStorage.getItem("authToken"));
 
-   onMounted(() => {
-     const storedType = sessionStorage.getItem("userType");
-     const storedToken = sessionStorage.getItem("authToken");
-     userType.value = storedType || '';
-     isAuthenticated.value = !!storedToken;
-   })
+    // Comprehensive session clearing function
+    const clearSession = () => {
+      sessionStorage.removeItem("userType");
+      sessionStorage.removeItem("authToken");
+      sessionStorage.removeItem("refreshToken");
+      
+      // Immediately update reactive variables
+      userType.value = '';
+      isAuthenticated.value = false;
+    };
 
-   window.addEventListener('storage', () => {
-     userType.value = sessionStorage.getItem("userType") || '';
-     isAuthenticated.value = !!sessionStorage.getItem("authToken");
-   });
+    // Storage event handler
+    const handleStorageChange = () => {
+      const storedType = sessionStorage.getItem("userType");
+      const storedToken = sessionStorage.getItem("authToken");
+      
+      userType.value = storedType || '';
+      isAuthenticated.value = !!storedToken;
+    };
 
-   const goToAuth = () => {
-     router.push('/auth');
-   };
+    // Initial mount setup
+    onMounted(() => {
+      // Initial check of session storage
+      handleStorageChange();
+      
+      // Add storage event listener
+      window.addEventListener('storage', handleStorageChange);
 
-   return {
-     isAuthPage,
-     userType,
-     isAuthenticated,
-     goToAuth
-   };
- }
+      // Add global event listener for logout
+      window.addEventListener('logout', clearSession);
+    });
+
+    // Clean up event listeners
+    onUnmounted(() => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('logout', clearSession);
+    });
+
+    // Navigation to auth page
+    const goToAuth = () => {
+      router.push('/auth');
+    };
+
+    // Logout function
+    const logout = () => {
+      // Dispatch global logout event
+      window.dispatchEvent(new Event('logout'));
+      
+      // Clear session data
+      clearSession(); 
+      
+      // Redirect to home/landing page
+      router.push('/'); 
+    };
+
+    return {
+      isAuthPage,
+      userType,
+      isAuthenticated,
+      goToAuth,
+      logout
+    };
+  }
 }
 </script>
 
 <template>
- <router-view />
- <div class="statusMessage" v-if="!isAuthPage">
-   <transition name="fade">
-     <div v-if="isAuthenticated && userType === 'model'" class="modelStatus">
-       <i class="fas fa-crown"></i>
-       <span>Аккаунт модели</span>
-     </div>
-   </transition>
-   <transition name="fade">
-     <div v-if="!isAuthenticated" class="authStatus" @click="goToAuth">
-       <i class="fas fa-user-lock"></i>
-       <span>Войдите в аккаунт</span>
-     </div>
-   </transition>
- </div>
+  <router-view />
+  <div class="statusMessage" v-if="!isAuthPage">
+    <transition name="fade">
+      <div v-if="isAuthenticated && userType === 'model'" class="modelStatus">
+        <i class="fas fa-crown"></i>
+        <span>Аккаунт модели</span>
+      </div>
+    </transition>
+    <transition name="fade">
+      <div v-if="!isAuthenticated" class="authStatus" @click="goToAuth">
+        <i class="fas fa-user-lock"></i>
+        <span>Войдите в аккаунт</span>
+      </div>
+    </transition>
+  </div>
 </template>
 
 <style scoped>

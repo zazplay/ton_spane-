@@ -1,81 +1,105 @@
 <template>
-    <div class="logout-container">
-      <el-button 
-        type="danger" 
-        class="logout-button"
-        @click="handleLogout"
+  <div class="logout-container">
+    <el-button
+      type="danger"
+      class="logout-button"
+      @click="handleLogout"
+    >
+      <el-icon class="logout-icon">
+        <Switch />
+      </el-icon>
+      Выйти из профиля
+    </el-button>
+    
+    <Teleport to="body">
+      <el-dialog
+        v-model="showConfirmDialog"
+        title="Подтверждение выхода"
+        width="300px"
+        class="logout-dialog"
+        append-to-body
       >
-        <el-icon class="logout-icon">
-          <Switch />
-        </el-icon>
-        Выйти из профиля
-      </el-button>
-  
-      <Teleport to="body">
-        <el-dialog
-          v-model="showConfirmDialog"
-          title="Подтверждение выхода"
-          width="300px"
-          class="logout-dialog"
-          append-to-body
-        >
-          <span>Вы действительно хотите выйти?</span>
-          <template #footer>
-            <span class="dialog-footer">
-              <el-button @click="showConfirmDialog = false">Отмена</el-button>
-              <el-button type="danger" @click="confirmLogout">
-                Выйти
-              </el-button>
-            </span>
-          </template>
-        </el-dialog>
-      </Teleport>
-    </div>
-  </template>
-  
-  <script>
-  import { Switch } from '@element-plus/icons-vue';
-  import { ElMessage } from 'element-plus';
+        <span>Вы действительно хотите выйти?</span>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="showConfirmDialog = false">Отмена</el-button>
+            <el-button 
+              type="danger" 
+              :loading="isLoading"
+              @click="confirmLogout"
+            >
+              Выйти
+            </el-button>
+          </span>
+        </template>
+      </el-dialog>
+    </Teleport>
+  </div>
+</template>
 
-  
-  export default {
-    name: 'LogoutButton',
-    components: {
-      Switch
-    },
-    data() {
-      return {
-        showConfirmDialog: false
-      };
-    },
-    methods: {
-      handleLogout() {
-        this.showConfirmDialog = true;
-      },
-      async confirmLogout() {
-        try {
-          // Очищаем все токены и данные аутентификации
-          sessionStorage.removeItem('authToken');
-          sessionStorage.removeItem('refreshToken');
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          
-          // Очищаем состояние Vuex если есть
-          if (this.$store) {
-            await this.$store.dispatch('clearAuth'); // Предполагая что у вас есть такой action
-          }
-  
-          // Перенаправляем на страницу логина
-          this.$router.push('/');
-          this.showConfirmDialog = false;
-        } catch (error) {
-          console.error('Error during logout:', error);
-          ElMessage.error('Произошла ошибка при выходе');
+<script>
+import { Switch } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+export default {
+  name: 'LogoutButton',
+  components: {
+    Switch
+  },
+  setup() {
+    const router = useRouter();
+    const showConfirmDialog = ref(false);
+    const isLoading = ref(false);
+
+    const handleLogout = () => {
+      showConfirmDialog.value = true;
+    };
+
+    const confirmLogout = async () => {
+      isLoading.value = true;
+      
+      try {
+        // Dispatch global logout event
+        window.dispatchEvent(new Event('logout'));
+
+        // Очищаем все токены и данные аутентификации
+        sessionStorage.removeItem('authToken');
+        sessionStorage.removeItem('refreshToken');
+        sessionStorage.removeItem('userType');
+        
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+
+        // Диспетчеризация очистки состояния, если используется Vuex
+        if (router.currentRoute.value.meta.store) {
+          await router.currentRoute.value.meta.store.dispatch('clearAuth');
         }
+
+        // Показываем сообщение об успешном выходе
+        ElMessage.success('Вы успешно вышли из системы');
+
+        // Перенаправляем на страницу логина
+        router.push('/');
+      } catch (error) {
+        console.error('Ошибка при выходе:', error);
+        ElMessage.error('Произошла ошибка при выходе');
+      } finally {
+        isLoading.value = false;
+        showConfirmDialog.value = false;
       }
-    }
-  };
-  </script>
+    };
+
+    return {
+      showConfirmDialog,
+      isLoading,
+      handleLogout,
+      confirmLogout
+    };
+  }
+};
+</script>
 
 <style scoped>
 .logout-container {
@@ -312,5 +336,23 @@
 
 :deep(.el-dialog) {
   animation: fadeIn 0.3s ease-out forwards;
+}
+
+.logout-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: -10px;
+  width:96%;
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logout-icon {
+  margin-right: 6px;
 }
 </style>
