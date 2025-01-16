@@ -93,61 +93,39 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useStore } from 'vuex';
 import { BellFilled, Box, CirclePlusFilled } from '@element-plus/icons-vue';
 import ListPostCards from '../ListPostCards.vue';
-import { ref, computed } from 'vue'
 import FollowingPage from './FollowingPage/FollowingPage.vue';
 import config from '../../config';
-import { useStore } from 'vuex';
 import UserLikes from './Likes/UserLikes.vue';
 import AddPostForm from './AddPostForm.vue'
 
+const store = useStore();
+const userId = computed(() => store.getters.getSub);
+const userType = ref(sessionStorage.getItem('userType'));
 
+const isFormOpen = ref(false);
+const activeTab = ref('first');
+const isDataLoaded = ref(false);
+const posts = ref([]);
 
+const openForm = () => {
+  isFormOpen.value = true; // открываем форму при клике
+};
 
-export default {
-  components: {
-    ListPostCards,
-    BellFilled,
-    Box,
-    FollowingPage,
-    UserLikes,
-    CirclePlusFilled,
-    AddPostForm
-  },
-  data() {
-    const store = useStore()
-    const userId = computed(() => store.getters.getSub)
-    const userType = sessionStorage.getItem('userType')
+const closeForm = () => {
+  isFormOpen.value = false; // закрываем форму
+};
 
-    return {
-      isFormOpen: false,  
-      activeTab: 'first',
-      isDataLoaded: false,
-      posts: ref([]),
-      userId,
-      userType
-    };
-  },
-  methods: {
-    openForm() {
-      this.isFormOpen = true  // открываем форму при клике
-    },
-    
-    closeForm() {
-      this.isFormOpen = false  // закрываем форму
-    },
-    async fetchPosts() {
+const fetchPosts = async () => {
   try {
-    this.isDataLoaded = false;
+    isDataLoaded.value = false;
     const authToken = sessionStorage.getItem("authToken");
-    
-    // Получаем актуальное значение userId
-    const currentUserId = this.userId?.value;
-
-    const url = authToken && currentUserId
-      ? `${config.API_BASE_URL}/posts/requester/${currentUserId}`
+    const url = authToken 
+      ? `${config.API_BASE_URL}/posts/requester/${userId.value}`
       : `${config.API_BASE_URL}/posts/admin`;
 
     const headers = {
@@ -162,21 +140,18 @@ export default {
     }
 
     const data = await response.json();
-    this.posts = data;
-
+    posts.value = data;
   } catch (error) {
     console.error('Error fetching posts:', error);
-    this.posts = [];
+    posts.value = [];
   } finally {
-    this.isDataLoaded = true;
-  }
-}
-
-  },
-  mounted() {
-    this.fetchPosts()
+    isDataLoaded.value = true;
   }
 };
+
+onMounted(() => {
+  fetchPosts();
+});
 </script>
 
 <style scoped>

@@ -107,7 +107,8 @@
       v-if="isLoaded && userData.posts && userData.posts.length > 0"
       :posts="userData.posts"
       :user="userData"
-      @updatePosts="handlePostUpdate"
+      @updatePosts="handlePostUpdate" 
+      style="width: 100%;"
     />
     <div v-else-if="isLoaded && (!userData.posts || userData.posts.length === 0)" class="no-posts">
       <el-empty

@@ -113,7 +113,7 @@ onMounted(() => {
   <ListPostCards 
     v-else-if="allPosts.length > 0" 
     :posts="allPosts" 
-    style="margin-top: 20px;"
+    style="margin-top: 20px; width: 95%;"
   />
   <el-empty
     v-else

@@ -15,16 +15,6 @@ const props = defineProps({
   }
 })
 
-// Watch for subscription changes and update posts accordingly
-watch(
-  () => store.getters.getSubscriptions,
-  async (newSubscriptions) => {
-    // Only trigger posts refresh if subscriptions actually changed
-    if (newSubscriptions.length > 0) {
-      await store.dispatch('refreshPosts')
-    }
-  }
-)
 </script>
 
 <template>
@@ -41,7 +31,7 @@ watch(
       :createdAt="post.createdAt"
       :updatedAt="post.updatedAt"
       :comments="post.comments"
-      :likes="post.likes"
+      :likesCount="post.likesCount"
       :isLikedByCurrentUser="post.isLikedByCurrentUser"
       :isSubscribed="post.isSubscribed"
     />

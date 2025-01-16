@@ -45,24 +45,26 @@ const fetchModelPosts = async (modelId, modelData) => {
     }
     
     return data.map(post => ({
-      ...post,
-      id: post.id,
-      imageUrl: formatImageUrl(post.imageUrl),
-      caption: post.caption || '',
-      price: String(post.price || 0),
-      isBlurred: post.isBlurred || false,
-      createdAt: post.createdAt,
-      model: {
-        id: modelData.id,
-        username: modelData.username,
-        email: modelData.email || '',
-        profilePicture: modelData.profilePicture
-      },
-      initialLiked: post.isLikedByCurrentUser || false,
-      initialShared: false,
-      initialDonated: false,
-      initialSubscribed: post.isSubscribed || false
-    }))
+  ...post,
+  id: post.id,
+  imageUrl: formatImageUrl(post.imageUrl),
+  caption: post.caption || '',
+  price: String(post.price || 0),
+  isBlurred: post.isBlurred || false,
+  createdAt: post.createdAt,
+  updatedAt: post.updatedAt || '', // Добавлено updatedAt
+  comments: post.comments || [], // Добавлено comments
+  likesCount: post.likesCount || 0, // Добавлено likesCount
+  isLikedByCurrentUser: post.isLikedByCurrentUser || false, // Переименовано initialLiked
+  isSubscribed: post.isSubscribed || false, // Переименовано initialSubscribed
+  model: {
+    id: modelData.id,
+    username: modelData.username,
+    email: modelData.email || '',
+    profilePicture: modelData.profilePicture,
+  },
+}));
+
   } catch (error) {
     console.error('Error fetching model posts:', error)
     ElMessage.error(`Ошибка при загрузке постов пользователя ${modelData.username}`)
@@ -160,9 +162,10 @@ onMounted(() => {
   <div v-if="loading" class="loading">
   </div>
   <ListPostCards 
+
     v-else-if="allPosts.length > 0"
     :posts="allPosts"
-    style="margin-top: 20px;"
+    style="margin-top: 20px; width: 100%;"
     @updatePosts="handlePostUpdate"
   />
   <el-empty

@@ -1,6 +1,6 @@
 <script setup>
-import { ref, defineProps, defineEmits, computed, watch } from 'vue'
-import ShareModal from './ShareModal.vue' 
+import { ref, computed, watch,defineProps,defineEmits } from 'vue'
+import ShareModal from './ShareModal.vue'
 import TipsModal from './TipsModal.vue'
 import SubscriptionModal from '../components/Page/SubOnCardModal/SubCardModal.vue'
 import { useStore } from 'vuex'
@@ -58,9 +58,9 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
-  likes: {
-    type: Array,
-    default: () => []
+  likesCount: {
+    type: Number,
+    default: 0
   },
   isLikedByCurrentUser: {
     type: Boolean,
@@ -79,7 +79,7 @@ const store = useStore()
 const subscriptionModalRef = ref(null)
 const localComments = ref([])
 const isLiked = ref(props.isLikedByCurrentUser)
-const likesCount = ref(props.likes.length)
+const likesCount = ref(props.initialLikesCount || 0)
 const isSubscribed = ref(props.isSubscribed)
 const isShared = ref(false)
 const isDonated = ref(false)
@@ -89,7 +89,7 @@ const showAllComments = ref(false)
 const newComment = ref('')
 const isSubmitting = ref(false)
 
-// Watchers для синхронизации состояния
+// Watchers for syncing state
 watch(() => props.comments, (newComments) => {
   localComments.value = [...newComments]
 }, { immediate: true, deep: true })
@@ -98,7 +98,7 @@ watch(() => props.isLikedByCurrentUser, (newValue) => {
   isLiked.value = newValue
 }, { immediate: true })
 
-watch(() => props.likes.length, (newValue) => {
+watch(() => props.likesCount, (newValue) => {
   likesCount.value = newValue
 }, { immediate: true })
 
@@ -178,6 +178,7 @@ const handleLike = async () => {
     const endpoint = isLiked.value ? 'unlike' : 'like'
     const method = isLiked.value ? 'DELETE' : 'POST'
     
+    // Обновление состояния
     isLiked.value = !isLiked.value
     likesCount.value = isLiked.value ? likesCount.value + 1 : likesCount.value - 1
 
@@ -187,8 +188,8 @@ const handleLike = async () => {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'accept': '*/*'
-        }
+          'accept': '*/*',
+        },
       }
     )
 
@@ -196,14 +197,17 @@ const handleLike = async () => {
       throw new Error('Failed to update like')
     }
 
+    // Сообщаем родителю о событии
+    emit('updateLikesCount', likesCount.value)
     emit('like', isLiked.value)
   } catch (error) {
     console.error('Error updating like:', error)
+
+    // Откат изменений в случае ошибки
     isLiked.value = !isLiked.value
-    likesCount.value = isLiked.value ? likesCount.value + 1 : likesCount.value - 1
+    likesCount.value = isLiked.value ? likesCount.value - 1 : likesCount.value + 1
   }
 }
-
 const checkSubscriptionStatus = async () => {
   if (!isUserLoggedIn()) return false
 
@@ -304,7 +308,7 @@ const postComment = async () => {
       throw new Error('Invalid response data')
     }
 
-    // Добавляем новый комментарий в начало массива
+    // Add new comment to the beginning of the array
     localComments.value = [{
       id: responseData.id,
       content: responseData.content,
@@ -400,25 +404,27 @@ const toggleComments = () => {
         <div class="action-buttons">
           <!-- Like Button -->
           <el-check-tag 
-            :checked="isLiked"
-            @change="handleLike"
-            class="action-tag heart"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="25"
-              height="25"
-              viewBox="0 0 24 24"
-              :fill="isLiked ? 'red' : 'none'"
-              stroke="red"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-            </svg>
-            <span style="margin-left: 5px">{{ likesCount }}</span>
-          </el-check-tag>
+    :checked="isLiked"
+    @change="handleLike"
+    class="action-tag heart"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="25"
+      height="25"
+      viewBox="0 0 24 24"
+      :fill="isLiked ? 'red' : 'none'"
+      stroke="red"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path
+        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+      />
+    </svg>
+    <span style="margin-left: 5px">{{ likesCount }}</span>
+  </el-check-tag>
           
           <!-- Share Button -->
           <el-check-tag 
