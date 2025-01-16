@@ -159,6 +159,98 @@ export default {
 </template>
 
 <style scoped>
+
+#app {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #333;
+  width: 100%;
+}
+
+.statusMessage {
+  position: fixed;
+  right: 20px;
+  top: 200px;
+  z-index: 1000;
+}
+
+.modelStatus, 
+.authStatus {
+  padding: 10px 20px;
+  border-radius: 50px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+}
+
+.modelStatus {
+  background: linear-gradient(135deg, #ee9ca7, #ffdde1);
+  color: #333;
+}
+
+.authStatus {
+  background: linear-gradient(135deg, #56ccf2, #2f80ed);
+  color: white;
+  cursor: pointer;
+}
+
+.authStatus:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.modelStatus i,
+.authStatus i {  
+  font-size: 16px;
+}
+
+/* Animations */
+.fade-enter-active,
+.fade-leave-active {  
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+/* Media queries */  
+@media screen and (max-width: 768px) {
+  .statusMessage {
+    right: 10px;
+    top: 20px;
+  }
+  
+  .modelStatus,
+  .authStatus {
+    padding: 8px 16px;  
+    font-size: 12px;
+    border-radius: 40px;  
+  }
+
+  .modelStatus i,
+  .authStatus i {
+    font-size: 14px;
+  }
+}
+
+/* Dark theme styles */
+html.dark .modelStatus {  
+  background: linear-gradient(135deg, #434343, #000000);
+  color: white;
+}
+
+html.dark .authStatus {
+  background: linear-gradient(135deg, #000428, #004e92);  
+}  
 .auth-modal-overlay {
   position: fixed;
   top: 0;
