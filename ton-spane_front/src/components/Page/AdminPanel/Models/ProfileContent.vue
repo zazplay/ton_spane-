@@ -228,40 +228,45 @@ const fetchUserData = async () => {
 }
 
 const fetchUserPosts = async () => {
-   try {
-       const response = await fetch(`${config.API_BASE_URL}/posts/user/${props.userIdProp}/requester/${props.userIdProp}`);
-       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-       const data = await response.json();
+    try {
+        const response = await fetch(`${config.API_BASE_URL}/posts/user/${props.userIdProp}/requester/${props.userIdProp}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
 
-       const formattedPosts = data.map(post => ({
-           ...post,
-           id: post.id,
-           imageUrl: post.imageUrl.includes(S3_BASE_URL)
-               ? post.imageUrl.replace(S3_BASE_URL, S3_BASE_URL)
-               : post.imageUrl,
-           caption: post.caption || '',
-           price: String(post.price),
-           isBlurred: post.isBlurred || false,
-           createdAt: post.createdAt,
-           user: {
-               id: props.userIdProp,
-               username: userData.value.username,
-               email: userData.value.email || '',
-               profilePicture: userData.value.profilePicture
-           },
-           initialLiked: false,
-           initialShared: false,
-           initialDonated: false,
-           initialSubscribed: false
-       }));
+        const formattedPosts = data.map(post => ({
+            ...post,
+            id: post.id,
+            imageUrl: post.imageUrl.includes(S3_BASE_URL)
+                ? post.imageUrl
+                : `${S3_BASE_URL}${post.imageUrl}`,
+            caption: post.caption || '',
+            price: String(post.price),
+            isBlurred: post.isBlurred || false,
+            createdAt: post.createdAt,
+            user: {
+                id: props.userIdProp,
+                username: userData.value.username,
+                email: userData.value.email || '',
+                profilePicture: userData.value.profilePicture
+            },
+            likes: post.likesCount || 0,
+            isLikedByCurrentUser: post.isLikedByCurrentUser || false,
+            initialLiked: post.isLikedByCurrentUser || false,
+            initialShared: false,
+            initialDonated: false,
+            initialSubscribed: post.isSubscribed || false
+        }));
 
-       userData.value.posts = formattedPosts;
-       userLikes.value = formattedPosts.reduce((total, post) => total + (post.likes?.length || 0), 0);
-   } catch (err) {
-       console.error('Error fetching user posts:', err);
-       userData.value.posts = [];
-       userLikes.value = 0;
-   }
+        userData.value.posts = formattedPosts;
+        
+        // Calculate total likes by summing up likesCount from each post
+        userLikes.value = formattedPosts.reduce((total, post) => total + (post.likesCount || 0), 0);
+        
+    } catch (err) {
+        console.error('Error fetching user posts:', err);
+        userData.value.posts = [];
+        userLikes.value = 0;
+    }
 }
 
 const preparePostsData = (posts) => {
