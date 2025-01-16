@@ -14,6 +14,10 @@ export default {
     const userType = ref(sessionStorage.getItem("userType") || '');
     const isAuthenticated = ref(!!sessionStorage.getItem("authToken"));
 
+    // Auth Modal State
+    const showAuthModal = ref(false);
+    const authModalTargetRoute = ref(null);
+
     // Comprehensive session clearing function
     const clearSession = () => {
       sessionStorage.removeItem("userType");
@@ -34,6 +38,22 @@ export default {
       isAuthenticated.value = !!storedToken;
     };
 
+    // Auth Modal Handlers
+    const handleShowAuthModal = (event) => {
+      showAuthModal.value = true;
+      authModalTargetRoute.value = event.detail.targetRoute;
+    };
+
+    const closeAuthModal = () => {
+      showAuthModal.value = false;
+      authModalTargetRoute.value = null;
+    };
+
+    const goToAuth = () => {
+      router.push('/auth');
+      closeAuthModal();
+    };
+
     // Initial mount setup
     onMounted(() => {
       // Initial check of session storage
@@ -44,18 +64,17 @@ export default {
 
       // Add global event listener for logout
       window.addEventListener('logout', clearSession);
+
+      // Add global event listener for auth modal
+      window.addEventListener('show-auth-modal', handleShowAuthModal);
     });
 
     // Clean up event listeners
     onUnmounted(() => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('logout', clearSession);
+      window.removeEventListener('show-auth-modal', handleShowAuthModal);
     });
-
-    // Navigation to auth page
-    const goToAuth = () => {
-      router.push('/auth');
-    };
 
     // Logout function
     const logout = () => {
@@ -74,7 +93,10 @@ export default {
       userType,
       isAuthenticated,
       goToAuth,
-      logout
+      logout,
+      showAuthModal,
+      closeAuthModal,
+      authModalTargetRoute
     };
   }
 }
@@ -82,6 +104,44 @@ export default {
 
 <template>
   <router-view />
+  
+  <div v-if="showAuthModal" class="auth-modal-overlay">
+    <div class="auth-modal-content">
+      <div class="auth-modal-header">
+        <h2>Необходима авторизация</h2>
+        <button @click="closeAuthModal" class="close-modal-btn">
+          <el-icon><Close /></el-icon>
+        </button>
+      </div>
+      <div class="auth-modal-body">
+        <p style="color: aliceblue;">Для доступа к этой странице и многим другим функциям вам нужно войти в аккаунт</p>
+        <div class="auth-modal-icon">
+          <el-icon :size="48" color="#4b7bec"><UserFilled /></el-icon>
+        </div>
+        <div class="auth-features">
+          <p style="color: aliceblue;">После авторизации вам будут доступны:</p>
+          <ul>
+            <li><el-icon><BellFilled /></el-icon> Уведомления</li>
+            <li><el-icon><VideoCamera /></el-icon> Клипы</li>  
+            <li><el-icon><ChatDotRound /></el-icon> Сообщения</li>
+            <li><el-icon><Wallet /></el-icon> Покупки</li>
+            <li><el-icon><MoreFilled /></el-icon> Дополнительные функции</li>
+          </ul>
+        </div>
+      </div>
+      <div class="auth-modal-actions">
+        <el-button type="primary" @click="goToAuth" class="auth-modal-login" round>
+          <template #icon>
+            <el-icon><Right /></el-icon>  
+          </template>
+          Войти
+        </el-button>
+        <el-button @click="closeAuthModal" class="auth-modal-cancel" round>Отмена</el-button>
+      </div>
+    </div>
+  </div>
+
+
   <div class="statusMessage" v-if="!isAuthPage">
     <transition name="fade">
       <div v-if="isAuthenticated && userType === 'model'" class="modelStatus">
@@ -99,189 +159,148 @@ export default {
 </template>
 
 <style scoped>
-#app {
- -webkit-font-smoothing: antialiased;
- -moz-osx-font-smoothing: grayscale;
- color: #2c3e50;
- width: 100%;
+.auth-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
 }
 
-.statusMessage {
- position: fixed;
- right: 20px;
- top: 20%;
- z-index: 1000;
+.auth-modal-content {
+  background: linear-gradient(145deg, #1a1f2e, #242936);
+  border-radius: 20px;
+  padding: 32px;
+  width: 400px;
+  max-height: 85vh;
+  overflow: auto;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-.modelStatus, .authStatus {
- padding: 8px 15px;
- border-radius: 12px;
- margin-bottom: 8px;
- font-size: 12px;
- font-weight: 500;
- display: flex;
- align-items: center;
- gap: 6px;
- box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
- backdrop-filter: blur(8px);
- transition: all 0.3s ease;
+.auth-modal-header {
+  margin-bottom: 32px;
+  position: relative;
 }
 
-.modelStatus {
- background: linear-gradient(135deg, rgba(255, 99, 132, 0.9), rgba(255, 159, 64, 0.9));
- color: white;
+.auth-modal-header h2 {
+  margin: 0;
+  font-size: 25px;
+  color: rgb(255, 195, 195);
+
 }
 
-.authStatus {
- background: linear-gradient(135deg, rgba(54, 162, 235, 0.9), rgba(75, 192, 192, 0.9));
- color: white;
- cursor: pointer;
+.close-modal-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  transition: color 0.3s;
 }
 
-.authStatus:hover {
- transform: translateY(-2px);
- box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+.close-modal-btn:hover {
+  color: #ff4757;
+  transform: rotate(90deg);
 }
 
-.modelStatus i, .authStatus i {
- font-size: 14px;
+.auth-modal-body {
+  margin-bottom: 40px;
 }
 
-/* Анимации */
-.fade-enter-active,
-.fade-leave-active {
- transition: opacity 0.3s ease, transform 0.3s ease;
+.auth-modal-icon {
+  margin: 24px 0;
+  color: #34d399;
+  font-size: 48px;
 }
 
-.fade-enter-from,
-.fade-leave-to {
- opacity: 0;
- transform: translateX(20px);
+.auth-features {
+  text-align: left;
+  margin-top: 24px;
 }
 
-/* Медиа запросы */
-@media screen and (max-width: 768px) {
- html {
-   font-size: 32px !important;
- }
-
- .statusMessage {
-   right: 10px;
-   top: 10px;
- }
-
- .modelStatus, .authStatus {
-   padding: 6px 12px;
-   font-size: 11px;
-   border-radius: 8px;
- }
-
- .modelStatus i, .authStatus i {
-   font-size: 12px;
- }
-
- #app {
-   transform-origin: top left;
-   font-size: 1rem;
- }
+.auth-features ul {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
 }
 
-/* Стили для темной темы */
-html.dark .modelStatus {
- background: linear-gradient(135deg, rgba(255, 99, 132, 0.8), rgba(255, 159, 64, 0.8));
+.auth-features li {
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
 }
 
-html.dark .authStatus {
- background: linear-gradient(135deg, rgba(54, 162, 235, 0.8), rgba(75, 192, 192, 0.8));
+.auth-features .el-icon {
+  font-size: 20px;
+  color: #34d399; 
 }
 
-.floating-theme-switcher {
- position: fixed;
- top: 20px;
- right: 20px;
- z-index: 9999;
- pointer-events: auto;
- isolation: isolate;
+.auth-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
 }
 
-.floating-theme-switcher .theme-button {
- box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+.auth-modal-login,
+.auth-modal-cancel {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: none; 
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
-.theme-button .el-icon {
- font-size: 20px;
+.auth-modal-login {
+  background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
 }
 
-/* Element Plus стили */
-:root {
- --el-message-z-index: 10000;
+.auth-modal-login:hover {
+  opacity: 0.85;
+  transform: translateY(-2px);
 }
 
-.el-message {
- z-index: var(--el-message-z-index) !important;
- top: 20px !important;
- left: 50% !important;
- transform: translateX(-50%) !important;
+.auth-modal-cancel {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
-/* Мобильные стили для Element Plus */
-@media screen and (max-width: 768px) {
- .el-message {
-   width: 90% !important;
- }
+.auth-modal-cancel:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
 
- .el-button {
-   height: auto !important;
-   padding: 20px 40px !important;
-   font-size: 1rem !important;
- }
+.auth-modal-login:active,
+.auth-modal-cancel:active {
+  opacity: 0.7;
+  transform: translateY(1px);  
+}
 
- .el-input__inner {
-   height: 60px !important;
-   line-height: 60px !important;
-   font-size: 1rem !important;
- }
-
- .el-form-item {
-   margin-bottom: 30px !important;
- }
-
- .el-form-item__label {
-   font-size: 1rem !important;
-   line-height: 2 !important;
- }
-
- .el-select,
- .el-dropdown,
- .el-menu-item {
-   font-size: 1rem !important;
- }
-
- /* Отступы */
- .el-form-item,
- .el-button,
- .el-input,
- .el-select {
-   margin: 15px 0 !important;
- }
-
- /* Контейнеры */
- .el-container,
- .el-row,
- .el-col {
-   width: 100% !important;
-   margin: 0 !important;
-   padding: 10px !important;
- }
-
- /* Таблицы */
- .el-table {
-   font-size: 1rem !important;
- }
-
- .el-table th,
- .el-table td {
-   padding: 20px !important;
- }
+/* Responsive Styles */
+@media screen and (max-width: 480px) {
+  .auth-modal-content {
+    width: 90%;
+    padding: 24px;
+  }
 }
 </style>
