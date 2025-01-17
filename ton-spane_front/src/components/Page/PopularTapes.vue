@@ -61,7 +61,7 @@
   
       const sortedPosts = computed(() => {
         return posts.value
-          .sort((a, b) => b.likes.length - a.likes.length)
+          .sort((a, b) => b.likesCount - a.likesCount)
           .slice(0, 10)
       })
   
