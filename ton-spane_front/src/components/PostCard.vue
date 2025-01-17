@@ -5,6 +5,8 @@ import TipsModal from './TipsModal.vue'
 import SubscriptionModal from '../components/Page/SubOnCardModal/SubCardModal.vue'
 import { useStore } from 'vuex'
 import { Lock, Share, Money, Comment } from '@element-plus/icons-vue'
+import AuthModal from './DontAuthModal.vue'
+
 
 const S3_BASE_URL = 'https://tonimages.s3.us-east-1.amazonaws.com/'
 
@@ -89,6 +91,9 @@ const showAllComments = ref(false)
 const newComment = ref('')
 const isSubmitting = ref(false)
 
+const authModalRef = ref(null)
+
+
 // Watchers for syncing state
 watch(() => props.comments, (newComments) => {
   localComments.value = [...newComments]
@@ -172,13 +177,15 @@ const handleImageClick = () => {
 }
 
 const handleLike = async () => {
-  if (!isUserLoggedIn()) return
+  if (!isUserLoggedIn()) {
+    authModalRef.value.open()
+    return
+  }
 
   try {
     const endpoint = isLiked.value ? 'unlike' : 'like'
     const method = isLiked.value ? 'DELETE' : 'POST'
     
-    // Обновление состояния
     isLiked.value = !isLiked.value
     likesCount.value = isLiked.value ? likesCount.value + 1 : likesCount.value - 1
 
@@ -197,17 +204,15 @@ const handleLike = async () => {
       throw new Error('Failed to update like')
     }
 
-    // Сообщаем родителю о событии
     emit('updateLikesCount', likesCount.value)
     emit('like', isLiked.value)
   } catch (error) {
     console.error('Error updating like:', error)
-
-    // Откат изменений в случае ошибки
     isLiked.value = !isLiked.value
     likesCount.value = isLiked.value ? likesCount.value - 1 : likesCount.value + 1
   }
 }
+
 const checkSubscriptionStatus = async () => {
   if (!isUserLoggedIn()) return false
 
@@ -234,7 +239,10 @@ const checkSubscriptionStatus = async () => {
 }
 
 const handleSubscribe = async () => {
-  if (!isUserLoggedIn()) return
+  if (!isUserLoggedIn()) {
+    authModalRef.value.open()
+    return
+  }
 
   try {
     isSubscribed.value = !isSubscribed.value
@@ -333,6 +341,8 @@ const toggleComments = () => {
 <template>
   <ShareModal v-model:dialogVisible="isShareModalVisible" />
   <TipsModal v-model:dialogDonateVisible="isTipsModalVisible" />
+  <AuthModal ref="authModalRef" />
+
   <SubscriptionModal 
     ref="subscriptionModalRef"
     :userId="props.user.id"  

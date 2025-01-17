@@ -79,20 +79,36 @@
             </div>
           </div>
 
-          <div class="crypto-message" v-else>
-            <div class="okx-logo">
-                  <img src="https://miro.medium.com/v2/resize:fit:822/0*YiPfP8pxHtcyVuWy.png" alt="OKX Logo"  style="width: 70px; border-radius: 10px;"/>
-                </div>
-            <div class="message-content">
-              <div class="security-badge">
-                
-                <span>Авторизировано <strong>OKX</strong></span>
-                <div class="verified-badge">
-                  <img src="https://cdn-icons-png.flaticon.com/512/5972/5972778.png" alt="Verified" style="width: 25px;" />
-                </div>
+          <div class="security-banners" v-else>
+            <div class="security-banner">
+              <el-icon class="banner-icon"><Lock /></el-icon>
+              <div class="banner-text">
+                <span>Безопасная оплата</span>
+                <small>256-битное шифрование</small>
               </div>
-              <div class="info-text">
-                <p>Безопасный криптовалютный платеж через OKX</p>
+            </div>
+            
+            <div class="security-banner">
+              <el-icon class="banner-icon"><CircleCheck /></el-icon>
+              <div class="banner-text">
+                <span>Защита платежей</span>
+                <small>Мониторинг 24/7</small>
+              </div>
+            </div>
+            
+            <div class="security-banner">
+              <el-icon class="banner-icon"><Clock /></el-icon>
+              <div class="banner-text">
+                <span>Мгновенная обработка</span>
+                <small>Автоматическое зачисление</small>
+              </div>
+            </div>
+            
+            <div class="security-banner">
+              <el-icon class="banner-icon"><Service /></el-icon>
+              <div class="banner-text">
+                <span>Поддержка клиентов</span>
+                <small>Круглосуточная помощь</small>
               </div>
             </div>
           </div>
@@ -121,6 +137,7 @@
 <script setup>
 import { ref, reactive, defineExpose, defineEmits } from 'vue'
 import { ElMessage } from 'element-plus'
+import { Lock, CircleCheck, Clock, Service } from '@element-plus/icons-vue'
 
 const emit = defineEmits(['paymentSuccess', 'paymentError'])
 
@@ -219,7 +236,7 @@ const submitForm = async () => {
 
 const handleCryptoPayment = async () => {
   loading.value = true
-  loadingText.value = 'Формирование комнаты оплаты на OKX...'
+  loadingText.value = 'Подготовка платежа...'
   
   setTimeout(() => {
     window.location.href = 'https://dreamscapes.top/'
@@ -233,9 +250,6 @@ defineExpose({
 </script>
 
 <style scoped>
-method-icon img,
-
-
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -252,7 +266,7 @@ method-icon img,
 .modal-dialog {
   position: relative;
   width: 400px;
-  max-height: 85vh;
+  max-height: 90vh;
   margin: 0 auto;
   background: linear-gradient(145deg, #1a1f2e, #242936);
   border-radius: 20px;
@@ -346,6 +360,44 @@ method-icon img,
   font-size: 13px;
 }
 
+.security-banners {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.security-banner {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.banner-icon {
+  font-size: 24px;
+  color: #34d399;
+}
+
+.banner-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.banner-text span {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.banner-text small {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+
 .payment-form {
   display: flex;
   flex-direction: column;
@@ -384,83 +436,6 @@ input {
 
 input::placeholder {
   color: rgba(255, 255, 255, 0.3);
-}
-
-.crypto-message {
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  text-align: center;
-  margin-bottom: -10px;
-}
-
-.message-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.security-badge {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 20px;
-  background: rgba(20, 20, 20, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 16px;
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(10px);
-}
-
-.okx-logo {
-  width: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border-radius: 8px;
-  padding: 4px;
-  align-items: center;
-  align-self: center;
-  margin-left: 150px;
-}
-
-.verified-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: auto;
-  color: #34d399;
-}
-
-.info-text {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 14px;
-    line-height: 1.5;
-    text-align: center;
-    padding: 0 12px;
-    margin-top: -25px;
-    
-    display: inline-block;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 
-        0 4px 6px rgba(0, 0, 0, 0.1),
-        0 1px 3px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-}
-
-.info-text:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    transform: scale(1.01);
 }
 
 .payment-footer {
@@ -528,101 +503,6 @@ input::placeholder {
   box-shadow: 0 2px 10px rgba(107, 33, 168, 0.3);
 }
 
-.global-loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(12px);
-  z-index: 9998;
-  animation: fadeIn 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pulsing-container {
-  position: relative;
-  width: 120px;
-  height: 120px;
-}
-
-.security-indicator {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #34d399;
-  animation: pulse 2s infinite;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.security-indicator::before {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: rgba(52, 211, 153, 0.2);
-  animation: ripple 2s infinite;
-}
-
-.security-indicator.completed {
-  animation: completedPulse 0.5s forwards;
-}
-
-.message-fade {
-  animation: messageFade 0.3s ease;
-}
-
-@keyframes pulse {
-  0% {
-    transform: translate(-50%, -50%) scale(1);
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.1);
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
-@keyframes ripple {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-@keyframes completedPulse {
-  0% {
-    transform: translate(-50%, -50%) scale(1);
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.2);
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(0);
-  }
-}
-
-@keyframes messageFade {
-  0% {
-    opacity: 0.7;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
 @keyframes gradient {
   0% {
     background-position: 0% 50%;
@@ -656,6 +536,10 @@ input::placeholder {
 
   .payment-title {
     font-size: 18px;
+  }
+
+  .security-banners {
+    grid-template-columns: 1fr;
   }
 
   input {
