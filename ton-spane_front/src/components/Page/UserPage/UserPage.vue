@@ -201,8 +201,8 @@ const handlePostUpdate = async () => {
     }
     
     // Обновляем количество лайков
-    userLikes.value = postsData.reduce((total, post) => total + (post.likes?.length || 0), 0)
-    
+    userLikes.value = postsData.reduce((total, post) => total + (post.likesCount || 0), 0)
+
   } catch (error) {
     console.error('Error updating posts:', error)
     ElMessage.error('Ошибка при обновлении постов')
@@ -539,9 +539,8 @@ const initializeUserData = async () => {
     };
 
     // Рассчитываем общее количество лайков из всех постов
-    userLikes.value = postsData.reduce((total, post) => {
-      return total + (Array.isArray(post.likes) ? post.likes.length : 0);
-    }, 0);
+    userLikes.value = postsData.reduce((total, post) => total + (post.likesCount || 0), 0)
+
     
     isLoaded.value = true;
   } catch (error) {
