@@ -72,13 +72,13 @@ const routes = [
         path: 'userSubscribeDonate/:id',
         component: () => import('./components/Page/UserSubsribeModal/UserSubscribe.vue'),
         name: 'userSubscribe',
-        meta: { requiresAuth: true }
+        meta: { publicAccess: true } // Публичный маршрут для поиска
       },
       {
         path: 'userSubscribeDonateYear/:id',
         component: () => import('./components/Page/UserYearSubPage/YearSubPage.vue'),
         name: 'userSubscribeYear',
-        meta: { requiresAuth: true }
+        meta: { publicAccess: true } // Публичный маршрут для поиска
       },
       {
         path: 'myPage/:id',
