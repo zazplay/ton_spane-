@@ -267,11 +267,27 @@ defineExpose({
   position: relative;
   width: 400px;
   max-height: 90vh;
-  margin: 0 auto;
+  margin: 20px auto;
   background: linear-gradient(145deg, #1a1f2e, #242936);
   border-radius: 20px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.modal-dialog::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-dialog::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-dialog::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
 }
 
 .close-button {
@@ -294,11 +310,15 @@ defineExpose({
 
 .payment-container {
   padding: 24px;
+  min-height: min-content;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .payment-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .payment-title {
@@ -318,7 +338,7 @@ defineExpose({
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .payment-method-item {
@@ -330,6 +350,7 @@ defineExpose({
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .payment-method-item.active {
@@ -363,18 +384,18 @@ defineExpose({
 .security-banners {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin: 20px 0;
+  gap: 10px;
+  margin: 0px 0;
 }
 
 .security-banner {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 10px;
+  padding: 10px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .banner-icon {
@@ -389,13 +410,13 @@ defineExpose({
 
 .banner-text span {
   color: #fff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
 }
 
 .banner-text small {
   color: rgba(255, 255, 255, 0.5);
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .payment-form {
@@ -439,7 +460,7 @@ input::placeholder {
 }
 
 .payment-footer {
-  margin-top: 24px;
+  margin-top: 16px;
   display: flex;
   gap: 12px;
 }
@@ -453,6 +474,7 @@ input::placeholder {
   flex: 1;
   border: none;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .cancel-btn {
@@ -460,10 +482,19 @@ input::placeholder {
   color: #fff;
 }
 
+.cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
 .pay-btn {
   background: linear-gradient(135deg, #34d399 0%, #059669 100%);
   color: #fff;
   box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
+}
+
+.pay-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(52, 211, 153, 0.4);
 }
 
 .crypto-pay-btn {
@@ -524,14 +555,16 @@ input::placeholder {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 480px), (max-height: 700px) {
   .modal-dialog {
     width: 90%;
-    max-height: 80vh;
+    max-height: 90vh;
+    margin: 10px auto;
   }
-
+  
   .payment-container {
-    padding: 20px;
+    padding: 16px;
+    gap: 16px;
   }
 
   .payment-title {
@@ -539,7 +572,9 @@ input::placeholder {
   }
 
   .security-banners {
-    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: -20px;
+    margin-bottom: -20px;
   }
 
   input {
@@ -556,6 +591,18 @@ input::placeholder {
   .crypto-pay-btn {
     height: 44px;
     font-size: 14px;
+  }
+
+  .security-banner {
+    padding: 10px;
+  }
+
+  .banner-text span {
+    font-size: 12px;
+  }
+
+  .banner-text small {
+    font-size: 10px;
   }
 }
 </style>
