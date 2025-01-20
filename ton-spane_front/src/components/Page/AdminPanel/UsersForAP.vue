@@ -3,7 +3,7 @@
     <!-- Панель управления пользователями -->
     <div class="control-panel">
       <div class="control-panel__left">
-        <el-button type="primary" @click="dialogVisible = true">
+        <el-button type="primary" @click="showUserModal">
           Добавить профиль
         </el-button>
         <el-input
@@ -88,62 +88,11 @@
       </el-skeleton>
     </el-space>
 
-    <!-- Диалог добавления пользователя -->
-    <el-dialog
-  v-model="dialogVisible"
-  title="Добавить профиль"
-  width="500px"
-  destroy-on-close
->
-  <el-form 
-    ref="formRef"
-    :model="newUser"
-    :rules="validationRules"
-    label-position="top"
-  >
-    <el-form-item label="Имя" prop="username">
-      <el-input
-        v-model="newUser.username"
-        @input="validateUsername"
-        placeholder="Введите имя профиля"
-      />
-      <span v-if="errors.username" class="error-message">
-        {{ errors.username }}
-      </span>
-    </el-form-item>
-
-    <el-form-item label="Email" prop="email">
-      <el-input
-        v-model="newUser.email"
-        type="email"
-        placeholder="Введите email"
-        @input="validateEmail"
-      />
-      <span v-if="errors.email" class="error-message">
-        {{ errors.email }}
-      </span>
-    </el-form-item>
-
-    <el-form-item label="Пароль" prop="password">
-      <el-input
-        v-model="newUser.password"
-        type="password"
-        placeholder="Введите пароль"
-        show-password
-        @input="validatePassword"
-      />
-      <span v-if="errors.password" class="error-message">
-        {{ errors.password }}
-      </span>
-    </el-form-item>
-  </el-form>
-  <template #footer>
-    <div class="dialog-footer">
-      <el-button @click="dialogVisible = false">Отмена</el-button>
-      <el-button type="primary" @click="saveUser" :disabled="!isFormValid">Сохранить</el-button>
-    </div>
-  </template>
-</el-dialog>
+    <!-- UserCreateModal component -->
+    <UserCreateModal
+      v-model:visible="isUserModalVisible"
+      @user-created="handleUserCreated"
+    />
 
     <!-- Диалог подтверждения удаления -->
     <el-dialog
@@ -169,24 +118,23 @@ import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import axios from 'axios'
 import config from '@/config'
-import { validateInputToScript, removeTagsOperators, validateLogin } from "../../Validation"
+import UserCreateModal from './AddUserFormModal.vue'
 
 // Определяем emit
 const emit = defineEmits(['select-user'])
 
 // Константы
-const defaultUserImg = "https://img.icons8.com/?size=100&id=83151&format=png&color=22C3E6" // или другой надежный URL
+const defaultUserImg = "https://img.icons8.com/?size=100&id=83151&format=png&color=22C3E6"
 const API_URL = `${config.API_BASE_URL}/users`
 
 // Состояние компонента
-const formRef = ref(null)
 const scrollContainer = ref(null)
 const loading = ref(true)
 const users = ref([])
 const searchQuery = ref('')
 const selectedUsers = ref([])
-const dialogVisible = ref(false)
 const deleteDialogVisible = ref(false)
+const isUserModalVisible = ref(false)
 const dragState = ref({ isDragging: false, startX: 0, scrollLeft: 0 })
 
 // Вычисляемые свойства
@@ -197,45 +145,6 @@ const filteredUsers = computed(() => {
   )
 })
 
-// Состояния
-const newUser = ref({
-  username: '',
-  email: '',
-  password: ''
-})
-
-const errors = ref({
-  username: '',
-  email: '',
-  password: ''
-})
-
-// Валидация email
-const validateEmail = () => {
-  errors.value.email = ''
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-  if (!emailRegex.test(newUser.value.email)) {
-    errors.value.email = 'Введите корректный email'
-  }
-}
-
-// Валидация пароля
-const validatePassword = () => {
-  errors.value.password = ''
-  if (newUser.value.password.length < 6) {
-    errors.value.password = 'Пароль должен быть не менее 6 символов'
-  }
-}
-
-// Проверка валидности формы
-const isFormValid = computed(() => {
-  return !errors.value.username && 
-         !errors.value.email && 
-         !errors.value.password &&
-         newUser.value.username &&
-         newUser.value.email &&
-         newUser.value.password
-})
 // Методы для работы с API
 const fetchUsers = async () => {
   try {
@@ -246,48 +155,6 @@ const fetchUsers = async () => {
     console.error('Error fetching users:', error)
   } finally {
     loading.value = false
-  }
-}
-
-const saveUser = async () => {
-  if (!formRef.value) return
-
-  try {
-    const valid = await formRef.value.validate()
-    if (!valid) return
-
-    // Отправляем только необходимые поля в нужном формате
-    const userData = {
-      username: newUser.value.username,
-      email: newUser.value.email,
-      password: newUser.value.password
-    }
-
-    console.log('Sending user data:', userData)
-
-    await axios.post(API_URL, userData)
-    
-    ElMessage.success('Профиль успешно добавлен')
-    dialogVisible.value = false
-    
-    // Очищаем форму
-    newUser.value = { 
-      username: '',
-      email: '',
-      password: '',
-      description: ''
-    }
-    
-    await fetchUsers()
-  } catch (error) {
-    console.error('Full error:', error)
-    console.error('Response data:', error.response?.data)
-    
-    if (error.response?.status === 500) {
-      ElMessage.error('Ошибка сервера при сохранении профиля. Проверьте правильность данных')
-    } else {
-      ElMessage.error('Ошибка при сохранении профиля')
-    }
   }
 }
 
@@ -325,21 +192,13 @@ const handleUserSelection = (checked, id) => {
   }
 }
 
-const validateUsername = () => {
-  errors.value.username = ''
-  const lengthLogin = validateLogin(newUser.value.username)
-  if (!lengthLogin.executionResult) {
-    errors.value.username = lengthLogin.messange
-  }
-  
-  const result = validateInputToScript(newUser.value.username)
-  if (!result.executionResult) {
-    errors.value.username = result.messange
-    newUser.value.username = removeTagsOperators(newUser.value.username)
-  }
+const showUserModal = () => {
+  isUserModalVisible.value = true
 }
 
-
+const handleUserCreated = async () => {
+  await fetchUsers()
+}
 
 // Обработчики drag-scroll
 const startDrag = (event) => {
@@ -371,7 +230,6 @@ onMounted(() => {
   fetchUsers()
 })
 </script>
-
 
 <style scoped>
 .profiles-container {
@@ -443,12 +301,6 @@ onMounted(() => {
   position: absolute;
   bottom: 5px;
   left: 5px;
-}
-
-.error-message {
-  color: #f56c6c;
-  font-size: 12px;
-  margin-top: 4px;
 }
 
 .user-grid::-webkit-scrollbar {

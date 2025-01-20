@@ -1,30 +1,70 @@
 <template>
-    <h1 class="title">Регистрация</h1>
-    <form @submit.prevent="submitRegistrationForm" class="auth-form">
-        <div class="form-item">
-            <label for="email" class="label-style">Эл. почта</label>
-            <input v-model="form.email" type="email" id="email" placeholder="example@email.com" required />
-            <p v-if="errors.email" class="error-text">{{ errors.email }}</p>
-        </div>
+  <h1 class="title">Регистрация</h1>
+  <form @submit.prevent="submitRegistrationForm" class="auth-form">
+      <div class="form-item">
+          <label for="email" class="label-style">Эл. почта*</label>
+          <input v-model="form.email" type="email" id="email" placeholder="example@email.com" required />
+          <p v-if="errors.email" class="error-text">{{ errors.email }}</p>
+      </div>
 
-        <div class="form-item">
-            <label for="password" class="label-style">Пароль</label>
-            <input v-model="form.password" type="password" id="password" placeholder="Введите пароль" required />
-            <p v-if="errors.password" class="error-text">{{ errors.password }}</p>
-        </div>
+      <div class="form-item">
+          <label for="username" class="label-style">Имя пользователя</label>
+          <input v-model="form.username" type="text" id="username" placeholder="Введите имя пользователя" />
+          <p v-if="errors.username" class="error-text">{{ errors.username }}</p>
+      </div>
 
-        <div class="form-item">
-            <label for="confirmPassword" class="label-style">Повторите пароль</label>
-            <input v-model="form.confirmPassword" type="password" id="confirmPassword" placeholder="Повторите пароль"
-                required />
-            <p v-if="errors.confirmPassword" class="error-text">{{ errors.confirmPassword }}</p>
-        </div>
+      <div class="form-item">
+          <label for="password" class="label-style">Пароль*</label>
+          <div class="password-wrapper">
+              <input 
+                  v-model="form.password" 
+                  :type="showPassword ? 'text' : 'password'" 
+                  id="password" 
+                  placeholder="Введите пароль" 
+                  required 
+              />
+              <button 
+                  type="button" 
+                  class="toggle-password" 
+                  @click="showPassword = !showPassword"
+              >
+                  <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+          </div>
+          <p v-if="errors.password" class="error-text">{{ errors.password }}</p>
+          <ul class="password-requirements" v-show="form.password">
+              <li :class="{ 'requirement-met': passwordLength }">Минимум 6 символов</li>
+              <li :class="{ 'requirement-met': hasUpperCase }">Минимум 1 заглавная буква</li>
+              <li :class="{ 'requirement-met': hasNumber }">Минимум 1 цифра</li>
+          </ul>
+      </div>
 
-        <div class="form-actions">
-            <button class="red-btn" type="button" @click="resetForm">Очистить</button>
-            <button type="submit" class="submit-btn blue-btn">Зарегистрироваться</button>
-        </div>
-    </form>
+      <div class="form-item">
+          <label for="confirmPassword" class="label-style">Повторите пароль*</label>
+          <div class="password-wrapper">
+              <input 
+                  v-model="form.confirmPassword" 
+                  :type="showConfirmPassword ? 'text' : 'password'" 
+                  id="confirmPassword" 
+                  placeholder="Повторите пароль"
+                  required 
+              />
+              <button 
+                  type="button" 
+                  class="toggle-password" 
+                  @click="showConfirmPassword = !showConfirmPassword"
+              >
+                  <i :class="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+          </div>
+          <p v-if="errors.confirmPassword" class="error-text">{{ errors.confirmPassword }}</p>
+      </div>
+
+      <div class="form-actions">
+          <button class="red-btn" type="button" @click="resetForm">Очистить</button>
+          <button type="submit" class="submit-btn blue-btn">Зарегистрироваться</button>
+      </div>
+  </form>
 </template>
 
 <script>
@@ -32,80 +72,122 @@ import axios from 'axios';
 import config from '@/config';
 
 export default {
-    name: "RegisterForm",
-    data() {
-        return {
-            form: {
-                email: "",
-                password: "",
-                confirmPassword: "",
-            },
-            errors: {},
-        };
-    },
-    methods: {
-        validateForm() {
-            const errors = {};
-            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  name: "RegisterForm",
+  data() {
+      return {
+          form: {
+              email: "",
+              username: "",
+              password: "",
+              confirmPassword: "",
+          },
+          errors: {},
+          showPassword: false,
+          showConfirmPassword: false
+      };
+  },
+  computed: {
+      passwordLength() {
+          return this.form.password.length >= 6;
+      },
+      hasUpperCase() {
+          return /[A-Z]/.test(this.form.password);
+      },
+      hasNumber() {
+          return /\d/.test(this.form.password);
+      }
+  },
+  methods: {
+      validateForm() {
+          const errors = {};
+          const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-            if (!this.form.email) {
-                errors.email = "Пожалуйста, введите email";
-            } else if (!emailPattern.test(this.form.email)) {
-                errors.email = "Введите корректный email";
-            }
+          if (!this.form.email) {
+              errors.email = "Пожалуйста, введите email";
+          } else if (!emailPattern.test(this.form.email)) {
+              errors.email = "Введите корректный email";
+          }
 
-            if (!this.form.password) {
-                errors.password = "Пожалуйста, введите пароль";
-            } else if (this.form.password.length < 6) {
-                errors.password = "Пароль должен быть не менее 6 символов";
-            }
+          if (this.form.username && this.form.username.length < 2) {
+              errors.username = "Имя пользователя должно содержать минимум 2 символа";
+          }
 
-            if (this.form.password !== this.form.confirmPassword) {
-                errors.confirmPassword = "Пароли не совпадают";
-            }
+          if (!this.form.password) {
+              errors.password = "Пожалуйста, введите пароль";
+          } else {
+              if (!this.passwordLength) {
+                  errors.password = "Пароль должен быть не менее 6 символов";
+              }
+              if (!this.hasUpperCase) {
+                  errors.password = (errors.password || "") + "\nПароль должен содержать хотя бы одну заглавную букву";
+              }
+              if (!this.hasNumber) {
+                  errors.password = (errors.password || "") + "\nПароль должен содержать хотя бы одну цифру";
+              }
+          }
 
-            this.errors = errors;
-            return Object.keys(errors).length === 0;
-        },
-        async submitRegistrationForm() {
-            if (this.validateForm()) {
-                try {
-                    // URL вашего API для авторизации
-                    const apiUrl = `${config.API_BASE_URL}/auth/register/`;
+          if (this.form.password !== this.form.confirmPassword) {
+              errors.confirmPassword = "Пароли не совпадают";
+          }
 
-                    // Данные для отправки
-                    const payload = {
-                        email: this.form.email,
-                        password: this.form.password,
-                    };
+          this.errors = errors;
+          return Object.keys(errors).length === 0;
+      },
+      async submitRegistrationForm() {
+          if (this.validateForm()) {
+              try {
+                  const apiUrl = `${config.API_BASE_URL}/users/`;
+                  
+                  const payload = {
+                      email: this.form.email,
+                      password: this.form.password,
+                      username: this.form.username || undefined
+                  };
 
-                    console.log("payload", payload);
-                    // Отправка запроса
-                    const response = await axios.post(apiUrl, payload);
+                  const response = await axios.post(apiUrl, payload);
 
-                    // Обработка ответа
-                    console.log("Успешная регистрация:", response);
-
-                    if (response.status === 201) {
-                        alert("Регистрация выполнена успешно!");
-                        window.location.href = "/auth";
-                    }
-                   
-                } catch (error) {
-                    console.error("Ошибка при регистрации:", error);
-                    alert("Не удалось выполнить регистрацию. Проверьте данные и попробуйте снова.");
-                }
-            } else {
-                console.log("Ошибка валидации формы!");
-            }
-        },
-        resetForm() {
-            this.form.email = "";
-            this.form.password = "";
-            this.form.confirmPassword = "";
-            this.errors = {};
-        },
-    },
+                  if (response.status === 201) {
+                      this.$router.push({
+                          path: '/auth',
+                          query: { 
+                              message: 'Регистрация успешна! Пожалуйста, войдите в систему.',
+                              type: 'success'
+                          }
+                      });
+                  }
+              } catch (error) {
+                  if (error.response) {
+                      switch (error.response.status) {
+                          case 409:
+                              if (error.response.data.message.includes('email')) {
+                                  this.errors.email = "Этот email уже зарегистрирован";
+                              }
+                              if (error.response.data.message.includes('username')) {
+                                  this.errors.username = "Это имя пользователя уже занято";
+                              }
+                              break;
+                          case 400:
+                              this.errors.password = error.response.data.message;
+                              break;
+                          default:
+                              alert("Произошла ошибка при регистрации. Попробуйте позже.");
+                      }
+                  } else {
+                      alert("Ошибка соединения с сервером. Проверьте подключение к интернету.");
+                  }
+              }
+          }
+      },
+      resetForm() {
+          this.form.email = "";
+          this.form.username = "";
+          this.form.password = "";
+          this.form.confirmPassword = "";
+          this.errors = {};
+          this.showPassword = false;
+          this.showConfirmPassword = false;
+      },
+  },
 };
 </script>
 

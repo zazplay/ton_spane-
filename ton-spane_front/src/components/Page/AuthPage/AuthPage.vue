@@ -90,14 +90,6 @@
             <!-- Кнопки действий -->
             <div class="form-actions">
               <button 
-                class="red-btn" 
-                type="button" 
-                @click="resetForm" 
-                :disabled="isLoading"
-              >
-                Очистить
-              </button>
-              <button 
                 type="submit" 
                 class="submit-btn blue-btn" 
                 :disabled="isLoading"
@@ -107,6 +99,15 @@
                   <div class="spinner"></div>
                 </div>
               </button>
+              <button 
+                class="red-btn" 
+                type="button" 
+                @click="resetForm" 
+                :disabled="isLoading"
+              >
+                Очистить
+              </button>
+              
             </div>
 
             <div class="guest-section">
@@ -420,7 +421,7 @@ html:not(.dark) .guest-btn:hover {
 .background-overlay {
   position: absolute;
   top: 50%;
-  left: 50%;
+  left: 50%; 
   width: 100%;
   height: 100%;
   transform: translate(-50%, -50%) scale(1.1);
@@ -448,7 +449,8 @@ html:not(.dark) .guest-btn:hover {
   max-width: 400px;
   display: flex;
   flex-direction: column;
-  margin-top: -80px;
+  padding-top: 20px; /* Добавляем padding вместо отрицательного margin */
+  margin: 0 auto; /* Центрируем контейнер */
 }
 
 /* Обновленные стили для формы */
@@ -507,9 +509,10 @@ html.dark .form-item input:focus {
 .logo-container {
   display: flex;
   align-items: center;
+  justify-content: center; /* Центрируем логотип */
   font-family: 'Comfortaa', cursive;
-  padding: 10px;
   border-radius: 10px;
+  margin-bottom: 20px; /* Добавляем отступ снизу */
 }
 
 /* Dark theme logo */
