@@ -107,25 +107,24 @@
               >
                 Очистить
               </button>
-              
             </div>
 
             <div class="guest-section">
-    <div class="separator">
-      <span>или</span>
-    </div>
-    <button 
-      @click="guestEntry" 
-      class="guest-btn"
-      type="button"
-    >
-      Войти как гость
-    </button>
-  </div>
+              <div class="separator">
+                <span>или</span>
+              </div>
+              <button 
+                @click="guestEntry" 
+                class="guest-btn"
+                type="button"
+              >
+                Войти как гость
+              </button>
+            </div>
           </form>
         </div>
         <div v-else>
-          <RegisterForm />
+          <RegisterForm @registration-success="onRegistrationSuccess" />
         </div>
       </div>
     </div>
@@ -136,6 +135,7 @@
 import axios from "axios";
 import config from "@/config";
 import RegisterForm from "./RegisterForm.vue";
+import { ElNotification } from 'element-plus'
 
 export default {
   name: "AuthPage",
@@ -161,36 +161,43 @@ export default {
     };
   },
   methods: {
-    validateForm() {
-      const errors = {};
-      
-      if (this.loginMethod === 'email') {
-        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!this.ruleForm.email) {
-          errors.email = "Пожалуйста, введите email";
-        } else if (!emailPattern.test(this.ruleForm.email)) {
-          errors.email = "Пожалуйста, введите корректный email";
-        }
-      } else {
-        if (!this.ruleForm.username) {
-          errors.username = "Пожалуйста, введите никнейм";
-        }
-      }
-
-      const { pass } = this.ruleForm;
-      if (!pass) {
-        errors.pass = "Пожалуйста, введите пароль";
-      } else if (pass.length < 6) {
-        errors.pass = "Пароль должен быть не менее 6 символов";
-      } else if (!/[A-Z]/.test(pass)) {
-        errors.pass = "Пароль должен содержать хотя бы одну заглавную букву";
-      } else if (!/[0-9]/.test(pass)) {
-        errors.pass = "Пароль должен содержать хотя бы одну цифру";
-      }
-
-      this.errors = errors;
-      return Object.keys(errors).length === 0;
+    onRegistrationSuccess() {
+      this.showLogin = true;
     },
+    validateForm() {
+  const errors = {};
+  
+  if (this.loginMethod === 'email') {
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!this.ruleForm.email) {
+      errors.email = "Пожалуйста, введите email";
+    } else if (!emailPattern.test(this.ruleForm.email)) {
+      errors.email = "Пожалуйста, введите корректный email";
+    }
+  } else {
+    // Валидация никнейма
+    const usernamePattern = /^[a-zA-Z0-9_]{2,20}$/;
+    if (!this.ruleForm.username) {
+      errors.username = "Пожалуйста, введите никнейм";
+    } else if (!usernamePattern.test(this.ruleForm.username)) {
+      errors.username = "Никнейм должен содержать от 2 до 20 символов (только буквы, цифры и '_')";
+    }
+  }
+
+  const { pass } = this.ruleForm;
+  if (!pass) {
+    errors.pass = "Пожалуйста, введите пароль";
+  } else if (pass.length < 6) {
+    errors.pass = "Пароль должен быть не менее 6 символов";
+  } else if (!/[A-Z]/.test(pass)) {
+    errors.pass = "Пароль должен содержать хотя бы одну заглавную букву";
+  } else if (!/[0-9]/.test(pass)) {
+    errors.pass = "Пароль должен содержать хотя бы одну цифру";
+  }
+
+  this.errors = errors;
+  return Object.keys(errors).length === 0;
+},
 
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
@@ -202,15 +209,13 @@ export default {
         try {
           const apiUrl = `${config.API_BASE_URL}/auth/login/`;
           const payload = {
-            // Используем email как поле для обоих случаев
             email: this.loginMethod === 'email' ? this.ruleForm.email : this.ruleForm.username,
             password: this.ruleForm.pass,
           };
 
           if(this.loginMethod === 'email'){
             sessionStorage.setItem("userType", "user");
-          }
-          else{
+          } else {
             sessionStorage.setItem("userType", "model");
           }
 
@@ -221,18 +226,71 @@ export default {
             sessionStorage.setItem("refreshToken", response.data.refreshToken);
             this.$store.dispatch('initializeSub', response.data.accessToken);
             
+            ElNotification({
+              title: 'Успешно',
+              message: 'Вход выполнен успешно!',
+              type: 'success',
+              duration: 3000
+            });
+
             setTimeout(() => {
               this.isLoading = false;
               window.location.href = "/app/tape";
             }, 500);
           }
         } catch (error) {
-          console.error("Ошибка при входе:", error);
           this.isLoading = false;
-          alert("Не удалось выполнить вход. Проверьте данные и попробуйте снова.");
+          
+          if (error.response) {
+            switch (error.response.status) {
+              case 401:
+                ElNotification({
+                  title: 'Ошибка',
+                  message: 'Неверный логин или пароль',
+                  type: 'error',
+                  duration: 5000
+                });
+                break;
+              case 404:
+                ElNotification({
+                  title: 'Ошибка',
+                  message: 'Пользователь не найден',
+                  type: 'error',
+                  duration: 5000
+                });
+                break;
+              case 429:
+                ElNotification({
+                  title: 'Ошибка',
+                  message: 'Слишком много попыток входа. Пожалуйста, подождите немного',
+                  type: 'warning',
+                  duration: 5000
+                });
+                break;
+              default:
+                ElNotification({
+                  title: 'Ошибка',
+                  message: 'Произошла ошибка при входе. Попробуйте позже',
+                  type: 'error',
+                  duration: 5000
+                });
+            }
+          } else {
+            ElNotification({
+              title: 'Ошибка соединения',
+              message: 'Проверьте подключение к интернету',
+              type: 'error',
+              duration: 5000
+            });
+          }
         }
       } else {
-        console.log("Ошибка валидации формы!");
+        ElNotification({
+          title: 'Внимание',
+          message: 'Пожалуйста, исправьте ошибки в форме',
+          type: 'warning',
+          duration: 4000
+        });
       }
     },
 
@@ -242,11 +300,12 @@ export default {
       this.ruleForm.pass = "";
       this.errors = {};
     },
+
     guestEntry() {
-    sessionStorage.removeItem("authToken");
-    sessionStorage.removeItem("userType");
-    window.location.href = "/app/tape";
-  }
+      sessionStorage.removeItem("authToken");
+      sessionStorage.removeItem("userType");
+      window.location.href = "/app/tape";
+    }
   },
   
   watch: {

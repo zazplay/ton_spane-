@@ -70,6 +70,7 @@
 <script>
 import axios from 'axios';
 import config from '@/config';
+import { ElNotification } from 'element-plus';
 
 export default {
   name: "RegisterForm",
@@ -98,6 +99,15 @@ export default {
       }
   },
   methods: {
+      showNotification(type, message, title = '') {
+          ElNotification({
+              title: title,
+              message: message,
+              type: type,
+              duration: 4500,
+              position: 'top-right'
+          });
+      },
       validateForm() {
           const errors = {};
           const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -134,50 +144,75 @@ export default {
           return Object.keys(errors).length === 0;
       },
       async submitRegistrationForm() {
-          if (this.validateForm()) {
-              try {
-                  const apiUrl = `${config.API_BASE_URL}/users/`;
-                  
-                  const payload = {
-                      email: this.form.email,
-                      password: this.form.password,
-                      username: this.form.username || undefined
-                  };
+        if (this.validateForm()) {
+            try {
+                const apiUrl = `${config.API_BASE_URL}/users/`;
+                
+                const payload = {
+                    email: this.form.email.toLowerCase(), // Нормализуем email
+                    password: this.form.password,
+                    username: this.form.username || undefined
+                };
 
-                  const response = await axios.post(apiUrl, payload);
+                const response = await axios.post(apiUrl, payload);
 
-                  if (response.status === 201) {
-                      this.$router.push({
-                          path: '/auth',
-                          query: { 
-                              message: 'Регистрация успешна! Пожалуйста, войдите в систему.',
-                              type: 'success'
-                          }
-                      });
-                  }
-              } catch (error) {
-                  if (error.response) {
-                      switch (error.response.status) {
-                          case 409:
-                              if (error.response.data.message.includes('email')) {
-                                  this.errors.email = "Этот email уже зарегистрирован";
-                              }
-                              if (error.response.data.message.includes('username')) {
-                                  this.errors.username = "Это имя пользователя уже занято";
-                              }
-                              break;
-                          case 400:
-                              this.errors.password = error.response.data.message;
-                              break;
-                          default:
-                              alert("Произошла ошибка при регистрации. Попробуйте позже.");
-                      }
-                  } else {
-                      alert("Ошибка соединения с сервером. Проверьте подключение к интернету.");
-                  }
-              }
-          }
-      },
+                if (response.status === 201) {
+                    this.showNotification('success', 'Регистрация успешна! Пожалуйста, войдите в систему.');
+                    this.$emit('registration-success');
+                }
+            } catch (error) {
+                if (error.response) {
+                    switch (error.response.status) {
+                        case 409: {
+                            // Проверяем точное сообщение об ошибке
+                            const errorMessage = error.response.data.message;
+                            if (errorMessage.includes('Email')) {
+                                this.showNotification('error', 'Этот email уже зарегистрирован', 'Ошибка');
+                                this.errors.email = "Этот email уже зарегистрирован";
+                            } else if (errorMessage.includes('Username')) {
+                                this.showNotification('error', 'Это имя пользователя уже занято', 'Ошибка');
+                                this.errors.username = "Это имя пользователя уже занято";
+                            } else {
+                                // Общая ошибка конфликта
+                                this.showNotification('error', errorMessage, 'Ошибка');
+                            }
+                            break;
+                        }
+                        case 400: {
+                            this.showNotification('error', error.response.data.message, 'Ошибка валидации');
+                            if (error.response.data.message.includes('Password')) {
+                                this.errors.password = error.response.data.message;
+                            }
+                            break;
+                        }
+                        default: {
+                            this.showNotification(
+                                'error',
+                                'Произошла ошибка при регистрации. Попробуйте позже.',
+                                'Системная ошибка'
+                            );
+                        }
+                    }
+
+                    // Логируем ошибку для отладки
+                    console.error('Registration error:', {
+                        status: error.response.status,
+                        message: error.response.data.message,
+                        data: error.response.data
+                    });
+                } else {
+                    this.showNotification(
+                        'error',
+                        'Ошибка соединения с сервером. Проверьте подключение к интернету.',
+                        'Ошибка соединения'
+                    );
+                    console.error('Network error:', error);
+                }
+            }
+        } else {
+            this.showNotification('warning', 'Пожалуйста, исправьте ошибки в форме', 'Внимание');
+        }
+    },
       resetForm() {
           this.form.email = "";
           this.form.username = "";
@@ -186,6 +221,7 @@ export default {
           this.errors = {};
           this.showPassword = false;
           this.showConfirmPassword = false;
+          this.showNotification('info', 'Форма очищена', 'Информация');
       },
   },
 };
