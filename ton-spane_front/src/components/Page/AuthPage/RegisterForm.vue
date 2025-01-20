@@ -526,4 +526,54 @@ html:not(.dark) .form-item input:focus + label {
     font-size: 14px;
   }
 }
+
+
+.password-requirements {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.password-requirements li {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 5px;
+  position: relative;
+  padding-left: 25px;
+  transition: color 0.3s ease;
+}
+
+.password-requirements li::before {
+  content: '✖';
+  position: absolute;
+  left: 0;
+  color: #ef4444;
+  transition: color 0.3s ease;
+}
+
+.password-requirements li.requirement-met {
+  color: #10b981;
+}
+
+.password-requirements li.requirement-met::before {
+  content: '✓';
+  color: #10b981;
+}
+
+/* Dark theme adjustments */
+html.dark .password-requirements li {
+  color: #89a4d1;
+}
+
+html.dark .password-requirements li::before {
+  color: #ff4b6e;
+}
+
+html.dark .password-requirements li.requirement-met {
+  color: #2ecc71;
+}
+
+html.dark .password-requirements li.requirement-met::before {
+  color: #2ecc71;
+}
 </style>
