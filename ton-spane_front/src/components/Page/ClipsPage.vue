@@ -285,7 +285,6 @@ const handleUpload = async () => {
   }
 }
 
-// Оптимизированная загрузка видео
 const fetchVideos = async () => {
   try {
     isLoading.value = true
@@ -304,7 +303,6 @@ const fetchVideos = async () => {
     
     const data = await response.json()
     
-    // Преобразование URL для видео
     const processedData = data.map(video => ({
       ...video,
       videoUrl: video.videoUrl.startsWith('http') 
@@ -312,10 +310,8 @@ const fetchVideos = async () => {
         : `https://tonimages.s3.us-east-1.amazonaws.com/${video.videoUrl}`
     }))
     
-    // Очистка существующей очереди
     loadingQueue.value = []
     
-    // Обработка только первых 2 видео
     const initialVideos = await Promise.all(
       processedData.slice(0, 2).map(async (video) => {
         if (!videoBlobs.value[video.id]) {

@@ -7,9 +7,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import router from './route.js'
 import store from './store'
 
-// Функция для определения начальной темы
 function getInitialTheme() {
-  // Проверяем, есть ли сохраненная тема
   const savedTheme = localStorage.getItem('theme')
   if (savedTheme) {
     return savedTheme

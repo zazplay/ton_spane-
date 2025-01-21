@@ -58,6 +58,25 @@ const routes = [
         component: () => import('./components/Page/Chats/ChatsPage.vue'),
         meta: { requiresAuth: true }
       },
+      {
+        path: 'thanks-for-payment',
+        component: () => import('./components/Page/ThanksForPayment.vue'),
+        name: 'thanksForPayment',
+        meta: { 
+          publicAccess: true,
+          noBackNavigation: true
+        },
+        beforeEnter: ( from, next) => {
+          const hasVisited = sessionStorage.getItem('thanksPageVisited');
+          const isFromPayment = from.name === 'userSubscribe' || 
+                              from.name === 'userSubscribeYear';
+          if ((isFromPayment || !from.name) && !hasVisited) {
+            next();
+          } else {
+            next('/app/tape');
+          }
+        }
+      },
       { 
         path: 'purchased', 
         component: () => import('./components/Page/PurchasedPage.vue'),

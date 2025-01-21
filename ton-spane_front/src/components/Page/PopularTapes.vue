@@ -1,13 +1,11 @@
 <template>
     <div class="popular-page">
-      <!-- Фоновые анимации -->
-      <div class="animated-background">
+=      <div class="animated-background">
         <div class="gradient-sphere"></div>
         <div class="gradient-sphere sphere-2"></div>
         <div class="floating-particles"></div>
       </div>
   
-      <!-- Заголовок -->
       <header class="popular-header">
         <div class="glowing-border">
           <h1 class="gradient-text">Топ-10 постов</h1>
@@ -18,13 +16,11 @@
         </div>
       </header>
   
-      <!-- Состояние загрузки -->
       <div v-if="!isDataLoaded" class="loading">
         <div class="loading-pulse"></div>
         <span class="loading-text">Загружаем лучшие посты...</span>
       </div>
   
-      <!-- Пустое состояние -->
       <div v-else-if="sortedPosts.length === 0" class="empty-state">
         <div class="empty-content">
           <div class="empty-icon">✨</div>
@@ -33,7 +29,6 @@
         </div>
       </div>
   
-      <!-- Список постов -->
       <div v-else class="posts-container">
         <ListPostCards :posts="sortedPosts" />
       </div>
