@@ -52,7 +52,7 @@
   
 <script setup>
 import { ref, defineProps, defineExpose } from 'vue'
-import PaymentModal from '../PaymentPage/PaymantPage.vue'
+import PaymentModal from '../PaymentPage/PaymantModal.vue'
   
 // Импорт иконок
 import fireIcon from '@/assets/fire-svgrepo-com.svg?url'

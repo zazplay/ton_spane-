@@ -45,7 +45,7 @@ import { ArrowLeftBold } from '@element-plus/icons-vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
-import PaymentModal from '../PaymentPage/PaymantPage.vue'
+import PaymentModal from '../PaymentPage/PaymantModal.vue'
 
 // Импорт иконок
 import fireIcon from '@/assets/fire-svgrepo-com.svg?url'

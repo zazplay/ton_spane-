@@ -66,10 +66,11 @@ const routes = [
           publicAccess: true,
           noBackNavigation: true
         },
-        beforeEnter: ( from, next) => {
+        beforeEnter: (to, from, next) => {  // Добавил параметр to и next
           const hasVisited = sessionStorage.getItem('thanksPageVisited');
           const isFromPayment = from.name === 'userSubscribe' || 
-                              from.name === 'userSubscribeYear';
+                               from.name === 'userSubscribeYear';
+          
           if ((isFromPayment || !from.name) && !hasVisited) {
             next();
           } else {

@@ -78,7 +78,7 @@
 import { ref, reactive, computed, watch, onBeforeUnmount, defineProps, defineEmits } from 'vue'
 import { Close } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import PaymentModal from './Page/PaymentPage/PaymantPage.vue'
+import PaymentModal from './Page/PaymentPage/PaymantModal.vue'
 const props = defineProps({
   dialogDonateVisible: { type: Boolean, required: true },
   initialSum: { type: String, default: '5' },

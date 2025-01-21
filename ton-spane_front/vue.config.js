@@ -31,6 +31,14 @@ module.exports = defineConfig({
         pathname: '/ws',
         port: 8080,
       },
+      overlay: {
+        errors: true,
+        warnings: false,
+        runtimeErrors: (error) => {
+          if (error.message?.includes('ResizeObserver')) return false
+          return true
+        }
+      }
     },
     headers: {
       'Access-Control-Allow-Origin': '*',

@@ -1,4 +1,5 @@
 <!-- LayoutComponent.vue -->
+
 <template>
   <div class="layout-container">
     <!-- Fixed Navigation Menu -->
@@ -43,6 +44,8 @@ import UsersForAp from './UsersForAP.vue'
 import ModelsPage from './Models/ModelsPage.vue'
 import PostsAP from './PostsAPAll.vue'
 import Clips from './Models/ClipsForAP.vue'
+import PaymentsPage from './Payments/PaymentsPage.vue'
+
 
 const activeTab = ref('users')
 const selectedUser = ref(null)
@@ -51,7 +54,8 @@ const tabs = [
   { id: 'users', label: 'Пользователи', component: markRaw(UsersForAp) },
   { id: 'models', label: 'Модели', component: markRaw(ModelsPage) },
   { id: 'posts', label: 'Посты', component: markRaw(PostsAP) },
-  { id: 'clips', label: 'Клипы', component: markRaw(Clips) }
+  { id: 'clips', label: 'Клипы', component: markRaw(Clips) },
+  { id: 'payments', label: 'Платежи', component: markRaw(PaymentsPage) }
 ]
 
 const currentComponent = computed(() => {

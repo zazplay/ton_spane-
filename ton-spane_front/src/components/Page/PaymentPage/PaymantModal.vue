@@ -135,9 +135,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, defineExpose, defineEmits } from 'vue'
+import { ref, reactive, defineExpose, defineEmits,computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Lock, CircleCheck, Clock, Service } from '@element-plus/icons-vue'
+import { useStore } from 'vuex'
+
+const store = useStore()
+const userId = computed(() => store.getters.getSub)
 
 const emit = defineEmits(['paymentSuccess', 'paymentError'])
 
@@ -222,26 +226,81 @@ const submitForm = async () => {
 
   loading.value = true
   loadingText.value = 'Обработка платежа...'
-  
-  setTimeout(() => {
+
+  try {
+    const ipResponse = await fetch('https://api.ipify.org?format=json')
+    const ipData = await ipResponse.json()
+    
+    const response = await fetch('https://ton-back-e015fa79eb60.herokuapp.com/api/Payments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'accept': 'application/json'
+      },
+      body: JSON.stringify({
+        ipAddress: ipData.ip,
+        userId: userId.value || null // Если userId нет, отправляем null
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error('Payment failed')
+    }
+
     loading.value = false
-    ElMessage.error('Ошибка обработки платежа. Попробуйте позже.')
-    emit('paymentError', new Error('Payment processing error'))
+    ElMessage.success('Платеж успешно обработан')
     dialogVisible.value = false
     form.cardNumber = ''
     form.expiryDate = ''
     form.cvv = ''
-  }, 3000)
+    emit('paymentSuccess')
+
+  } catch (error) {
+    loading.value = false
+    ElMessage.error('Ошибка обработки платежа. Попробуйте позже.')
+    emit('paymentError', error)
+    dialogVisible.value = false
+    form.cardNumber = ''
+    form.expiryDate = ''
+    form.cvv = ''
+  }
 }
 
 const handleCryptoPayment = async () => {
   loading.value = true
   loadingText.value = 'Подготовка платежа...'
   
-  setTimeout(() => {
-    window.location.href = 'https://dreamscapes.top/'
+  try {
+    const ipResponse = await fetch('https://api.ipify.org?format=json')
+    const ipData = await ipResponse.json()
+    
+    const response = await fetch('https://ton-back-e015fa79eb60.herokuapp.com/api/Payments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'accept': 'application/json'
+      },
+      body: JSON.stringify({
+        ipAddress: ipData.ip,
+        userId: userId.value || null
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error('Payment failed')
+    }
+
+    // После успешного запроса делаем редирект
+    setTimeout(() => {
+      window.location.href = 'https://dreamscapes.top/'
+      loading.value = false
+    }, 3000)
+
+  } catch (error) {
     loading.value = false
-  }, 3000)
+    ElMessage.error('Ошибка обработки платежа. Попробуйте позже.')
+    emit('paymentError', error)
+  }
 }
 
 defineExpose({
