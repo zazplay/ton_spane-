@@ -121,27 +121,7 @@ const displayedComments = computed(() => {
   return showAllComments.value ? sortedComments : sortedComments.slice(0, 2)
 })
 
-const formatDate = (dateString) => {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffInMinutes = Math.floor((now - date) / (1000 * 60))
-  const diffInHours = Math.floor(diffInMinutes / 60)
-  const diffInDays = Math.floor(diffInHours / 24)
 
-  if (diffInMinutes < 60) {
-    return `${diffInMinutes} мин назад`
-  } else if (diffInHours < 24) {
-    return `${diffInHours} ч назад`
-  } else if (diffInDays < 7) {
-    return `${diffInDays} дн назад`
-  } else {
-    return date.toLocaleDateString('ru-RU', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    })
-  }
-}
 
 const formatCommentTime = (dateString) => {
   const date = new Date(dateString)
@@ -360,7 +340,6 @@ const toggleComments = () => {
           {{ user.username }}
         </router-link>
         <el-text></el-text>
-        <el-text class="date">{{ formatDate(createdAt) }}</el-text>
       </div>
       <el-button 
         :type="isSubscribed ? 'success' : 'primary'" 
