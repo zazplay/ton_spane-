@@ -10,14 +10,17 @@
           <div></div>
         </el-container>
       </el-header>
-
+      
       <el-main>
         <GoToProfile/>
         <ThemeSwitcher/>
-        <el-button class="languageButton">English</el-button>
+        <LanguageSwitcher />  <!-- Заменили кнопку на компонент -->
         <LogoutButton />
       </el-main>
     </el-container>
+    
+    <!-- Скрытый элемент для Google Translate -->
+    <div id="google_translate_element"></div>
   </div>
 </template>
 
@@ -25,13 +28,15 @@
 import GoToProfile from './GoToProfile.vue';
 import ThemeSwitcher from '../../../assets/ThemeSwitcher.vue';
 import LogoutButton from './LogoutButton.vue';
+import LanguageSwitcher from './LanguageSwitcher.vue';  // Импортируем новый компонент
 
 export default {
   name: 'MorePage',
   components: {
     GoToProfile,
     ThemeSwitcher,
-    LogoutButton
+    LogoutButton,
+    LanguageSwitcher  // Добавляем в components
   },
   methods: {
     goBack() {
@@ -40,31 +45,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.container-header {
-  display: flex;
-  justify-content: space-between;
-  color: white;
-  width: 100%;
-  margin-top: 1em;
-  font-size: x-large;
-}
-.languageButton{
-  margin-left: 37px;
-  width: 90%;
-  height: 50px;
-  font-size: 15px;
-  border-radius: 10px;
-  margin-top: 25px;
-  
-}
-
-
-@media (max-width: 580px) {
-    .languageButton {
-  margin-left: 10px !important;
-  width: 95%;
-}
-}
-</style>
