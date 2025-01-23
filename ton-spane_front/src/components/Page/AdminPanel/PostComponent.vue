@@ -1,15 +1,19 @@
 <script setup>
 import { computed, ref, onMounted, defineProps, defineEmits } from 'vue'
-import { Lock, Share, Money, Delete, ChatDotRound } from '@element-plus/icons-vue'
+import { Lock, Share, Money, Delete, ChatDotRound, CirclePlusFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 const emit = defineEmits(['likeUpdated'])
 const comments = ref([])
-const selectedComments = ref([])
 const isAdmin = ref(true)
-const commentText = ref('')
-const loading = ref(false)
 const isLiked = ref(false)
+
+// Состояние для модального окна фейковых комментариев
+const showFakeCommentsModal = ref(false)
+const fakeCommentsForm = ref({
+  count: 1
+})
+const isAddingFakeComments = ref(false)
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -98,41 +102,60 @@ const handleLike = async () => {
   }
 }
 
-const handleAddComment = async () => {
-  if (!commentText.value.trim()) return
+// Функция добавления фейковых комментариев
+const handleAddFakeComments = async () => {
+  if (fakeCommentsForm.value.count < 1 || fakeCommentsForm.value.count > 30) {
+    ElMessage.warning('Количество комментариев должно быть от 1 до 30');
+    return;
+  }
 
-  loading.value = true
+  isAddingFakeComments.value = true;
   try {
-    const response = await fetch(`${API_BASE}/comments/post/${props.id}`, {
+    // Получаем текущее значение count из формы
+    const count = parseInt(fakeCommentsForm.value.count);
+    const postId = props.id;
+
+    console.log('Sending request with:', { postId, count }); // Отладочный вывод
+
+    const response = await fetch(`${API_BASE}/comments/${postId}/fake`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'accept': 'application/json'
       },
       body: JSON.stringify({
-        postId: props.id,
-        content: commentText.value
+        count: count
       })
-    })
-    
-    if (response.ok) {
-      const newComment = await response.json()
-      comments.value = [newComment, ...comments.value]
-      commentText.value = ''
-      ElMessage.success('Комментарий добавлен')
+    });
+
+    console.log('Response status:', response.status); // Отладочный вывод
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Ошибка при добавлении комментариев');
     }
+
+    const result = await response.json();
+    await fetchComments();
+    showFakeCommentsModal.value = false;
+    
+    ElMessage({
+      message: `Успешно добавлено ${result.addedComments} комментариев`,
+      type: 'success'
+    });
+
   } catch (error) {
-    console.error('Error:', error)
-    ElMessage.error('Ошибка при добавлении комментария')
+    console.error('Error details:', error);
+    ElMessage.error(error.message || 'Ошибка при добавлении комментариев');
   } finally {
-    loading.value = false
+    isAddingFakeComments.value = false;
   }
-}
+};
 
 const handleDeleteComment = async (commentId) => {
   try {
     comments.value = comments.value.filter(c => c.id !== commentId)
-    selectedComments.value = selectedComments.value.filter(id => id !== commentId)
 
     const response = await fetch(`${API_BASE}/comments/admin/one`, {
       method: 'DELETE',
@@ -253,72 +276,132 @@ const fetchComments = async () => {
           <div class="comments-header">
             <el-icon :size="24"><ChatDotRound /></el-icon>
             <span>Комментарии ({{ comments.length }})</span>
+            <el-button
+              v-if="isAdmin"
+              type="success"
+              circle
+              class="add-comments-btn"
+              @click="showFakeCommentsModal = true"
+            >
+              <el-icon><CirclePlusFilled /></el-icon>
+            </el-button>
           </div>
         </el-divider>
 
-        <el-input
-          v-model="commentText"
-          type="textarea"
-          :rows="3"
-          resize="none"
-          placeholder="Напишите комментарий..."
-          class="comment-input"
-        >
-          <template #append>
-            <el-button 
-              type="primary" 
-              :loading="loading" 
-              @click="handleAddComment"
-              size="large"
-            >
-              Отправить
-            </el-button>
-          </template>
-        </el-input>
-
         <el-scrollbar height="400px">
-          <transition-group name="el-fade-in-linear">
-            <div v-for="comment in comments" :key="comment.id" class="comment">
-              <el-card shadow="hover" class="comment-card">
-                <div class="comment-header">
-                  <div class="comment-user">
-                    <el-avatar :size="36" :src="comment.user.profilePicture" />
-                    <div class="comment-info">
-                      <el-text class="comment-username" type="primary" size="large">
+          <el-timeline v-if="comments.length">
+            <el-timeline-item
+              v-for="comment in comments"
+              :key="comment.id"
+              :hide-timestamp="false"
+              :timestamp="formatDate(comment.createdAt)"
+              type="primary"
+            >
+              <el-card class="timeline-card">
+                <template #header>
+                  <div class="card-header">
+                    <div class="user-info-compact">
+                      <el-avatar :size="32" :src="comment.user.profilePicture" />
+                      <el-text class="comment-username" type="primary">
                         {{ comment.user.username }}
                       </el-text>
-                      <el-text class="comment-date" type="info">
-                        {{ formatDate(comment.createdAt) }}
-                      </el-text>
+                    </div>
+                    <div v-if="isAdmin" class="card-actions">
+                      <el-button 
+                        type="danger" 
+                        :icon="Delete"
+                        circle
+                        @click="handleDeleteComment(comment.id)"
+                      />
                     </div>
                   </div>
-                  <div v-if="isAdmin" class="comment-actions">
-                    <el-button 
-                      type="danger" 
-                      :size="large"
-                      text 
-                      @click="handleDeleteComment(comment.id)"
-                    >
-                      <el-icon :size="24"><Delete /></el-icon>
-                    </el-button>
-                  </div>
-                </div>
-                <el-text class="comment-content" size="large">{{ comment.content }}</el-text>
+                </template>
+                <el-text>{{ comment.content }}</el-text>
               </el-card>
-            </div>
-          </transition-group>
+            </el-timeline-item>
+          </el-timeline>
           
           <el-empty 
-            v-if="!comments.length" 
+            v-else
             description="Нет комментариев" 
           />
         </el-scrollbar>
       </div>
     </el-card>
+
+    <!-- Модальное окно фейковых комментариев -->
+    <el-dialog
+      v-model="showFakeCommentsModal"
+      title="Добавить комментарии"
+      width="400px"
+      :modal="true"
+      :append-to-body="true"
+      :lock-scroll="true"
+      :close-on-click-modal="false"
+      destroy-on-close
+    >
+      <el-form :model="fakeCommentsForm" label-position="top">
+        <el-form-item label="Количество комментариев">
+          <el-input-number
+            v-model="fakeCommentsForm.count"
+            :min="1"
+            :max="30"
+            controls-position="right"
+            class="w-full"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="showFakeCommentsModal = false">
+            Отмена
+          </el-button>
+          <el-button
+            type="primary"
+            @click="handleAddFakeComments"
+            :loading="isAddingFakeComments"
+          >
+            Добавить
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
+
 <style scoped>
+
+:deep(.el-timeline-item__content) {
+  width: 110%;
+  margin-left: -60px;
+  margin-top: 10px;
+  margin-right: 0px;
+  padding-right: 0px;
+}
+
+:deep(.el-timeline-item__node) {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+:deep(.el-timeline-item__tail) {
+  position: absolute;
+  left: 4px;
+}
+
+:deep(.el-timeline-item__wrapper) {
+  width: calc(100% - 24px);
+  margin-left: auto;
+}
+
+.timeline-card {
+  width: 100%;
+  background-color: var(--el-bg-color);
+  border-radius: 8px;
+}
+/* Базовые стили для карточки */
 .post-card {
   background-color: var(--el-bg-color);
   border: 1px solid var(--el-border-color);
@@ -327,6 +410,7 @@ const fetchComments = async () => {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
+/* Стили заголовка */
 .header {
   display: flex;
   gap: 16px;
@@ -353,6 +437,7 @@ const fetchComments = async () => {
   color: var(--el-text-color-secondary);
 }
 
+/* Стили для изображения */
 .image-container {
   position: relative;
   width: 100%;
@@ -390,6 +475,7 @@ const fetchComments = async () => {
   font-weight: 600;
 }
 
+/* Стили для кнопок действий */
 .actions {
   padding: 16px;
   background-color: var(--el-bg-color);
@@ -445,6 +531,7 @@ const fetchComments = async () => {
   margin-left: 6px;
 }
 
+/* Стили для подписи */
 .caption {
   padding: 16px;
   margin: 0;
@@ -455,6 +542,7 @@ const fetchComments = async () => {
   border-bottom: 2px solid var(--el-border-color);
 }
 
+/* Стили для секции комментариев */
 .comments-section {
   padding: 20px;
   background-color: var(--el-bg-color-page);
@@ -464,111 +552,49 @@ const fetchComments = async () => {
 .comments-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   font-size: 16px;
   font-weight: 600;
   color: var(--el-text-color-primary);
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid var(--el-border-color);
 }
 
-.comment-input {
-  margin-bottom: 20px;
+/* Стили для Timeline карточки */
+.timeline-card {
+  background-color: var(--el-bg-color);
+  border-radius: 8px;
 }
 
-.comment-input :deep(.el-textarea__inner) {
-  font-size: 14px;
-  padding: 12px;
-  border-radius: 6px;
-  border: 2px solid var(--el-border-color);
-}
-
-.comment {
-  margin-bottom: 16px;
-}
-
-.comment-card {
-  background-color: white;
-  border: 1px solid var(--el-border-color);
-  border-radius: 6px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.comment-header {
+.card-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
-}
-
-.comment-user {
-  display: flex;
-  gap: 12px;
   align-items: center;
+  padding: 8px 0;
 }
 
-.comment-info {
+.user-info-compact {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  gap: 12px;
 }
 
 .comment-username {
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.comment-content {
-  margin-left: 44px;
-  line-height: 1.6;
-  font-size: 14px;
-  color: var(--el-text-color-primary);
-}
-
-/* Админские контролы */
-.admin-controls {
-  padding: 16px;
-  background-color: var(--el-color-info-light-9);
-  border-top: 2px solid var(--el-color-info);
-  border-radius: 0 0 8px 8px;
-}
-
-.admin-buttons {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.admin-button {
-  height: 36px !important;
-  font-size: 14px !important;
-  font-weight: 500 !important;
-  border-width: 2px !important;
-}
-
-.likes-button {
-  background-color: var(--el-color-success-light-9) !important;
-  border-color: var(--el-color-success) !important;
-  color: var(--el-color-success) !important;
-}
-
-.edit-button {
-  background-color: var(--el-color-primary-light-9) !important;
-  border-color: var(--el-color-primary) !important;
-  color: var(--el-color-primary) !important;
-}
-
-.select-checkbox {
-  margin-left: auto;
-}
-
-.select-checkbox :deep(.el-checkbox__label) {
-  font-size: 14px;
   font-weight: 500;
 }
 
+.card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Стили для диалога */
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Медиа-запросы */
 @media (max-width: 480px) {
   .post-card {
     margin: 12px;
@@ -583,22 +609,12 @@ const fetchComments = async () => {
     min-width: 110px;
   }
 
-  .comment-content {
-    margin-left: 20px;
-  }
-
-  .admin-buttons {
+  .dialog-footer {
     flex-direction: column;
-    align-items: stretch;
   }
 
-  .admin-button {
+  .dialog-footer .el-button {
     width: 100%;
-  }
-
-  .select-checkbox {
-    margin: 12px 0 0 0;
-    align-self: flex-start;
   }
 }
 </style>

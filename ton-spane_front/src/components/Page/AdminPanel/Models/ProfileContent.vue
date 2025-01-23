@@ -1,14 +1,14 @@
 <script setup>
-import { ref, onMounted, watch, onUnmounted,defineProps,reactive } from 'vue'
+import { ref, onMounted, watch, onUnmounted, defineProps, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Loading } from '@element-plus/icons-vue'
+import { Loading, CirclePlusFilled } from '@element-plus/icons-vue'
 import config from '@/config'
 import PostsAP from '../PostsAPForUser.vue'
 import CreatePost from './AddPostForm.vue'
 import ChatPage from './Chats/ChatsPage.vue'
+
 const showChats = ref(false)
 
-// Добавляем метод открытия чатов вместо startEditing
 const openChats = () => {
   showChats.value = true
 }
@@ -18,7 +18,7 @@ const props = defineProps({
        type: String,
        required: false,
    },
-});
+})
 
 const showPostModal = ref(false)
 const userLikes = ref(0)
@@ -59,7 +59,12 @@ const editFormRules = {
    ]
 }
 
-
+// Состояние модального окна и формы подписчиков
+const showSubscribersModal = ref(false)
+const subscribersForm = reactive({
+    count: 1
+})
+const isAddingSubscribers = ref(false)
 
 const formatImageUrl = (imageUrl) => {
    if (!imageUrl) return null
@@ -229,9 +234,9 @@ const fetchUserData = async () => {
 
 const fetchUserPosts = async () => {
     try {
-        const response = await fetch(`${config.API_BASE_URL}/posts/user/${props.userIdProp}/requester/${props.userIdProp}`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const data = await response.json();
+        const response = await fetch(`${config.API_BASE_URL}/posts/user/${props.userIdProp}/requester/${props.userIdProp}`)
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+        const data = await response.json()
 
         const formattedPosts = data.map(post => ({
             ...post,
@@ -255,17 +260,14 @@ const fetchUserPosts = async () => {
             initialShared: false,
             initialDonated: false,
             initialSubscribed: post.isSubscribed || false
-        }));
+        }))
 
-        userData.value.posts = formattedPosts;
-        
-        // Calculate total likes by summing up likesCount from each post
-        userLikes.value = formattedPosts.reduce((total, post) => total + (post.likesCount || 0), 0);
-        
+        userData.value.posts = formattedPosts
+        userLikes.value = formattedPosts.reduce((total, post) => total + (post.likesCount || 0), 0)
     } catch (err) {
-        console.error('Error fetching user posts:', err);
-        userData.value.posts = [];
-        userLikes.value = 0;
+        console.error('Error fetching user posts:', err)
+        userData.value.posts = []
+        userLikes.value = 0
     }
 }
 
@@ -281,94 +283,84 @@ const preparePostsData = (posts) => {
    }))
 }
 
+// Функция для добавления подписчиков к модели
+const addMultipleSubscribers = async (modelId, followersCount) => {
+  if (!modelId || typeof modelId !== 'string') {
+    throw new Error('Некорректный ID модели')
+  }
+
+  if (!followersCount || isNaN(followersCount) || followersCount <= 0) {
+    throw new Error('Количество подписчиков должно быть положительным числом')
+  }
+
+  try {
+    const response = await fetch(
+      `${config.API_BASE_URL}/subscriptions/${modelId}/add-followers`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'accept': '*/*'
+        },
+        body: JSON.stringify({ followersCount })
+      }
+    )
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.message || 'Ошибка при добавлении подписчиков')
+    }
+
+    return {
+      successful: followersCount,
+      failed: 0
+    }
+  } catch (error) {
+    console.error('Ошибка при добавлении подписчиков:', error)
+    throw error
+  }
+}
+
+// Обработчик добавления подписчиков
+const handleAddSubscribers = async () => {
+  try {
+    isAddingSubscribers.value = true
+    
+    // Получаем значения из формы и props
+    const count = subscribersForm.count
+    const modelId = props.userIdProp
+    
+    const results = await addMultipleSubscribers(modelId, count)
+    
+    ElMessage({
+      message: `Успешно добавлено ${results.successful} подписчиков, ${results.failed} не удалось`,
+      type: results.failed === 0 ? 'success' : 'warning'
+    })
+    
+    // Обновляем количество подписчиков
+    await fetchUserSubs()
+    
+    // Закрываем модальное окно
+    showSubscribersModal.value = false
+    
+  } catch (error) {
+    ElMessage.error(error.message || 'Произошла ошибка при добавлении подписчиков')
+  } finally {
+    isAddingSubscribers.value = false
+  }
+}
+
+const handlePostsUpdate = async () => {
+   console.log("Data update triggered")
+   await initializeUserData()
+}
+
 const initializeUserData = async () => {
    await fetchUserData()
    await Promise.all([
      fetchUserPosts(),
      fetchUserSubs()
    ])
-}
-
-const showSubscribersModal = ref(false)
-const subscribersForm = reactive({
-    count: 1
-})
-const isAddingSubscribers = ref(false)
-
-// Функция добавления подписчиков
-const handleAddSubscribers = async () => {
-    try {
-        isAddingSubscribers.value = true
-        const results = await addMultipleSubscribers(subscribersForm.count)
-        
-        // Показываем результат
-        ElMessage({
-            message: `Успешно добавлено ${results.successful} подписчиков, ${results.failed} не удалось`,
-            type: results.failed === 0 ? 'success' : 'warning'
-        })
-        
-        showSubscribersModal.value = false
-    } catch (error) {
-        ElMessage.error('Произошла ошибка при добавлении подписчиков')
-    } finally {
-        isAddingSubscribers.value = false
-    }
-}
-
-
-
-// Функция добавления множественных подписчиков
-const addMultipleSubscribers = async (subscribersCount) => {
-    const results = {
-        successful: 0,
-        failed: 0
-    };
-
-    try {
-        // Создаем все запросы сразу
-        const requests = Array(subscribersCount).fill().map(() => 
-            fetch(
-                `https://ton-back-e015fa79eb60.herokuapp.com/api/subscriptions/49c598e5-3a2e-47ce-9e03-db88b8dc6977/follow/${props.userIdProp}`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'accept': '*/*'
-                    }
-                }
-            )
-        );
-
-        // Разбиваем запросы на чанки по 200 для избежания перегрузки браузера
-        const chunkSize = 200;
-        for (let i = 0; i < requests.length; i += chunkSize) {
-            const chunk = requests.slice(i, i + chunkSize);
-            const responses = await Promise.allSettled(chunk);
-            
-            responses.forEach(response => {
-                if (response.status === 'fulfilled' && response.value.status === 201) {
-                    results.successful++;
-                } else {
-                    results.failed++;
-                }
-            });
-
-            // Минимальная задержка между чанками
-            if (i + chunkSize < requests.length) {
-                await new Promise(resolve => setTimeout(resolve, 50));
-            }
-        }
-
-        await initializeUserData();
-    } catch (err) {
-        console.error('Error in batch subscriber addition:', err);
-    }
-
-    return results;
-}
-
-const handlePostsUpdate = async () => {
-   console.log("Data update triggered")
-   await initializeUserData()
 }
 
 watch(() => props.userIdProp, (newValue) => {
@@ -386,6 +378,7 @@ onUnmounted(() => {
    window.removeEventListener('postsDataChanged', handlePostsUpdate)
 })
 </script>
+
 
 <template>
     <div v-if="isLoaded" class="layout">
@@ -447,23 +440,20 @@ onUnmounted(() => {
                         <el-text class="stat-badge" type="primary">
                             <el-text class="stat-text">{{ userData.posts.length }} публикации</el-text>
                         </el-text>
-                        <el-text class="stat-badgeLikes" type="primary"> <el-text class="stat-text">{{ userLikes }}  лайков</el-text></el-text>
-
-                                
-                           
-                        <div style="display: flex; flex-direction: column; align-items: center; margin-top: -20px" >
-                        <div style="display: flex; flex-direction: row; align-items: center; margin-left: 15px;">
-                            <el-icon size="35px" color="green" @click="showSubscribersModal = true"><CirclePlusFilled/></el-icon>
-                        </div>
-                        <el-text class="stat-badgeSubs" type="primary">
-                            <el-text class="stat-text">{{ userSubscription }} подписчиков</el-text>
+                        <el-text class="stat-badgeLikes" type="primary">
+                            <el-text class="stat-text">{{ userLikes }} лайков</el-text>
                         </el-text>
+
+                        <div style="display: flex; flex-direction: column; align-items: center; margin-top: -20px">
+                            <el-text class="stat-badgeSubs" type="primary">
+                                <el-icon size="35px" color="green" @click="showSubscribersModal = true" class="addSubsBtn">
+                                    <CirclePlusFilled />
+                                </el-icon>
+                                <el-text class="stat-text">{{ userSubscription }} подписчиков</el-text>
+                            </el-text>
                         </div>
-                       
                     </div>
-                    
                 </el-aside>
-               
             </el-container>
 
             <el-container>
@@ -494,32 +484,21 @@ onUnmounted(() => {
                     <el-button class="openChatsButton" type="primary" @click="openChats">
                         Открыть чаты
                     </el-button>
-                    <el-dialog
-  v-model="showChats"
-  :fullscreen="false"
-  :show-close="true"
-  :close-on-click-modal="false"
-  :destroy-on-close="true"
->
-  <ChatPage 
-    :model-id="props.userIdProp"
-    @close="showChats = false"
-  /></el-dialog>
+                    <el-dialog v-model="showChats" :fullscreen="false" :show-close="true" :close-on-click-modal="false"
+                        :destroy-on-close="true">
+                        <ChatPage :model-id="props.userIdProp" @close="showChats = false" />
+                    </el-dialog>
 
                     <el-button type="primary" @click="startEditing">
                         Редактировать профиль
                     </el-button>
                     <div class="create-post-button">
-                        <el-button 
-                            type="primary" 
-                            @click="showPostModal = true"
-                            class="add-post-btn"
-                        >
+                        <el-button type="primary" @click="showPostModal = true" class="add-post-btn">
                             Добавить пост
                         </el-button>
                     </div>
                 </template>
-                
+
                 <template v-else>
                     <el-button type="success" @click="saveChanges" :loading="isSubmitting">
                         Сохранить
@@ -531,56 +510,31 @@ onUnmounted(() => {
             </div>
         </el-container>
         <div style="position: relative;">
-            <PostsAP v-if="userData.posts.length" 
-                :postsParam="userData.posts" 
-                :user="userData" 
-                :userId="userData.id"
-                :showAddButton="true" 
-            />
+            <PostsAP v-if="userData.posts.length" :postsParam="userData.posts" :user="userData" :userId="userData.id"
+                :showAddButton="true" />
         </div>
-        <CreatePost 
-            :isOpen="showPostModal"
-            :userId="props.userIdProp" 
-            @close="showPostModal = false"
-        />
-
-        
+        <CreatePost :isOpen="showPostModal" :userId="props.userIdProp" @close="showPostModal = false" />
     </div>
     <div v-else class="loading-container">
         <el-skeleton :rows="3" animated />
     </div>
 
-
-    <el-dialog
-            v-model="showSubscribersModal"
-            title="Добавить подписчиков"
-            width="30%"
-            :close-on-click-modal="false"
-        >
-            <el-form :model="subscribersForm">
-                <el-form-item label="Количество подписчиков">
-                    <el-input-number 
-                        v-model="subscribersForm.count"
-                        :min="1"
-                        :max="100"
-                        controls-position="right"
-                    />
-                </el-form-item>
-            </el-form>
-            <template #footer>
-                <span class="dialog-footer">
-                    <el-button @click="showSubscribersModal = false">Отмена</el-button>
-                    <el-button
-                        type="primary"
-                        @click="handleAddSubscribers"
-                        :loading="isAddingSubscribers"
-                    >
-                        Добавить
-                    </el-button>
-                </span>
-            </template>
-        </el-dialog>
-
+    <!-- Модальное окно добавления подписчиков -->
+    <el-dialog v-model="showSubscribersModal" title="Добавить подписчиков" width="30%" :close-on-click-modal="false">
+        <el-form :model="subscribersForm">
+            <el-form-item label="Количество подписчиков">
+                <el-input-number v-model="subscribersForm.count" :min="1" :max="3000" controls-position="right" />
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button @click="showSubscribersModal = false">Отмена</el-button>
+                <el-button type="primary" @click="handleAddSubscribers" :loading="isAddingSubscribers">
+                    Добавить
+                </el-button>
+            </span>
+        </template>
+    </el-dialog>
 </template>
 
 
@@ -735,6 +689,7 @@ onUnmounted(() => {
     margin-left: 20px;
     backdrop-filter: blur(10px);
     transition: all 0.4s ease;
+
 }
 
 .stat-badge {
@@ -779,6 +734,13 @@ onUnmounted(() => {
         0 4px 6px rgba(0, 0, 0, 0.2),
         inset 0 1px 2px rgba(255, 255, 255, 0.2),
         0 0 15px rgba(139, 92, 246, 0.2);
+    flex-direction: row;
+    padding: 0px;
+    width: 200px;
+    padding-top: 10px;
+    padding-bottom: 20px;
+    margin-top: 20px;
+
 }
 .stat-date {
     color: #94a3b8;
@@ -957,5 +919,33 @@ onUnmounted(() => {
         font-size: 0.8rem;
         padding: 6px 12px;
     }
+}
+.addSubsBtn {
+    margin-right: 10px;
+    margin-left: -20px;
+
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.addSubsBtn:hover {
+    transform: scale(1.1);
+    background-color: #45a049;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.addSubsBtn:active {
+    transform: scale(0.95);
+    background-color: #3d8b40;
 }
 </style>
