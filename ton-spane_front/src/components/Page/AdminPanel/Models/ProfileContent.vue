@@ -519,7 +519,6 @@ onUnmounted(() => {
         <el-skeleton :rows="3" animated />
     </div>
 
-    <!-- Модальное окно добавления подписчиков -->
     <el-dialog v-model="showSubscribersModal" title="Добавить подписчиков" width="30%" :close-on-click-modal="false">
         <el-form :model="subscribersForm">
             <el-form-item label="Количество подписчиков">

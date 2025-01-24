@@ -316,6 +316,28 @@ const postComment = async () => {
 const toggleComments = () => {
   showAllComments.value = !showAllComments.value
 }
+
+const getRandomColor = () => {
+ const colors = [
+   // Blues
+   '#2196F3', '#1976D2', '#1565C0', '#0D47A1',
+   // Purples
+   '#9C27B0', '#7B1FA2', '#6A1B9A', '#4A148C',
+   // Teals
+   '#009688', '#00796B', '#00695C', '#004D40',
+   // Greens  
+   '#4CAF50', '#388E3C', '#2E7D32', '#1B5E20',
+   // Deep oranges
+   '#FF5722', '#E64A19', '#D84315', '#BF360C',
+   // Browns
+   '#795548', '#5D4037', '#4E342E', '#3E2723',
+   // Blue greys
+   '#607D8B', '#455A64', '#37474F', '#263238',
+   // Indigo
+   '#3F51B5', '#303F9F', '#283593', '#1A237E'
+ ];
+ return colors[Math.floor(Math.random() * colors.length)];
+}
 </script>
 
 <template>
@@ -495,19 +517,13 @@ const toggleComments = () => {
               class="comment-item"
             >
               <div class="comment-header">
-                <div 
-                  class="custom-avatar"
-                  :style="{
-                    backgroundImage: `url(${comment.user?.profilePicture})`,
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    overflow: 'hidden',
-                    flexShrink: 0,
-                  }"
-                />
+                <el-avatar 
+                    :src="comment.user?.profilePicture"
+                    :size="40"
+                    :style="{ backgroundColor: getRandomColor() }"
+                    >
+                    {{ comment.user?.username?.charAt(0).toUpperCase() }}
+                    </el-avatar>
                 <div class="comment-info">
                   <div class="comment-author">
                     {{ comment.user?.username }} 
