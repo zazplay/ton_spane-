@@ -38,62 +38,60 @@
       </el-header>
 
       <el-main class="main-container-content">
-        <el-container>
-          <el-tabs v-model="activeTab" class="demo-tabs containet-style">
-            
-            <el-tab-pane class = "forYou" label="Для вас" name="first" >
-              <div v-if="!isDataLoaded" class="loading-container">
-                <el-row :gutter="20">
-                  <el-col :span="24" v-for="n in 3" :key="n">
-                    <el-card class="loading-card">
-                      <el-skeleton animated>
-                        <template #template>
-                          <div style="display: flex; align-items: center; margin-bottom: 20px">
-                            <el-skeleton-item variant="circle" style="width: 40px; height: 40px; margin-right: 16px"/>
-                            <el-skeleton-item variant="text" style="width: 30%"/>
-                          </div>
-                          <el-skeleton-item variant="image" style="width: 100%; height: 240px"/>
-                          <div style="padding: 14px">
-                            <el-skeleton-item variant="p" style="width: 90%"/>
-                            <el-skeleton-item variant="text" style="width: 60%; margin-top: 16px"/>
-                          </div>
-                        </template>
-                      </el-skeleton>
-                    </el-card>
-                  </el-col>
-                </el-row>
-              </div>
-              <!-- Пустое состояние -->
-              <div v-else-if="posts.length === 0" class="empty-state">
-                <el-card class="empty-card">
-                  <div class="empty-content">
-                    <el-icon class="empty-icon"><Box /></el-icon>
-                    <h3 class="empty-title">Здесь пока пусто</h3>
-                    <p class="empty-description">Публикации появятся позже</p>
-                  </div>
-                </el-card>
-              </div>
-              <!-- Список постов -->
-              <ListPostCards v-else :posts="posts" />
-            </el-tab-pane>
-            <el-tab-pane label="Подписки" name="second">
-              <keep-alive>
-
-              <FollowingPage />
-              </keep-alive>
-
-            </el-tab-pane>
-            <el-tab-pane label="Понравилось" name="third">
-              <UserLikes></UserLikes>
-            </el-tab-pane>
-          </el-tabs>
-        </el-container>
-      </el-main>
+ <el-container>
+   <CustomTabs>
+     <template #first>
+       <div v-if="!isDataLoaded" class="loading-container">
+         <el-row :gutter="20">
+           <el-col :span="24" v-for="n in 3" :key="n">
+             <el-card class="loading-card">
+               <el-skeleton animated>
+                 <template #template>
+                   <div style="display: flex; align-items: center; margin-bottom: 20px">
+                     <el-skeleton-item variant="circle" style="width: 40px; height: 40px; margin-right: 16px"/>
+                     <el-skeleton-item variant="text" style="width: 30%"/>
+                   </div>
+                   <el-skeleton-item variant="image" style="width: 100%; height: 240px"/>
+                   <div style="padding: 14px">
+                     <el-skeleton-item variant="p" style="width: 90%"/>
+                     <el-skeleton-item variant="text" style="width: 60%; margin-top: 16px"/>
+                   </div>
+                 </template>
+               </el-skeleton>
+             </el-card>
+           </el-col>
+         </el-row>
+       </div>
+       <div v-else-if="posts.length === 0" class="empty-state">
+         <el-card class="empty-card">
+           <div class="empty-content">
+             <el-icon class="empty-icon"><Box /></el-icon>
+             <h3 class="empty-title">Здесь пока пусто</h3>
+             <p class="empty-description">Публикации появятся позже</p>
+           </div>
+         </el-card>
+       </div>
+       <ListPostCards v-else :posts="posts" />
+     </template>
+     
+     <template #second>
+       <keep-alive>
+         <FollowingPage />
+       </keep-alive>
+     </template>
+     
+     <template #third>
+       <UserLikes />
+     </template>
+   </CustomTabs>
+ </el-container>
+</el-main>
     </el-container>
   </div>
 </template>
 
 <script setup>
+import CustomTabs from './CustomTabs.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex';
 import { BellFilled, Box, CirclePlusFilled } from '@element-plus/icons-vue';
@@ -108,7 +106,6 @@ const userId = computed(() => store.getters.getSub);
 const userType = ref(sessionStorage.getItem('userType'));
 
 const isFormOpen = ref(false);
-const activeTab = ref('first');
 const isDataLoaded = ref(false);
 const posts = ref([]);
 
@@ -165,12 +162,12 @@ onMounted(() => {
  color: #6b778c;
  font-size: 32px;
  font-weight: 600;
- margin-left: 10px;
+ 
  
 }
 
 .containet-style {
- width: 100%;
+ width: 100% -20px;
 }
 
 .icon-style {
