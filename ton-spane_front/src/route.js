@@ -134,12 +134,13 @@ router.beforeEach((to, from, next) => {
 
   // Публичные роуты
   
-  // Проверка для админ-панели
   if (to.path === '/admin') {
     if (!isAdmin) {
       next('/admin-auth');
       return;
     }
+    next(); // Важно: явно вызываем next() если админ авторизован
+    return;
   }
 
   // Проверка публичного маршрута через мета-тег
